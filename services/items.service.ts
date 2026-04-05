@@ -1,20 +1,55 @@
 import type { createApiService } from "./api";
 
 export type Item = {
+  // core
   id: string;
   created_at: string;
-  title: string | null;
-  category: string;
-  creator: string | null;
-  description: string | null;
-  tags: string[];
+  raw_input: string;
+  input_type: string;
   source: string;
   status: string;
   rating: number | null;
+  your_notes: string | null;
+
+  // AI extracted
+  category: string;
+  title: string | null;
+  creator: string | null;
+  description: string | null;
+  tags: string[] | null;
   ai_notes: string | null;
-  raw_input: string;
+  note_type: string | null;
+
+  // urls
   image_url: string | null;
   external_url: string | null;
+
+  // shared enrichment
+  artwork_url: string | null;
+  backdrop_url: string | null;
+  release_year: string | null;
+  external_rating: number | null;
+  genres: string[] | null;
+  runtime: number | null;
+
+  // tmdb (movies & shows)
+  tmdb_id: string | null;
+
+  // spotify (music)
+  spotify_id: string | null;
+  spotify_url: string | null;
+  preview_url: string | null;
+  album_name: string | null;
+  duration_ms: number | null;
+  apple_music_url: string | null;
+  youtube_url: string | null;
+  deezer_url: string | null;
+
+  // books
+  open_library_id: string | null;
+  amazon_url: string | null;
+  goodreads_url: string | null;
+  audible_url: string | null;
 };
 
 export type CapturePayload = {
