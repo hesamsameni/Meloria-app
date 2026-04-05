@@ -1,0 +1,44 @@
+<template>
+  <div>
+    <div v-if="loading" class="flex flex-col gap-2">
+      <USkeleton
+        v-for="i in skeletonCount"
+        :key="i"
+        class="h-20 w-full rounded-xl"
+      />
+    </div>
+
+    <div v-else class="flex flex-col gap-2">
+      <ItemCard
+        v-for="item in items"
+        :key="item.id"
+        :item="item"
+        :show-status="showStatus"
+        @status-change="(id, status) => $emit('status-change', id, status)"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { Item } from "~/services/items.service";
+
+withDefaults(
+  defineProps<{
+    items: Item[];
+    loading?: boolean;
+    showStatus?: boolean;
+    emptyMessage?: string;
+    skeletonCount?: number;
+  }>(),
+  {
+    emptyMessage: "Nothing here yet",
+    skeletonCount: 4,
+    showStatus: false,
+  },
+);
+
+defineEmits<{
+  "status-change": [id: string, status: string];
+}>();
+</script>
