@@ -74,6 +74,8 @@ const categories = [
   { value: "show", label: "Shows", emoji: "📺" },
   { value: "article", label: "Articles", emoji: "📰" },
   { value: "idea", label: "Ideas", emoji: "💡" },
+  { value: "note", label: "Notes", emoji: "📝" },
+  { value: "place", label: "Places", emoji: "📍" },
 ];
 
 const statuses = [
