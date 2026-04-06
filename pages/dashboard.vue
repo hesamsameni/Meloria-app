@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto px-6 py-10">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <!-- header -->
     <div class="mb-8">
       <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">
@@ -67,9 +67,10 @@ const stats = computed(() => [
 const greeting = computed(() => {
   const h = new Date().getHours();
   const name = user.value?.email?.split("@")[0] ?? "";
-  if (h < 12) return `Good morning, ${name}`;
-  if (h < 18) return `Good afternoon, ${name}`;
-  return `Good evening, ${name}`;
+  const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+  if (h < 12) return `Good morning, ${capitalizedName}`;
+  if (h < 18) return `Good afternoon, ${capitalizedName}`;
+  return `Good evening, ${capitalizedName}`;
 });
 
 const today = computed(() =>

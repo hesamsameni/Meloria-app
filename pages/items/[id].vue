@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto px-6 py-10" v-if="item">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10" v-if="item">
     <!-- back -->
     <NuxtLink
       to="/library"
@@ -289,7 +289,7 @@
   </div>
 
   <!-- loading -->
-  <div v-else-if="loading" class="max-w-2xl mx-auto px-6 py-10">
+  <div v-else-if="loading" class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <div class="flex gap-5 mb-8">
       <USkeleton class="w-28 h-40 rounded-xl shrink-0" />
       <div class="flex-1 flex flex-col gap-3">
