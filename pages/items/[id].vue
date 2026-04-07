@@ -117,7 +117,6 @@
 
     <!-- map embed -->
     <div v-if="item.category === 'place' && mapQuery" class="mb-6">
-      {{ item.raw_input }}
       <iframe
         :src="`https://www.google.com/maps?q=${encodeURIComponent(item.raw_input)}&output=embed`"
         width="100%"
