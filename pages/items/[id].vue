@@ -115,6 +115,19 @@
       />
     </div>
 
+    <!-- map embed -->
+    <div v-if="item.category === 'place' && mapQuery" class="mb-6">
+      {{ item.raw_input }}
+      <iframe
+        :src="`https://www.google.com/maps?q=${encodeURIComponent(item.raw_input)}&output=embed`"
+        width="100%"
+        height="260"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        class="rounded-xl border border-neutral-100 dark:border-neutral-800"
+      />
+    </div>
+
     <!-- description -->
     <UCard v-if="item.description" class="mb-6">
       <p class="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed">
@@ -356,8 +369,14 @@ const linksLabel = computed(() => {
     movie: "Watch on",
     show: "Watch on",
     book: "Read on",
+    place: "Find on",
   };
   return map[item.value?.category || ""] || "Links";
+});
+
+const mapQuery = computed(() => {
+  if (item.value?.category !== "place") return "";
+  return item.value?.title || item.value?.raw_input || "";
 });
 
 const formatRuntime = (mins: number) => {

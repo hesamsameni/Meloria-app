@@ -57,9 +57,24 @@
       empty-message="No items match your filters"
       @status-change="items.updateStatus"
     />
+
+    <!-- load more -->
+    <div
+      v-if="items.hasMore.value && !items.loading.value && filtered.length > 0"
+      class="mt-6 text-center"
+    >
+      <UButton
+        variant="outline"
+        color="neutral"
+        size="sm"
+        :loading="items.loadingMore.value"
+        @click="handleLoadMore"
+      >
+        Load more
+      </UButton>
+    </div>
   </div>
 </template>
-
 <script setup lang="ts">
 const items = useItems();
 
@@ -85,6 +100,12 @@ const statuses = [
   { value: "done", label: "Done" },
 ];
 
+const filterParams = computed(() => ({
+  ...(activeCategory.value ? { category: activeCategory.value } : {}),
+  ...(activeStatus.value !== "all" ? { status: activeStatus.value } : {}),
+  ...(search.value ? { query: search.value } : {}),
+}));
+
 const filtered = computed(() =>
   items.items.value.filter((item: any) => {
     const matchSearch =
@@ -99,10 +120,30 @@ const filtered = computed(() =>
   }),
 );
 
-const statusCount = (status: string) =>
-  status === "all"
-    ? items.items.value.length
-    : items.items.value.filter((i: any) => i.status === status).length;
+const statusCount = (status: string) => {
+  if (status === "all") return items.totals.value.total;
+  if (status === "saved") return items.totals.value.saved;
+  if (status === "in_progress") return items.totals.value.in_progress;
+  if (status === "done") return items.totals.value.done;
+  return 0;
+};
 
-onMounted(() => items.fetch());
+const handleLoadMore = () => items.loadMore(filterParams.value);
+
+// re-fetch when filters change
+watch([activeCategory, activeStatus], () => {
+  items.fetch(filterParams.value);
+});
+
+// debounce search
+let searchTimer: ReturnType<typeof setTimeout>;
+watch(search, () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => items.fetch(filterParams.value), 400);
+});
+
+onMounted(() => {
+  items.fetch();
+  items.fetchTotals();
+});
 </script>
