@@ -79,9 +79,10 @@ export const createItemsService = (
       category?: string;
       status?: string;
       limit?: number;
+      offset?: number;
     } = {},
   ): Promise<Item[]> => {
-    return api.call<Item[]>("/mcp-test/search_items", {
+    return api.call<Item[]>("/mcp/search_items", {
       method: "POST",
       body: params,
     });

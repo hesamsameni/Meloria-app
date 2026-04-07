@@ -20,7 +20,7 @@
 
     <!-- capture -->
     <div class="mb-8">
-      <CaptureBar @captured="items.fetch()" />
+      <CaptureBar @captured="handleCaptured" />
     </div>
 
     <!-- recent -->
@@ -43,6 +43,21 @@
         empty-message="Nothing captured yet — use the bar above to add your first item"
       />
     </div>
+
+    <div
+      v-if="items.hasMore.value && !items.loading.value"
+      class="mt-4 text-center"
+    >
+      <UButton
+        variant="outline"
+        color="neutral"
+        size="sm"
+        :loading="items.loadingMore.value"
+        @click="items.loadMore()"
+      >
+        Load more
+      </UButton>
+    </div>
   </div>
 </template>
 
@@ -50,19 +65,23 @@
 const { user } = useAuth();
 const items = useItems();
 
-const recentItems = computed(() => items.items.value.slice(0, 8));
+const recentItems = computed(() => items.items.value);
 
 const stats = computed(() => [
-  { label: "Total saved", value: items.items.value.length },
+  { label: "Total saved", value: items.totals.value.total },
   {
     label: "Movies",
-    value: items.items.value.filter((i: any) => i.category === "movie").length,
+    value: items.totals.value.movies,
   },
   {
     label: "Music",
-    value: items.items.value.filter((i: any) => i.category === "music").length,
+    value: items.totals.value.music,
   },
 ]);
+
+const handleCaptured = async () => {
+  await Promise.all([items.fetch(), items.fetchTotals()]);
+};
 
 const greeting = computed(() => {
   const h = new Date().getHours();
@@ -81,5 +100,8 @@ const today = computed(() =>
   }),
 );
 
-onMounted(() => items.fetch());
+onMounted(() => {
+  items.fetch();
+  items.fetchTotals();
+});
 </script>
