@@ -13,6 +13,18 @@ export const useCapture = () => {
   const lastCaptured = ref<Item | null>(null);
   const error = ref<string | null>(null);
 
+  const formatResetsAt = (iso: string) => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const capture = async (content: string, source = "dashboard") => {
     if (!content.trim()) return null;
 
@@ -25,7 +37,18 @@ export const useCapture = () => {
       lastCaptured.value = item;
       return item;
     } catch (e: any) {
-      error.value = e.data?.error || e.message || "Failed to capture";
+      const baseMessage = e?.data?.error || e?.message || "Failed to capture";
+      const resetsAtIso = e?.data?.resets_at;
+      const status = e?.statusCode || e?.status || e?.response?.status;
+
+      if (status === 429 && typeof resetsAtIso === "string") {
+        const formatted = formatResetsAt(resetsAtIso);
+        error.value = formatted
+          ? `${baseMessage} Your limit resets at ${formatted}.`
+          : baseMessage;
+      } else {
+        error.value = baseMessage;
+      }
       return null;
     } finally {
       loading.value = false;

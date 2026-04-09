@@ -1,12 +1,15 @@
 import { createApiService } from "~/services/api";
-import { createItemsService, type Item } from "~/services/items.service";
+import {
+  createItemsService,
+  type Item,
+  type ItemTotals,
+} from "~/services/items.service";
 
 const PAGE_SIZE = 20;
 
 export const useItems = () => {
   const config = useRuntimeConfig();
   const { getToken } = useAuth();
-  const { $supabase } = useNuxtApp();
 
   const api = createApiService(config.public.apiUrl, getToken);
   const itemsService = createItemsService(api);
@@ -18,14 +21,7 @@ export const useItems = () => {
   const offset = useState<number>("items:offset", () => 0);
   const error = useState<string | null>("items:error", () => null);
 
-  const totals = useState<{
-    total: number;
-    movies: number;
-    music: number;
-    saved: number;
-    in_progress: number;
-    done: number;
-  }>("items:totals", () => ({
+  const totals = useState<ItemTotals>("items:totals", () => ({
     total: 0,
     movies: 0,
     music: 0,
@@ -38,56 +34,7 @@ export const useItems = () => {
   const fetchTotals = async () => {
     totalsLoading.value = true;
     try {
-      // Count queries are independent of pagination.
-      // RLS should scope results to the authenticated user.
-      const supabase = $supabase as any;
-
-      const [
-        { count: totalCount, error: totalError },
-        { count: movieCount, error: movieError },
-        { count: musicCount, error: musicError },
-        { count: savedCount, error: savedError },
-        { count: inProgressCount, error: inProgressError },
-        { count: doneCount, error: doneError },
-      ] = await Promise.all([
-        supabase.from("items").select("id", { count: "exact", head: true }),
-        supabase
-          .from("items")
-          .select("id", { count: "exact", head: true })
-          .eq("category", "movie"),
-        supabase
-          .from("items")
-          .select("id", { count: "exact", head: true })
-          .eq("category", "music"),
-        supabase
-          .from("items")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "saved"),
-        supabase
-          .from("items")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "in_progress"),
-        supabase
-          .from("items")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "done"),
-      ]);
-
-      if (totalError) throw totalError;
-      if (movieError) throw movieError;
-      if (musicError) throw musicError;
-      if (savedError) throw savedError;
-      if (inProgressError) throw inProgressError;
-      if (doneError) throw doneError;
-
-      totals.value = {
-        total: totalCount ?? 0,
-        movies: movieCount ?? 0,
-        music: musicCount ?? 0,
-        saved: savedCount ?? 0,
-        in_progress: inProgressCount ?? 0,
-        done: doneCount ?? 0,
-      };
+      totals.value = await itemsService.getTotals();
     } catch (e: any) {
       // Keep the last known totals; surface an error for visibility.
       error.value = e?.message || "Failed to load totals";

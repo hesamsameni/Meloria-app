@@ -58,6 +58,15 @@ export type CapturePayload = {
   source?: string;
 };
 
+export type ItemTotals = {
+  total: number;
+  movies: number;
+  music: number;
+  saved: number;
+  in_progress: number;
+  done: number;
+};
+
 export const createItemsService = (
   api: ReturnType<typeof createApiService>,
 ) => {
@@ -95,5 +104,11 @@ export const createItemsService = (
     });
   };
 
-  return { capture, search, updateStatus };
+  const getTotals = async (): Promise<ItemTotals> => {
+    return api.call<ItemTotals>("/items/totals", {
+      method: "GET",
+    });
+  };
+
+  return { capture, search, updateStatus, getTotals };
 };

@@ -5,7 +5,7 @@
         Settings
       </h1>
       <p class="text-sm text-neutral-400 mt-0.5">
-        Manage your account and API access
+        Manage your account information and API access
       </p>
     </div>
 
@@ -18,23 +18,172 @@
       </p>
       <UCard>
         <div class="flex items-center gap-3">
-          <UAvatar :alt="user?.email" size="md" />
-          <div>
-            <p class="text-sm font-medium text-neutral-900 dark:text-white">
-              {{ user?.email }}
-            </p>
-            <p class="text-xs text-neutral-400">Free plan</p>
+          <div class="relative">
+            <UAvatar
+              :alt="user?.email"
+              :src="profile?.avatar_url || undefined"
+              size="md"
+            />
+            <input
+              ref="avatarInput"
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="onAvatarSelected"
+            />
           </div>
+
+          <div class="min-w-0">
+            <p
+              class="text-sm font-medium text-neutral-900 dark:text-white truncate"
+            >
+              {{ displayLabel || user?.email }}
+            </p>
+            <p class="text-xs text-neutral-400">
+              {{
+                (profile?.subscription || "free").charAt(0).toUpperCase() +
+                (profile?.subscription || "free").slice(1) +
+                " plan"
+              }}
+            </p>
+          </div>
+
+          <div class="ml-auto flex items-center gap-2">
+            <UButton
+              size="sm"
+              variant="outline"
+              color="neutral"
+              :loading="profileLoading"
+              @click="avatarInput?.click()"
+            >
+              Change photo
+            </UButton>
+            <UButton variant="ghost" color="neutral" size="sm" @click="signOut">
+              Sign out
+            </UButton>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div class="sm:col-span-2">
+            <p class="text-xs font-medium text-neutral-500 mb-1">
+              Display name
+            </p>
+            <UInput
+              v-model="displayName"
+              placeholder="Your name"
+              @keyup.enter="saveDisplayName"
+            />
+          </div>
+          <div class="flex items-end">
+            <UButton
+              class="w-full"
+              :loading="profileLoading"
+              :disabled="displayName === (profile?.display_name || '')"
+              @click="saveDisplayName"
+            >
+              Save
+            </UButton>
+          </div>
+        </div>
+
+        <p v-if="profileError" class="text-xs text-red-500 mt-2">
+          {{ profileError }}
+        </p>
+      </UCard>
+    </section>
+
+    <!-- upgrade plan (static) -->
+    <section class="mb-8">
+      <p
+        class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
+      >
+        Plan
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <UCard v-for="plan in plans" :key="plan.tier">
+          <p class="text-sm font-medium text-neutral-900 dark:text-white">
+            {{ plan.name }}
+          </p>
+          <p class="text-xs text-neutral-400 mt-0.5">{{ plan.description }}</p>
           <UButton
-            variant="ghost"
-            color="neutral"
+            class="w-full mt-3"
             size="sm"
-            class="ml-auto"
-            @click="signOut"
+            :variant="
+              (profile?.subscription || 'free') === plan.tier
+                ? 'outline'
+                : 'solid'
+            "
+            :color="
+              (profile?.subscription || 'free') === plan.tier
+                ? 'neutral'
+                : 'primary'
+            "
+            :disabled="(profile?.subscription || 'free') === plan.tier"
           >
-            Sign out
+            {{
+              (profile?.subscription || "free") === plan.tier
+                ? "Current plan"
+                : (profile?.subscription || "free") === "ultimate" &&
+                    plan.tier !== "ultimate"
+                  ? "Downgrade"
+                  : plan.tier === "free" &&
+                      (profile?.subscription || "free") !== "free"
+                    ? "Downgrade"
+                    : "Upgrade"
+            }}
+          </UButton>
+        </UCard>
+      </div>
+    </section>
+
+    <!-- preferred model (paid only) -->
+    <section v-if="showPreferredModel" class="mb-8">
+      <p
+        class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
+      >
+        AI Model
+      </p>
+
+      <UCard>
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-neutral-900 dark:text-white">
+              Preferred model
+            </p>
+            <p class="text-xs text-neutral-400 mt-0.5">
+              Used for extracting details during capture
+            </p>
+          </div>
+
+          <div class="w-full max-w-xs">
+            <USelect
+              v-model="preferredModel"
+              :items="modelOptions"
+              :loading="loadingModels"
+              placeholder="Select a model"
+            />
+          </div>
+        </div>
+
+        <div class="mt-3 flex justify-end">
+          <UButton
+            size="sm"
+            :loading="profileLoading"
+            :disabled="
+              !preferredModel ||
+              preferredModel === (profile?.preferred_model || '')
+            "
+            @click="savePreferredModel"
+          >
+            Save
           </UButton>
         </div>
+
+        <p v-if="modelsError" class="text-xs text-red-500 mt-2">
+          {{ modelsError }}
+        </p>
       </UCard>
     </section>
 
@@ -176,10 +325,29 @@
 </template>
 
 <script setup lang="ts">
+import { createApiService } from "~/services/api";
+import { createTokensService, type ApiToken } from "~/services/tokens.service";
+import {
+  createModelsService,
+  type AvailableModel,
+} from "~/services/models.service";
+
 const { user, signOut, getToken } = useAuth();
+const {
+  profile,
+  loading: profileLoading,
+  error: profileError,
+  displayLabel,
+  updateProfile,
+  uploadAvatar,
+} = useProfile();
 const config = useRuntimeConfig();
 
-const tokens = ref<any[]>([]);
+const api = createApiService(config.public.apiUrl, getToken);
+const tokensService = createTokensService(api);
+const modelsService = createModelsService(api);
+
+const tokens = ref<ApiToken[]>([]);
 const loadingTokens = ref(true);
 const showCreate = ref(false);
 const newTokenName = ref("");
@@ -187,23 +355,58 @@ const creating = ref(false);
 const newToken = ref("");
 const copied = ref(false);
 
+const avatarInput = ref<HTMLInputElement | null>(null);
+const displayName = ref("");
+const preferredModel = ref("");
+
+const availableModels = ref<AvailableModel[]>([]);
+const loadingModels = ref(false);
+const modelsError = ref<string | null>(null);
+
+const plans = [
+  { tier: "free", name: "Free", description: "30 per month" },
+  { tier: "pro", name: "Pro", description: "120 per month" },
+  {
+    tier: "ultimate",
+    name: "Ultimate",
+    description: "Unlimited usage",
+  },
+];
+
 const apiUrl = config.public.apiUrl;
 
-const call = async (path: string, options: any = {}) => {
-  const token = await getToken();
-  return $fetch(`${config.public.apiUrl}${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+const showPreferredModel = computed(() => {
+  return (profile.value?.subscription || "free") !== "free";
+});
+
+const modelOptions = computed(() => {
+  return availableModels.value.map((m) => ({
+    label: m.label || m.model,
+    value: m.model,
+  }));
+});
+
+const loadModels = async () => {
+  if (!showPreferredModel.value) return;
+  loadingModels.value = true;
+  modelsError.value = null;
+  try {
+    availableModels.value = await modelsService.listAvailableModels();
+  } catch (e: any) {
+    modelsError.value = e?.data?.error || e?.message || "Failed to load models";
+  } finally {
+    loadingModels.value = false;
+  }
+};
+
+const savePreferredModel = async () => {
+  if (!preferredModel.value) return;
+  await updateProfile({ preferred_model: preferredModel.value });
 };
 
 const loadTokens = async () => {
   try {
-    tokens.value = (await call("/tokens")) as any[];
+    tokens.value = await tokensService.list();
   } finally {
     loadingTokens.value = false;
   }
@@ -212,11 +415,8 @@ const loadTokens = async () => {
 const createToken = async () => {
   creating.value = true;
   try {
-    const data = (await call("/tokens", {
-      method: "POST",
-      body: { name: newTokenName.value },
-    })) as any;
-    newToken.value = data.token;
+    const data = await tokensService.create({ name: newTokenName.value });
+    newToken.value = data.token ?? "";
     showCreate.value = false;
     newTokenName.value = "";
     await loadTokens();
@@ -226,8 +426,121 @@ const createToken = async () => {
 };
 
 const revokeToken = async (id: string) => {
-  await call(`/tokens/${id}`, { method: "DELETE" });
+  await tokensService.revoke(id);
   tokens.value = tokens.value.filter((t: any) => t.id !== id);
+};
+
+const saveDisplayName = async () => {
+  await updateProfile({ display_name: displayName.value || null });
+};
+
+const MAX_AVATAR_BYTES = 1 * 1024 * 1024; // 1MB
+const MAX_AVATAR_DIM = 512;
+
+const canvasToBlob = (
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality?: number,
+): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return reject(new Error("Failed to encode image"));
+        resolve(blob);
+      },
+      type,
+      quality,
+    );
+  });
+};
+
+const loadImageBitmap = async (file: File): Promise<ImageBitmap> => {
+  if (typeof createImageBitmap !== "undefined") {
+    return await createImageBitmap(file);
+  }
+
+  const url = URL.createObjectURL(file);
+  try {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = url;
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("Failed to load image"));
+    });
+    return await createImageBitmap(img as any);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
+
+const resizeAndCompressAvatar = async (file: File): Promise<File> => {
+  // If it's already comfortably small, just upload it.
+  if (file.size <= MAX_AVATAR_BYTES * 0.9) return file;
+
+  const bitmap = await loadImageBitmap(file);
+
+  const scale = Math.min(
+    1,
+    MAX_AVATAR_DIM / Math.max(bitmap.width, bitmap.height),
+  );
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Failed to create canvas context");
+
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close?.();
+
+  // Prefer WebP when available.
+  const preferredType = "image/webp";
+  const fallbackType = "image/jpeg";
+
+  const tryEncode = async (type: string, quality: number) => {
+    const blob = await canvasToBlob(canvas, type, quality);
+    return new File(
+      [blob],
+      "avatar" + (type === preferredType ? ".webp" : ".jpg"),
+      {
+        type,
+        lastModified: Date.now(),
+      },
+    );
+  };
+
+  // Quality ladder to hit <= 1MB.
+  const qualities = [0.85, 0.75, 0.65, 0.55, 0.45];
+
+  for (const q of qualities) {
+    const out = await tryEncode(preferredType, q);
+    if (out.size <= MAX_AVATAR_BYTES) return out;
+  }
+
+  for (const q of qualities) {
+    const out = await tryEncode(fallbackType, q);
+    if (out.size <= MAX_AVATAR_BYTES) return out;
+  }
+
+  // As a last resort, return the smallest attempt.
+  const last = await tryEncode(fallbackType, qualities[qualities.length - 1]);
+  return last;
+};
+
+const onAvatarSelected = async (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  try {
+    const processed = await resizeAndCompressAvatar(file);
+    await uploadAvatar(processed);
+  } finally {
+    input.value = "";
+  }
 };
 
 const copyToken = async () => {
@@ -244,6 +557,30 @@ const formatDate = (d: string) =>
     day: "numeric",
     year: "numeric",
   });
+
+watch(
+  () => profile.value?.display_name,
+  (v) => {
+    displayName.value = v || "";
+  },
+  { immediate: true },
+);
+
+watch(
+  () => profile.value?.preferred_model,
+  (v) => {
+    preferredModel.value = v || "";
+  },
+  { immediate: true },
+);
+
+watch(
+  () => showPreferredModel.value,
+  (show) => {
+    if (show) loadModels();
+  },
+  { immediate: true },
+);
 
 onMounted(loadTokens);
 </script>

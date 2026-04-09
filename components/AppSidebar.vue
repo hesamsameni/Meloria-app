@@ -30,14 +30,24 @@
       <div class="flex items-center gap-2.5 mb-2">
         <UAvatar
           :alt="user?.email"
+          :src="profile?.avatar_url || undefined"
           size="xs"
           :style="`background: var(--ui-color-primary-500)`"
         />
-        <span
-          class="text-xs text-neutral-500 dark:text-neutral-400 truncate flex-1"
-        >
-          {{ user?.email }}
-        </span>
+        <div class="min-w-0 flex-1">
+          <span
+            class="text-xs text-neutral-500 dark:text-neutral-400 truncate block"
+          >
+            {{ displayLabel || user?.email }}
+          </span>
+          <span class="text-[11px] text-neutral-400 truncate block">
+            {{
+              (profile?.subscription || "free").charAt(0).toUpperCase() +
+              (profile?.subscription || "free").slice(1) +
+              " plan"
+            }}
+          </span>
+        </div>
       </div>
       <UButton
         variant="ghost"
@@ -54,8 +64,10 @@
 
 <script setup lang="ts">
 import { useAuth } from "~/composables/useAuth";
+import { useProfile } from "~/composables/useProfile";
 
 const { user, signOut } = useAuth();
+const { profile, displayLabel } = useProfile();
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: "i-lucide-layout-dashboard" },
