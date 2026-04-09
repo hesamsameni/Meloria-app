@@ -63,6 +63,7 @@
 
 <script setup lang="ts">
 const { user } = useAuth();
+const { displayLabel } = useProfile();
 const items = useItems();
 
 const recentItems = computed(() => items.items.value);
@@ -85,11 +86,21 @@ const handleCaptured = async () => {
 
 const greeting = computed(() => {
   const h = new Date().getHours();
-  const name = user.value?.email?.split("@")[0] ?? "";
-  const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
-  if (h < 12) return `Good morning, ${capitalizedName}`;
-  if (h < 18) return `Good afternoon, ${capitalizedName}`;
-  return `Good evening, ${capitalizedName}`;
+  const rawName = (displayLabel.value || user.value?.email || "").trim();
+  const firstName = rawName.includes("@") ? rawName.split("@")[0] : rawName;
+  const capitalizedName = firstName
+    ? firstName.charAt(0).toUpperCase() + firstName.slice(1)
+    : "";
+
+  if (h < 12)
+    return capitalizedName
+      ? `Good morning, ${capitalizedName}`
+      : "Good morning";
+  if (h < 18)
+    return capitalizedName
+      ? `Good afternoon, ${capitalizedName}`
+      : "Good afternoon";
+  return capitalizedName ? `Good evening, ${capitalizedName}` : "Good evening";
 });
 
 const today = computed(() =>
