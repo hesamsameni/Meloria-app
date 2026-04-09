@@ -60,9 +60,22 @@
           color="error"
           variant="soft"
           title="Something went wrong"
-          :description="error"
           :close-button="{ onClick: reset }"
-        />
+        >
+          <template #description>
+            <span v-if="upgradeParts">
+              {{ upgradeParts.before }}
+              <NuxtLink
+                to="/settings"
+                class="underline underline-offset-2 hover:text-primary-500 transition-colors"
+              >
+                {{ upgradeParts.match }}
+              </NuxtLink>
+              {{ upgradeParts.after }}
+            </span>
+            <span v-else>{{ error }}</span>
+          </template>
+        </UAlert>
       </Transition>
     </div>
   </UCard>
@@ -82,6 +95,21 @@ const sources = ["manual", "instagram", "youtube", "x", "shazam"];
 
 const placeholder =
   "Drop anything — a movie title, YouTube link, Shazam result, idea…  ⌘↵ to send";
+
+const upgradeParts = computed(() => {
+  if (!error.value) return null;
+  const msg = String(error.value);
+
+  // Turn the first occurrence of the word "upgrade" into a link.
+  const idx = msg.toLowerCase().indexOf("upgrade");
+  if (idx === -1) return null;
+
+  return {
+    before: msg.slice(0, idx),
+    match: msg.slice(idx, idx + "upgrade".length),
+    after: msg.slice(idx + "upgrade".length),
+  };
+});
 
 const handleCapture = async () => {
   const item = await capture(input.value, selectedSource.value);
