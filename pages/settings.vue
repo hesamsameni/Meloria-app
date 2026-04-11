@@ -121,21 +121,25 @@
                 : 'primary'
             "
             :disabled="(profile?.subscription || 'free') === plan.tier"
+            :loading="billingLoading === plan.tier"
+            @click="selectPlan(plan.tier)"
           >
             {{
               (profile?.subscription || "free") === plan.tier
                 ? "Current plan"
-                : (profile?.subscription || "free") === "ultimate" &&
-                    plan.tier !== "ultimate"
+                : TIER_RANK[plan.tier] <
+                      TIER_RANK[profile?.subscription || "free"] ||
+                    plan.tier === "free"
                   ? "Downgrade"
-                  : plan.tier === "free" &&
-                      (profile?.subscription || "free") !== "free"
-                    ? "Downgrade"
-                    : "Upgrade"
+                  : "Upgrade"
             }}
           </UButton>
         </UCard>
       </div>
+
+      <p v-if="billingError" class="text-xs text-red-500 mt-3">
+        {{ billingError }}
+      </p>
     </section>
 
     <!-- preferred model (paid only) -->
@@ -396,6 +400,7 @@ import {
   createModelsService,
   type AvailableModel,
 } from "~/services/models.service";
+import { createBillingService } from "~/services/billing.service";
 
 const { user, signOut, getToken } = useAuth();
 const {
@@ -411,6 +416,7 @@ const config = useRuntimeConfig();
 const api = createApiService(config.public.apiUrl, getToken);
 const tokensService = createTokensService(api);
 const modelsService = createModelsService(api);
+const billingService = createBillingService(api);
 
 const tokens = ref<ApiToken[]>([]);
 const loadingTokens = ref(true);
@@ -427,6 +433,39 @@ const preferredModel = ref("");
 const availableModels = ref<AvailableModel[]>([]);
 const loadingModels = ref(false);
 const modelsError = ref<string | null>(null);
+
+// billing
+const billingLoading = ref<string | null>(null);
+const billingError = ref<string | null>(null);
+
+const TIER_RANK: Record<string, number> = { free: 0, pro: 1, ultimate: 2 };
+
+const selectPlan = async (tier: string) => {
+  const current = profile.value?.subscription || "free";
+  if (current === tier) return;
+
+  billingLoading.value = tier;
+  billingError.value = null;
+
+  try {
+    const currentRank = TIER_RANK[current] ?? 0;
+    const targetRank = TIER_RANK[tier] ?? 0;
+    const isDowngrade = targetRank < currentRank;
+
+    if (isDowngrade || tier === "free") {
+      const { url } = await billingService.portal();
+      window.location.href = url;
+    } else {
+      const { url } = await billingService.checkout(tier);
+      window.location.href = url;
+    }
+  } catch (e: any) {
+    billingError.value =
+      e?.data?.error || e?.message || "Something went wrong. Please try again.";
+  } finally {
+    billingLoading.value = null;
+  }
+};
 
 // telegram
 const telegramStatus = ref<any>(null);

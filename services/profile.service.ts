@@ -9,7 +9,7 @@ export type UserProfile = {
   subscription: SubscriptionTier;
   preferred_model: string;
   display_name: string | null;
-  subscription_expires_at: string | null;
+  current_period_end: string | null;
   created_at: string | null;
   updated_at: string | null;
 };
