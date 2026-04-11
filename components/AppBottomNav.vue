@@ -28,14 +28,10 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute();
+import { NAV_ITEMS } from "~/constants/navigation";
 
-const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: "i-lucide-layout-dashboard" },
-  { to: "/library", label: "Library", icon: "i-lucide-library" },
-  { to: "/suggestions", label: "Suggestions", icon: "i-lucide-sparkles" },
-  { to: "/settings", label: "Settings", icon: "i-lucide-settings" },
-];
+const route = useRoute();
+const navItems = NAV_ITEMS;
 
 const isActive = (to: string) => {
   if (to === "/dashboard") return route.path === "/dashboard";

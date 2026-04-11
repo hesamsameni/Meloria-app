@@ -73,14 +73,8 @@ const recentItems = computed(() => items.items.value);
 
 const stats = computed(() => [
   { label: "Total saved", value: items.totals.value.total },
-  {
-    label: "Movies",
-    value: items.totals.value.movies,
-  },
-  {
-    label: "Music",
-    value: items.totals.value.music,
-  },
+  { label: "Movies", value: items.totals.value.movies },
+  { label: "Music", value: items.totals.value.music },
 ]);
 
 const handleCaptured = async () => {
@@ -91,19 +85,13 @@ const greeting = computed(() => {
   const h = new Date().getHours();
   const rawName = (displayLabel.value || user.value?.email || "").trim();
   const firstName = rawName.includes("@") ? rawName.split("@")[0] : rawName;
-  const capitalizedName = firstName
+  const name = firstName
     ? firstName.charAt(0).toUpperCase() + firstName.slice(1)
     : "";
 
-  if (h < 12)
-    return capitalizedName
-      ? `Good morning, ${capitalizedName}`
-      : "Good morning";
-  if (h < 18)
-    return capitalizedName
-      ? `Good afternoon, ${capitalizedName}`
-      : "Good afternoon";
-  return capitalizedName ? `Good evening, ${capitalizedName}` : "Good evening";
+  if (h < 12) return name ? `Good morning, ${name}` : "Good morning";
+  if (h < 18) return name ? `Good afternoon, ${name}` : "Good afternoon";
+  return name ? `Good evening, ${name}` : "Good evening";
 });
 
 const today = computed(() =>

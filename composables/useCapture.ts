@@ -1,12 +1,7 @@
-import { createApiService } from "~/services/api";
 import { createItemsService, type Item } from "~/services/items.service";
-import { useAuth } from "./useAuth";
 
 export const useCapture = () => {
-  const config = useRuntimeConfig();
-  const { getToken } = useAuth();
-
-  const api = createApiService(config.public.apiUrl, getToken);
+  const api = useApiService();
   const itemsService = createItemsService(api);
 
   const loading = ref(false);

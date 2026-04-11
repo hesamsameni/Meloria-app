@@ -104,11 +104,34 @@ export const createItemsService = (
     });
   };
 
+  const getById = async (id: string): Promise<Item> => {
+    return api.call<Item>(`/items/${id}`, { method: "GET" });
+  };
+
+  const updateItem = async (
+    id: string,
+    payload: Partial<Pick<Item, "status" | "your_notes">>,
+  ): Promise<void> => {
+    await api.call(`/items/${id}`, { method: "PATCH", body: payload });
+  };
+
+  const remove = async (id: string): Promise<void> => {
+    await api.call(`/items/${id}`, { method: "DELETE" });
+  };
+
   const getTotals = async (): Promise<ItemTotals> => {
     return api.call<ItemTotals>("/items/totals", {
       method: "GET",
     });
   };
 
-  return { capture, search, updateStatus, getTotals };
+  return {
+    capture,
+    search,
+    updateStatus,
+    getById,
+    updateItem,
+    remove,
+    getTotals,
+  };
 };

@@ -76,29 +76,16 @@
   </div>
 </template>
 <script setup lang="ts">
+import { LIBRARY_CATEGORIES, LIBRARY_STATUSES } from "~/constants/items";
+
 const items = useItems();
 
 const search = ref("");
 const activeCategory = ref("");
 const activeStatus = ref("all");
 
-const categories = [
-  { value: "movie", label: "Movies", emoji: "🎬" },
-  { value: "music", label: "Music", emoji: "🎵" },
-  { value: "book", label: "Books", emoji: "📚" },
-  { value: "show", label: "Shows", emoji: "📺" },
-  { value: "article", label: "Articles", emoji: "📰" },
-  { value: "idea", label: "Ideas", emoji: "💡" },
-  { value: "note", label: "Notes", emoji: "📝" },
-  { value: "place", label: "Places", emoji: "📍" },
-];
-
-const statuses = [
-  { value: "all", label: "All" },
-  { value: "saved", label: "Saved" },
-  { value: "in_progress", label: "In progress" },
-  { value: "done", label: "Done" },
-];
+const categories = LIBRARY_CATEGORIES;
+const statuses = LIBRARY_STATUSES;
 
 const filterParams = computed(() => ({
   ...(activeCategory.value ? { category: activeCategory.value } : {}),

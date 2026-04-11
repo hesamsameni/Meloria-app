@@ -6,7 +6,12 @@
 
     <main
       class="flex-1 min-w-0"
-      :class="isAuthenticated ? 'pb-20 md:pb-0' : ''"
+      :class="isAuthenticated ? 'pb-24 md:pb-0' : ''"
+      :style="
+        isAuthenticated
+          ? { paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }
+          : ''
+      "
     >
       <slot />
     </main>

@@ -192,7 +192,14 @@
         <!-- status right aligned -->
         <USelect
           v-if="showStatus"
-          :model-value="item.status"
+          :model-value="
+            item.status as
+              | 'saved'
+              | 'in_progress'
+              | 'done'
+              | 'skipped'
+              | undefined
+          "
           :items="statusOptions"
           size="xs"
           class="w-28 ml-auto"
@@ -205,6 +212,7 @@
 
 <script setup lang="ts">
 import type { Item } from "~/services/items.service";
+import { CATEGORY_EMOJI, STATUS_OPTIONS } from "~/constants/items";
 
 const props = defineProps<{
   item: Item;
@@ -215,28 +223,11 @@ defineEmits<{
   "status-change": [id: string, status: string];
 }>();
 
-const statusOptions = [
-  { label: "Saved", value: "saved" },
-  { label: "In progress", value: "in_progress" },
-  { label: "Done", value: "done" },
-  { label: "Skipped", value: "skipped" },
-];
+const statusOptions = [...STATUS_OPTIONS];
 
-const categoryEmoji = computed(() => {
-  const map: Record<string, string> = {
-    movie: "🎬",
-    music: "🎵",
-    book: "📚",
-    show: "📺",
-    article: "📰",
-    place: "📍",
-    person: "👤",
-    idea: "💡",
-    note: "📝",
-    product: "🛍️",
-  };
-  return map[props.item.category] || "✦";
-});
+const categoryEmoji = computed(
+  () => CATEGORY_EMOJI[props.item.category] || "✦",
+);
 
 const isNote = computed(() =>
   ["note", "idea", "thought"].includes(props.item.category),

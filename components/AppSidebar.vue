@@ -63,16 +63,10 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from "~/composables/useAuth";
-import { useProfile } from "~/composables/useProfile";
+import { NAV_ITEMS } from "~/constants/navigation";
 
 const { user, signOut } = useAuth();
 const { profile, displayLabel } = useProfile();
 
-const navItems = [
-  { to: "/dashboard", label: "Dashboard", icon: "i-lucide-layout-dashboard" },
-  { to: "/library", label: "Library", icon: "i-lucide-library" },
-  { to: "/suggestions", label: "Suggestions", icon: "i-lucide-sparkles" },
-  { to: "/settings", label: "Settings", icon: "i-lucide-settings" },
-];
+const navItems = NAV_ITEMS;
 </script>

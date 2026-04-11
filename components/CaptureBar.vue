@@ -10,24 +10,7 @@
         @keydown.ctrl.enter="handleCapture"
       />
 
-      <div class="flex items-center gap-2 flex-wrap">
-        <!-- source selector -->
-        <div class="flex items-center gap-1.5 flex-wrap flex-1">
-          <button
-            v-for="s in sources"
-            :key="s"
-            @click="selectedSource = s"
-            class="px-2.5 py-1 rounded-full text-xs transition-colors border"
-            :class="
-              selectedSource === s
-                ? 'bg-primary-500 border-primary-500 text-white'
-                : 'border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-primary-300'
-            "
-          >
-            {{ s }}
-          </button>
-        </div>
-
+      <div class="flex justify-end gap-2 flex-wrap">
         <UButton
           @click="handleCapture"
           :loading="loading"

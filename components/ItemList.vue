@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- Loading skeletons -->
     <div v-if="loading" class="flex flex-col gap-2">
       <USkeleton
         v-for="i in skeletonCount"
@@ -8,6 +9,10 @@
       />
     </div>
 
+    <!-- Empty state -->
+    <EmptyState v-else-if="items.length === 0" :description="emptyMessage" />
+
+    <!-- Item list -->
     <div v-else class="flex flex-col gap-2">
       <ItemCard
         v-for="item in items"
