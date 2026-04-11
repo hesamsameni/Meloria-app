@@ -65,6 +65,9 @@
 const { user } = useAuth();
 const { displayLabel } = useProfile();
 const items = useItems();
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 
 const recentItems = computed(() => items.items.value);
 
@@ -114,5 +117,15 @@ const today = computed(() =>
 onMounted(() => {
   items.fetch();
   items.fetchTotals();
+
+  if (route.query.upgraded === "true") {
+    toast.add({
+      title: "You're all upgraded!",
+      description: "Your subscription is now active. Enjoy the new features.",
+      color: "success",
+      duration: 6000,
+    });
+    router.replace({ query: {} });
+  }
 });
 </script>
