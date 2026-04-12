@@ -232,7 +232,7 @@ const loadSpotifyStatus = async () => {
   if (!isSpotify.value) return;
   spotifyLoading.value = true;
   try {
-    spotifyStatus.value = await api.call("/spotify/status");
+    spotifyStatus.value = await api.call("/api/auth/spotify/status");
   } catch {
     spotifyStatus.value = { linked: false };
   } finally {
@@ -244,7 +244,7 @@ const connectSpotify = async () => {
   if (!isSpotify.value) return;
   spotifyLoading.value = true;
   try {
-    const response = await api.call<{ url: string }>("/spotify/auth-url", {
+    const response = await api.call<{ url: string }>("/api/auth/spotify/auth-url", {
       method: "POST",
       body: {
         // Backend can use this to return user to settings after callback.
@@ -270,7 +270,7 @@ const disconnectSpotify = async () => {
   if (!isSpotify.value) return;
   spotifyLoading.value = true;
   try {
-    await api.call("/spotify/disconnect", { method: "DELETE" });
+    await api.call("/api/auth/spotify/disconnect", { method: "DELETE" });
     spotifyStatus.value = { linked: false };
     toast.add({
       title: "Spotify disconnected",
@@ -315,7 +315,7 @@ const savePlaylist = async () => {
   if (!playlistInput.value.trim()) return;
   savingPlaylist.value = true;
   try {
-    await api.call("/spotify/playlist", {
+    await api.call("/api/auth/spotify/playlist", {
       method: "PATCH",
       body: { playlist_url: playlistInput.value.trim() },
     });
