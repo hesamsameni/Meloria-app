@@ -7,18 +7,25 @@
     </p>
 
     <div class="space-y-3">
-      <SettingsTelegramSection :show-title="false" />
-
       <SettingsIntegrationProviderCard
-        icon="🎵"
-        title="Spotify"
-        description="Connect Spotify to import tracks and playlists directly into your library."
+        icon="i-simple-icons-telegram"
+        title="Telegram"
+        provider="telegram"
+        description="Connect Telegram to capture anything directly from your phone — voice notes, links, forwarded posts."
       />
 
       <SettingsIntegrationProviderCard
-        icon="☁️"
+        icon="i-simple-icons-spotify"
+        title="Spotify"
+        provider="spotify"
+        description="Connect Spotify to add tracks to your playlists directly from Meloria, and create a smart playlist based on your listening habits."
+      />
+
+      <SettingsIntegrationProviderCard
+        icon="i-simple-icons-soundcloud"
         title="SoundCloud"
-        description="Connect SoundCloud to capture tracks, likes, and reposts into Meloria."
+        provider="soundcloud"
+        description="Connect SoundCloud to add tracks to your playlists directly from Meloria, and create a smart playlist based on your listening habits."
       />
     </div>
   </section>

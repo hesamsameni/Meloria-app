@@ -10,6 +10,9 @@ export default defineNuxtConfig({
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
+      spotifyClientId: process.env.SPOTIFY_CLIENT_ID,
+      spotifyClientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+      spotifyRedirectUri: process.env.SPOTIFY_REDIRECT_URI,
       apiUrl: process.env.NUXT_PUBLIC_API_URL || "http://localhost:3000",
     },
   },
