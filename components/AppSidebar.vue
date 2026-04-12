@@ -1,14 +1,26 @@
 <template>
   <aside
-    class="w-56 shrink-0 h-screen sticky top-0 flex flex-col border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-6"
+    class="flex flex-col border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-6"
+    :class="
+      mobile ? 'w-52 h-full shadow-xl' : 'w-56 shrink-0 h-screen sticky top-0'
+    "
   >
     <!-- logo -->
-    <div class="px-3 mb-8">
+    <div class="px-3 mb-8 flex items-center justify-between gap-2">
       <span
         class="text-xl font-semibold tracking-tight text-neutral-900 dark:text-white"
       >
         Meloria
       </span>
+      <UButton
+        v-if="mobile"
+        icon="i-lucide-x"
+        size="xs"
+        color="neutral"
+        variant="ghost"
+        aria-label="Close navigation menu"
+        @click="emit('close')"
+      />
     </div>
 
     <!-- nav -->
@@ -17,6 +29,7 @@
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
+        @click="emit('navigate')"
         class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
         activeClass="bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium"
       >
@@ -54,7 +67,7 @@
         size="xs"
         color="neutral"
         class="w-full justify-start text-neutral-400"
-        @click="signOut"
+        @click="handleSignOut"
       >
         Sign out
       </UButton>
@@ -65,8 +78,27 @@
 <script setup lang="ts">
 import { NAV_ITEMS } from "~/constants/navigation";
 
+withDefaults(
+  defineProps<{
+    mobile?: boolean;
+  }>(),
+  {
+    mobile: false,
+  },
+);
+
+const emit = defineEmits<{
+  (e: "navigate"): void;
+  (e: "close"): void;
+}>();
+
 const { user, signOut } = useAuth();
 const { profile, displayLabel } = useProfile();
 
 const navItems = NAV_ITEMS;
+
+const handleSignOut = async () => {
+  await signOut();
+  emit("navigate");
+};
 </script>

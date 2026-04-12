@@ -1,12 +1,5 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-    <div class="mb-6">
-      <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">
-        Library
-      </h1>
-      <p class="text-sm text-neutral-400 mt-0.5">Everything you've captured</p>
-    </div>
-
     <!-- filters -->
     <div class="flex flex-col gap-3 mb-6">
       <UInput
@@ -79,6 +72,9 @@
 import { LIBRARY_CATEGORIES, LIBRARY_STATUSES } from "~/constants/items";
 
 const items = useItems();
+const { setPageHeader } = usePageHeader();
+
+setPageHeader("Library", "Everything you've captured");
 
 const search = ref("");
 const activeCategory = ref("");

@@ -13,4 +13,16 @@ export default defineNuxtConfig({
       apiUrl: process.env.NUXT_PUBLIC_API_URL || "http://localhost:3000",
     },
   },
+  app: {
+    pageTransition: { name: "page", mode: "out-in" },
+    head: {
+      meta: [
+        {
+          name: "viewport",
+          content:
+            "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+        },
+      ],
+    },
+  },
 });

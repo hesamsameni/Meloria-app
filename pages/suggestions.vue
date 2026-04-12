@@ -1,12 +1,5 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-    <div class="mb-8">
-      <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">
-        Suggestions
-      </h1>
-      <p class="text-sm text-neutral-400 mt-0.5">Based on your taste profile</p>
-    </div>
-
     <UCard class="text-center py-16">
       <p class="text-4xl mb-4">✦</p>
       <p class="text-sm font-medium text-neutral-900 dark:text-white mb-1">
@@ -19,3 +12,9 @@
     </UCard>
   </div>
 </template>
+
+<script setup lang="ts">
+const { setPageHeader } = usePageHeader();
+
+setPageHeader("Suggestions", "Based on your taste profile");
+</script>
