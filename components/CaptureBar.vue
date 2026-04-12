@@ -19,7 +19,7 @@
           @keydown.ctrl.enter="handleCapture"
         />
 
-        <div class="flex justify-between items-center mt-3">
+        <div class="flex justify-between items-center mt-3 mb-3">
           <p class="text-xs text-neutral-400">
             {{ input.trim().length }} chars
           </p>

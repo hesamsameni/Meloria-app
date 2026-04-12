@@ -183,10 +183,13 @@ const props = withDefaults(
 const isTelegram = computed(() => props.provider === "telegram");
 const isSpotify = computed(() => props.provider === "spotify");
 
+import { createIntegrationsService } from "~/services/integrations.service";
+
 const api = useApiService();
+const integrationsService = createIntegrationsService(api);
 const route = useRoute();
 const router = useRouter();
-const toast = useToast();
+const toast = useGlobalToast();
 
 const telegramStatus = ref<any>(null);
 const linkCode = ref<any>(null);
@@ -201,7 +204,7 @@ const savingPlaylist = ref(false);
 const loadTelegramStatus = async () => {
   if (!isTelegram.value) return;
   try {
-    telegramStatus.value = await api.call("/telegram/status");
+    telegramStatus.value = await integrationsService.getTelegramStatus();
   } catch {
     telegramStatus.value = null;
   }
@@ -211,9 +214,7 @@ const generateCode = async () => {
   if (!isTelegram.value || telegramStatus.value?.linked) return;
   generatingCode.value = true;
   try {
-    linkCode.value = await api.call("/telegram/generate-code", {
-      method: "POST",
-    });
+    linkCode.value = await integrationsService.generateTelegramCode();
   } finally {
     generatingCode.value = false;
   }
@@ -232,7 +233,7 @@ const loadSpotifyStatus = async () => {
   if (!isSpotify.value) return;
   spotifyLoading.value = true;
   try {
-    spotifyStatus.value = await api.call("/api/auth/spotify/status");
+    spotifyStatus.value = await integrationsService.getSpotifyStatus();
   } catch {
     spotifyStatus.value = { linked: false };
   } finally {
@@ -244,23 +245,16 @@ const connectSpotify = async () => {
   if (!isSpotify.value) return;
   spotifyLoading.value = true;
   try {
-    const response = await api.call<{ url: string }>("/api/auth/spotify/auth-url", {
-      method: "POST",
-      body: {
-        // Backend can use this to return user to settings after callback.
-        return_to: "/settings",
-      },
-    });
+    const response = await integrationsService.getSpotifyAuthUrl("/settings");
 
     if (response?.url) {
       window.location.href = response.url;
     }
   } catch (e: any) {
-    toast.add({
-      title: "Spotify connection failed",
-      description: e?.data?.error || e?.message || "Please try again.",
-      color: "error",
-    });
+    toast.error(
+      "Spotify connection failed",
+      e?.data?.error || e?.message || "Please try again.",
+    );
   } finally {
     spotifyLoading.value = false;
   }
@@ -270,18 +264,14 @@ const disconnectSpotify = async () => {
   if (!isSpotify.value) return;
   spotifyLoading.value = true;
   try {
-    await api.call("/api/auth/spotify/disconnect", { method: "DELETE" });
+    await integrationsService.disconnectSpotify();
     spotifyStatus.value = { linked: false };
-    toast.add({
-      title: "Spotify disconnected",
-      color: "success",
-    });
+    toast.success("Spotify disconnected");
   } catch (e: any) {
-    toast.add({
-      title: "Could not disconnect Spotify",
-      description: e?.data?.error || e?.message || "Please try again.",
-      color: "error",
-    });
+    toast.error(
+      "Could not disconnect Spotify",
+      e?.data?.error || e?.message || "Please try again.",
+    );
   } finally {
     spotifyLoading.value = false;
   }
@@ -291,7 +281,7 @@ const handleSpotifyCallbackStatus = async () => {
   if (!isSpotify.value) return;
   const state = route.query.spotify;
   if (state === "connected") {
-    toast.add({ title: "Spotify connected", color: "success" });
+    toast.success("Spotify connected");
     await loadSpotifyStatus();
     const query = { ...route.query };
     delete query.spotify;
@@ -300,11 +290,7 @@ const handleSpotifyCallbackStatus = async () => {
   }
 
   if (state === "error") {
-    toast.add({
-      title: "Spotify connection failed",
-      description: "Please retry the connection.",
-      color: "error",
-    });
+    toast.error("Spotify connection failed", "Please retry the connection.");
     const query = { ...route.query };
     delete query.spotify;
     router.replace({ query });
@@ -315,20 +301,16 @@ const savePlaylist = async () => {
   if (!playlistInput.value.trim()) return;
   savingPlaylist.value = true;
   try {
-    await api.call("/api/auth/spotify/playlist", {
-      method: "PATCH",
-      body: { playlist_url: playlistInput.value.trim() },
-    });
-    toast.add({ title: "Playlist updated", color: "success" });
+    await integrationsService.updateSpotifyPlaylist(playlistInput.value.trim());
+    toast.success("Playlist updated");
     showPlaylistInput.value = false;
     playlistInput.value = "";
     await loadSpotifyStatus();
   } catch (e: any) {
-    toast.add({
-      title: "Could not update playlist",
-      description: e?.data?.error || e?.message || "Please try again.",
-      color: "error",
-    });
+    toast.error(
+      "Could not update playlist",
+      e?.data?.error || e?.message || "Please try again.",
+    );
   } finally {
     savingPlaylist.value = false;
   }
