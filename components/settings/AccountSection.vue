@@ -1,18 +1,21 @@
 <template>
-  <section class="mb-8">
+  <section class="mb-10">
     <p
       class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
     >
       Account
     </p>
 
-    <UCard>
-      <div class="flex items-center gap-3">
+    <UCard
+      class="border border-neutral-200/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/70 shadow-sm rounded-2xl"
+    >
+      <div class="flex items-center gap-4">
         <div class="relative">
           <UAvatar
             :alt="user?.email"
             :src="profile?.avatar_url || undefined"
             size="md"
+            class="ring-2 ring-white dark:ring-neutral-900 shadow-sm"
           />
           <input
             ref="avatarInput"
@@ -23,13 +26,13 @@
           />
         </div>
 
-        <div class="min-w-0">
+        <div class="min-w-0 flex-1">
           <p
-            class="text-sm font-medium text-neutral-900 dark:text-white truncate"
+            class="text-sm font-semibold text-neutral-900 dark:text-white truncate"
           >
             {{ displayLabel || user?.email }}
           </p>
-          <p class="text-xs text-neutral-400">
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
             {{ subscriptionLabel }}
           </p>
         </div>
@@ -40,19 +43,28 @@
             variant="outline"
             color="neutral"
             :loading="loading"
+            class="rounded-lg"
             @click="avatarInput?.click()"
           >
             Change photo
           </UButton>
-          <UButton variant="ghost" color="neutral" size="sm" @click="signOut">
+          <UButton
+            variant="ghost"
+            color="neutral"
+            size="sm"
+            class="rounded-lg"
+            @click="signOut"
+          >
             Sign out
           </UButton>
         </div>
       </div>
 
-      <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         <div class="sm:col-span-2">
-          <p class="text-xs font-medium text-neutral-500 mb-1">Display name</p>
+          <p class="text-xs font-medium text-neutral-500 mb-1.5">
+            Display name
+          </p>
           <UInput
             v-model="displayName"
             placeholder="Your name"
@@ -61,7 +73,7 @@
         </div>
         <div class="flex items-end">
           <UButton
-            class="w-full"
+            class="w-full rounded-lg"
             :loading="loading"
             :disabled="displayName === (profile?.display_name || '')"
             @click="saveDisplayName"

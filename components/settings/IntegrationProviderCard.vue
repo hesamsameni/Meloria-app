@@ -1,11 +1,16 @@
 <template>
-  <UCard class="border border-neutral-200/80 dark:border-neutral-800/80">
-    <div class="flex items-start justify-between gap-3">
+  <UCard
+    class="border border-neutral-200/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/70 shadow-sm rounded-2xl"
+  >
+    <div class="flex items-start justify-between gap-4">
       <div class="flex items-start gap-3 min-w-0">
         <div
-          class="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center shrink-0"
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center shrink-0"
         >
-          <UIcon :name="icon" class="w-5 h-5" />
+          <UIcon
+            :name="icon"
+            class="w-5 h-5 text-neutral-700 dark:text-neutral-200"
+          />
         </div>
 
         <div class="min-w-0">
@@ -43,12 +48,18 @@
         {{ spotifyStatus?.linked ? "Disconnect" : "Connect" }}
       </UButton>
 
-      <UBadge v-else color="neutral" variant="soft" label="Coming soon" />
+      <UBadge
+        v-else
+        color="neutral"
+        variant="soft"
+        label="Coming soon"
+        class="shrink-0"
+      />
     </div>
 
     <div
       v-if="isTelegram"
-      class="mt-3 rounded-lg bg-neutral-50 dark:bg-neutral-900/50 px-3 py-2"
+      class="mt-4 rounded-xl border border-neutral-200/70 dark:border-neutral-800/80 bg-neutral-50/90 dark:bg-neutral-900/40 px-3.5 py-3"
     >
       <p
         v-if="telegramStatus?.linked"
@@ -69,7 +80,7 @@
           and send this command:
         </p>
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-2.5 flex-wrap">
           <code
             class="flex-1 min-w-[12rem] text-sm font-mono font-semibold text-center py-2 rounded-lg bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 tracking-widest"
           >
@@ -97,7 +108,7 @@
 
     <div
       v-if="isSpotify"
-      class="mt-3 rounded-lg bg-neutral-50 dark:bg-neutral-900/50 px-3 py-2 space-y-2"
+      class="mt-4 rounded-xl border border-neutral-200/70 dark:border-neutral-800/80 bg-neutral-50/90 dark:bg-neutral-900/40 px-3.5 py-3 space-y-3"
     >
       <template v-if="spotifyStatus?.linked">
         <p class="text-xs text-neutral-500 dark:text-neutral-400">
@@ -110,7 +121,7 @@
           </span>
         </p>
 
-        <div v-if="!showPlaylistInput" class="flex items-center gap-2">
+        <div v-if="!showPlaylistInput" class="flex items-center gap-2.5">
           <p class="text-xs text-neutral-500 dark:text-neutral-400 flex-1">
             Saving music to your
             <strong>Meloria</strong> playlist automatically.
@@ -129,7 +140,7 @@
           <p class="text-xs text-neutral-500 dark:text-neutral-400">
             Paste a Spotify playlist URL to use as the target instead:
           </p>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2.5">
             <UInput
               v-model="playlistInput"
               class="flex-1 text-xs"

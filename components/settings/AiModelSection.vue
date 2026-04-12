@@ -1,5 +1,5 @@
 <template>
-  <section class="mb-8">
+  <section class="mb-10">
     <p
       class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
     >
@@ -11,7 +11,7 @@
       <div
         v-for="i in 3"
         :key="i"
-        class="h-[4.5rem] rounded-xl bg-neutral-100 dark:bg-neutral-800 animate-pulse"
+        class="h-[5rem] rounded-2xl bg-neutral-100 dark:bg-neutral-800 animate-pulse"
       />
     </div>
 
@@ -21,17 +21,23 @@
     </p>
 
     <!-- Model list -->
-    <div v-else class="flex flex-col gap-3">
+    <div v-else class="flex flex-col gap-3.5">
       <UCard
         v-for="model in availableModels"
         :key="model.model"
-        class="border border-neutral-200/80 dark:border-neutral-800/80 transition-opacity"
-        :class="{ 'opacity-50': !isModelEnabled(model) }"
+        class="border border-neutral-200/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/70 shadow-sm rounded-2xl transition-all duration-200"
+        :class="{
+          'opacity-55': !isModelEnabled(model),
+          'ring-1 ring-primary-500/50 border-primary-300/60 dark:border-primary-700/60':
+            preferredModel === model.model,
+          'hover:shadow-md hover:-translate-y-0.5':
+            isModelEnabled(model) && preferredModel !== model.model,
+        }"
       >
-        <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start justify-between gap-4">
           <div class="flex items-start gap-3 min-w-0">
             <div
-              class="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center shrink-0"
+              class="w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800 flex items-center justify-center shrink-0"
             >
               <UIcon
                 :name="
@@ -42,7 +48,7 @@
                 class="w-5 h-5"
                 :class="
                   isModelEnabled(model)
-                    ? 'text-neutral-500 dark:text-neutral-400'
+                    ? 'text-neutral-700 dark:text-neutral-300'
                     : 'text-neutral-400 dark:text-neutral-600'
                 "
               />
@@ -57,11 +63,20 @@
                 </p>
                 <UBadge
                   v-if="isPlanRestricted(model)"
-                  color="primary"
+                  color="neutral"
+                  variant="soft"
+                  size="xs"
+                  class="uppercase tracking-wide"
+                >
+                  {{ planBadgeLabel(model) }}
+                </UBadge>
+                <UBadge
+                  v-if="preferredModel === model.model"
+                  color="success"
                   variant="soft"
                   size="xs"
                 >
-                  {{ planBadgeLabel(model) }}
+                  Active
                 </UBadge>
               </div>
               <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
@@ -82,7 +97,7 @@
             :color="preferredModel === model.model ? 'primary' : 'neutral'"
             :disabled="!isModelEnabled(model) || preferredModel === model.model"
             :loading="saving && pendingModel === model.model"
-            class="shrink-0"
+            class="shrink-0 min-w-[92px] align-center"
             @click="selectModel(model)"
           >
             {{ preferredModel === model.model ? "Selected" : "Select" }}

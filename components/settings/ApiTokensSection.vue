@@ -1,6 +1,6 @@
 <template>
-  <section>
-    <div class="flex items-center justify-between mb-3">
+  <section class="mb-10">
+    <div class="flex items-center justify-between mb-3.5">
       <div>
         <p
           class="text-xs font-medium uppercase tracking-widest text-neutral-400"
@@ -11,12 +11,17 @@
           Use these with your Apple Shortcut
         </p>
       </div>
-      <UButton size="sm" @click="showCreate = true">New token</UButton>
+      <UButton size="sm" class="rounded-lg" @click="showCreate = true">
+        New token
+      </UButton>
     </div>
 
     <!-- Create form -->
     <Transition name="fade">
-      <UCard v-if="showCreate" class="mb-3 ring-1 ring-primary-500">
+      <UCard
+        v-if="showCreate"
+        class="mb-3 border border-primary-300/70 dark:border-primary-700/60 bg-primary-50/40 dark:bg-primary-900/10 rounded-2xl"
+      >
         <div class="flex gap-2">
           <UInput
             v-model="newTokenName"
@@ -24,17 +29,27 @@
             class="flex-1"
             @keyup.enter="createToken"
           />
-          <UButton :loading="creating" @click="createToken">Create</UButton>
-          <UButton variant="ghost" color="neutral" @click="showCreate = false"
-            >Cancel</UButton
+          <UButton class="rounded-lg" :loading="creating" @click="createToken">
+            Create
+          </UButton>
+          <UButton
+            variant="ghost"
+            color="neutral"
+            class="rounded-lg"
+            @click="showCreate = false"
           >
+            Cancel
+          </UButton>
         </div>
       </UCard>
     </Transition>
 
     <!-- Newly created token (show once) -->
     <Transition name="fade">
-      <UCard v-if="newToken" class="mb-3 ring-1 ring-green-500">
+      <UCard
+        v-if="newToken"
+        class="mb-3 border border-green-400/70 dark:border-green-700/70 bg-green-50/50 dark:bg-green-900/10 rounded-2xl"
+      >
         <p class="text-xs text-green-600 dark:text-green-400 font-medium mb-2">
           ✓ Copy this token now — it won't be shown again
         </p>
@@ -61,7 +76,10 @@
       <USkeleton v-for="i in 2" :key="i" class="h-14 w-full rounded-xl" />
     </div>
 
-    <UCard v-else-if="tokens.length === 0" class="text-center py-8">
+    <UCard
+      v-else-if="tokens.length === 0"
+      class="text-center py-8 border border-dashed border-neutral-300 dark:border-neutral-700 rounded-2xl"
+    >
       <p class="text-sm text-neutral-400">No tokens yet</p>
     </UCard>
 
@@ -69,7 +87,7 @@
       <UCard
         v-for="token in tokens"
         :key="token.id"
-        class="flex items-center gap-3"
+        class="flex items-center gap-3 border border-neutral-200/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/70 shadow-sm rounded-2xl"
       >
         <UIcon name="i-lucide-key" class="w-4 h-4 text-neutral-400 shrink-0" />
         <div class="flex-1 min-w-0">
@@ -88,6 +106,7 @@
           variant="ghost"
           color="error"
           size="xs"
+          class="rounded-lg"
           @click="revokeToken(token.id)"
         >
           Revoke
@@ -96,7 +115,9 @@
     </div>
 
     <!-- Apple Shortcut setup hint -->
-    <UCard class="mt-6 bg-neutral-100 dark:bg-neutral-900 border-0">
+    <UCard
+      class="mt-6 border border-neutral-200/80 dark:border-neutral-800/80 bg-neutral-50/80 dark:bg-neutral-900/40 rounded-2xl"
+    >
       <p class="text-xs font-medium text-neutral-900 dark:text-white mb-2">
         Apple Shortcut setup
       </p>
