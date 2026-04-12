@@ -3,6 +3,7 @@ import type { createApiService } from "./api";
 export type AvailableModel = {
   model: string;
   label: string | null;
+  plans?: string[];
 };
 
 export const createModelsService = (

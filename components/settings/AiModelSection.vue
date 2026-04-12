@@ -1,49 +1,95 @@
 <template>
-  <section v-if="isPaidPlan" class="mb-8">
+  <section class="mb-8">
     <p
       class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
     >
       AI Model
     </p>
 
-    <UCard>
-      <div class="flex items-center justify-between gap-4">
-        <div class="min-w-0">
-          <p class="text-sm font-medium text-neutral-900 dark:text-white">
-            Preferred model
-          </p>
-          <p class="text-xs text-neutral-400 mt-0.5">
-            Used for extracting details during capture
-          </p>
-        </div>
-        <div class="w-full max-w-xs">
-          <USelect
-            v-model="preferredModel"
-            :items="modelOptions"
-            :loading="loadingModels"
-            placeholder="Select a model"
-          />
-        </div>
-      </div>
+    <!-- Loading skeletons -->
+    <div v-if="loadingModels" class="flex flex-col gap-3">
+      <div
+        v-for="i in 3"
+        :key="i"
+        class="h-[4.5rem] rounded-xl bg-neutral-100 dark:bg-neutral-800 animate-pulse"
+      />
+    </div>
 
-      <div class="mt-3 flex justify-end">
-        <UButton
-          size="sm"
-          :loading="profileLoading"
-          :disabled="
-            !preferredModel ||
-            preferredModel === (profile?.preferred_model || '')
-          "
-          @click="savePreferredModel"
-        >
-          Save
-        </UButton>
-      </div>
+    <!-- Error -->
+    <p v-else-if="modelsError" class="text-xs text-red-500">
+      {{ modelsError }}
+    </p>
 
-      <p v-if="modelsError" class="text-xs text-red-500 mt-2">
-        {{ modelsError }}
-      </p>
-    </UCard>
+    <!-- Model list -->
+    <div v-else class="flex flex-col gap-3">
+      <UCard
+        v-for="model in availableModels"
+        :key="model.model"
+        class="border border-neutral-200/80 dark:border-neutral-800/80 transition-opacity"
+        :class="{ 'opacity-50': !isModelEnabled(model) }"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3 min-w-0">
+            <div
+              class="w-10 h-10 rounded-xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center shrink-0"
+            >
+              <UIcon
+                :name="
+                  isModelEnabled(model)
+                    ? 'i-heroicons-cpu-chip'
+                    : 'i-heroicons-lock-closed'
+                "
+                class="w-5 h-5"
+                :class="
+                  isModelEnabled(model)
+                    ? 'text-neutral-500 dark:text-neutral-400'
+                    : 'text-neutral-400 dark:text-neutral-600'
+                "
+              />
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <p
+                  class="text-sm font-semibold text-neutral-900 dark:text-white"
+                >
+                  {{ model.label || model.model }}
+                </p>
+                <UBadge
+                  v-if="isPlanRestricted(model)"
+                  color="primary"
+                  variant="soft"
+                  size="xs"
+                >
+                  {{ planBadgeLabel(model) }}
+                </UBadge>
+              </div>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                <template v-if="!isModelEnabled(model)">
+                  Only available on the {{ planBadgeLabel(model) }}
+                  {{ (model.plans?.length ?? 0) > 1 ? "plans" : "plan" }}
+                </template>
+                <template v-else>
+                  {{ model.model }}
+                </template>
+              </p>
+            </div>
+          </div>
+
+          <UButton
+            size="sm"
+            :variant="preferredModel === model.model ? 'soft' : 'outline'"
+            :color="preferredModel === model.model ? 'primary' : 'neutral'"
+            :disabled="!isModelEnabled(model) || preferredModel === model.model"
+            :loading="saving && pendingModel === model.model"
+            class="shrink-0"
+            @click="selectModel(model)"
+          >
+            {{ preferredModel === model.model ? "Selected" : "Select" }}
+          </UButton>
+        </div>
+      </UCard>
+    </div>
   </section>
 </template>
 
@@ -52,29 +98,40 @@ import {
   createModelsService,
   type AvailableModel,
 } from "~/services/models.service";
+import { useGlobalToast } from "~/composables/useGlobalToast";
 
-const { profile, loading: profileLoading, updateProfile } = useProfile();
+const { profile, updateProfile } = useProfile();
 const api = useApiService();
 const modelsService = createModelsService(api);
+const toast = useGlobalToast();
 
 const preferredModel = ref("");
 const availableModels = ref<AvailableModel[]>([]);
 const loadingModels = ref(false);
 const modelsError = ref<string | null>(null);
+const saving = ref(false);
+const pendingModel = ref<string | null>(null);
 
-const isPaidPlan = computed(
-  () => (profile.value?.subscription || "free") !== "free",
-);
+const userPlan = computed(() => profile.value?.subscription || "free");
 
-const modelOptions = computed(() =>
-  availableModels.value.map((m) => ({
-    label: m.label || m.model,
-    value: m.model,
-  })),
-);
+function isPlanRestricted(model: AvailableModel): boolean {
+  return (
+    !!model.plans && model.plans.length > 0 && !model.plans.includes("free")
+  );
+}
+
+function isModelEnabled(model: AvailableModel): boolean {
+  if (!model.plans || model.plans.length === 0) return true;
+  return model.plans.includes(userPlan.value);
+}
+
+function planBadgeLabel(model: AvailableModel): string {
+  return (model.plans ?? [])
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" & ");
+}
 
 const loadModels = async () => {
-  if (!isPaidPlan.value) return;
   loadingModels.value = true;
   modelsError.value = null;
   try {
@@ -86,9 +143,22 @@ const loadModels = async () => {
   }
 };
 
-const savePreferredModel = async () => {
-  if (!preferredModel.value) return;
-  await updateProfile({ preferred_model: preferredModel.value });
+const selectModel = async (model: AvailableModel) => {
+  if (!isModelEnabled(model) || preferredModel.value === model.model) return;
+  saving.value = true;
+  pendingModel.value = model.model;
+  try {
+    await updateProfile({ preferred_model: model.model });
+    preferredModel.value = model.model;
+    toast.success("Preferred model updated");
+  } catch (e: any) {
+    toast.error(
+      e?.data?.error || e?.message || "Failed to update preferred model",
+    );
+  } finally {
+    saving.value = false;
+    pendingModel.value = null;
+  }
 };
 
 watch(
@@ -98,11 +168,8 @@ watch(
   },
   { immediate: true },
 );
-watch(
-  isPaidPlan,
-  (show) => {
-    if (show) loadModels();
-  },
-  { immediate: true },
-);
+
+onMounted(() => {
+  loadModels();
+});
 </script>

@@ -63,7 +63,7 @@ const { displayLabel } = useProfile();
 const items = useItems();
 const route = useRoute();
 const router = useRouter();
-const toast = useToast();
+const toast = useGlobalToast();
 const { setPageHeader } = usePageHeader();
 
 const recentItems = computed(() => items.items.value);
@@ -108,12 +108,10 @@ onMounted(() => {
   items.fetchTotals();
 
   if (route.query.upgraded === "true") {
-    toast.add({
-      title: "You're all upgraded!",
-      description: "Your subscription is now active. Enjoy the new features.",
-      color: "success",
-      duration: 6000,
-    });
+    toast.success(
+      "You're all upgraded!",
+      "Your subscription is now active. Enjoy the new features.",
+    );
     router.replace({ query: {} });
   }
 });
