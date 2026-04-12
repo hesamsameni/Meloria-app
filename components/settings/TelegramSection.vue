@@ -1,6 +1,7 @@
 <template>
   <section class="mb-8">
     <p
+      v-if="showTitle"
       class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
     >
       Telegram
@@ -65,6 +66,15 @@
 </template>
 
 <script setup lang="ts">
+withDefaults(
+  defineProps<{
+    showTitle?: boolean;
+  }>(),
+  {
+    showTitle: true,
+  },
+);
+
 const api = useApiService();
 
 const telegramStatus = ref<any>(null);
