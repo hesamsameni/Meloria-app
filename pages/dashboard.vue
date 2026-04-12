@@ -1,16 +1,12 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-    <!-- header -->
-    <div class="mb-8">
-      <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">
-        {{ greeting }}
-      </h1>
-      <p class="text-sm text-neutral-400 mt-0.5">{{ today }}</p>
-    </div>
-
     <!-- stats -->
     <div class="grid grid-cols-3 gap-3 mb-8">
-      <UCard v-for="stat in stats" :key="stat.label" class="text-center">
+      <UCard
+        v-for="stat in stats"
+        :key="stat.label"
+        class="text-center bg-neutral-50 dark:bg-neutral-950"
+      >
         <p class="text-2xl font-semibold text-neutral-900 dark:text-white">
           {{ stat.value }}
         </p>
@@ -68,6 +64,7 @@ const items = useItems();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const { setPageHeader } = usePageHeader();
 
 const recentItems = computed(() => items.items.value);
 
@@ -101,6 +98,10 @@ const today = computed(() =>
     day: "numeric",
   }),
 );
+
+watchEffect(() => {
+  setPageHeader(greeting.value, today.value);
+});
 
 onMounted(() => {
   items.fetch();
