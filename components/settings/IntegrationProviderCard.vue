@@ -31,6 +31,18 @@
         {{ telegramStatus?.linked ? "Connected" : "Connect" }}
       </UButton>
 
+      <UButton
+        v-else-if="isSpotify"
+        size="sm"
+        :variant="spotifyStatus?.linked ? 'soft' : 'outline'"
+        :color="spotifyStatus?.linked ? 'success' : 'neutral'"
+        :loading="spotifyLoading"
+        class="shrink-0"
+        @click="spotifyStatus?.linked ? disconnectSpotify() : connectSpotify()"
+      >
+        {{ spotifyStatus?.linked ? "Disconnect" : "Connect" }}
+      </UButton>
+
       <UBadge v-else color="neutral" variant="soft" label="Coming soon" />
     </div>
 
@@ -82,6 +94,76 @@
         Tap Connect to generate your Telegram linking code.
       </p>
     </div>
+
+    <div
+      v-if="isSpotify"
+      class="mt-3 rounded-lg bg-neutral-50 dark:bg-neutral-900/50 px-3 py-2 space-y-2"
+    >
+      <template v-if="spotifyStatus?.linked">
+        <p class="text-xs text-neutral-500 dark:text-neutral-400">
+          Connected as
+          <strong>{{
+            spotifyStatus.display_name || spotifyStatus.spotify_user_id
+          }}</strong>
+          <span v-if="spotifyStatus.linked_at">
+            • linked {{ formatDate(spotifyStatus.linked_at) }}
+          </span>
+        </p>
+
+        <div v-if="!showPlaylistInput" class="flex items-center gap-2">
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 flex-1">
+            Saving music to your
+            <strong>Meloria</strong> playlist automatically.
+          </p>
+          <UButton
+            size="xs"
+            variant="ghost"
+            color="neutral"
+            @click="showPlaylistInput = true"
+          >
+            Change playlist
+          </UButton>
+        </div>
+
+        <div v-else class="flex flex-col gap-2">
+          <p class="text-xs text-neutral-500 dark:text-neutral-400">
+            Paste a Spotify playlist URL to use as the target instead:
+          </p>
+          <div class="flex items-center gap-2">
+            <UInput
+              v-model="playlistInput"
+              class="flex-1 text-xs"
+              placeholder="https://open.spotify.com/playlist/..."
+              size="sm"
+            />
+            <UButton
+              size="sm"
+              variant="solid"
+              color="neutral"
+              :loading="savingPlaylist"
+              @click="savePlaylist"
+            >
+              Save
+            </UButton>
+            <UButton
+              size="sm"
+              variant="ghost"
+              color="neutral"
+              @click="
+                showPlaylistInput = false;
+                playlistInput = '';
+              "
+            >
+              Cancel
+            </UButton>
+          </div>
+        </div>
+      </template>
+
+      <p v-else class="text-xs text-neutral-500 dark:text-neutral-400">
+        Connect Spotify to enable playlist and listening-based features.
+      </p>
+    </div>
   </UCard>
 </template>
 
@@ -99,13 +181,22 @@ const props = withDefaults(
 );
 
 const isTelegram = computed(() => props.provider === "telegram");
+const isSpotify = computed(() => props.provider === "spotify");
 
 const api = useApiService();
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 
 const telegramStatus = ref<any>(null);
 const linkCode = ref<any>(null);
 const generatingCode = ref(false);
 const codeCopied = ref(false);
+const spotifyStatus = ref<any>(null);
+const spotifyLoading = ref(false);
+const showPlaylistInput = ref(false);
+const playlistInput = ref("");
+const savingPlaylist = ref(false);
 
 const loadTelegramStatus = async () => {
   if (!isTelegram.value) return;
@@ -137,5 +228,114 @@ const copyLinkCode = async () => {
   }, 2000);
 };
 
-onMounted(loadTelegramStatus);
+const loadSpotifyStatus = async () => {
+  if (!isSpotify.value) return;
+  spotifyLoading.value = true;
+  try {
+    spotifyStatus.value = await api.call("/spotify/status");
+  } catch {
+    spotifyStatus.value = { linked: false };
+  } finally {
+    spotifyLoading.value = false;
+  }
+};
+
+const connectSpotify = async () => {
+  if (!isSpotify.value) return;
+  spotifyLoading.value = true;
+  try {
+    const response = await api.call<{ url: string }>("/spotify/auth-url", {
+      method: "POST",
+      body: {
+        // Backend can use this to return user to settings after callback.
+        return_to: "/settings",
+      },
+    });
+
+    if (response?.url) {
+      window.location.href = response.url;
+    }
+  } catch (e: any) {
+    toast.add({
+      title: "Spotify connection failed",
+      description: e?.data?.error || e?.message || "Please try again.",
+      color: "error",
+    });
+  } finally {
+    spotifyLoading.value = false;
+  }
+};
+
+const disconnectSpotify = async () => {
+  if (!isSpotify.value) return;
+  spotifyLoading.value = true;
+  try {
+    await api.call("/spotify/disconnect", { method: "DELETE" });
+    spotifyStatus.value = { linked: false };
+    toast.add({
+      title: "Spotify disconnected",
+      color: "success",
+    });
+  } catch (e: any) {
+    toast.add({
+      title: "Could not disconnect Spotify",
+      description: e?.data?.error || e?.message || "Please try again.",
+      color: "error",
+    });
+  } finally {
+    spotifyLoading.value = false;
+  }
+};
+
+const handleSpotifyCallbackStatus = async () => {
+  if (!isSpotify.value) return;
+  const state = route.query.spotify;
+  if (state === "connected") {
+    toast.add({ title: "Spotify connected", color: "success" });
+    await loadSpotifyStatus();
+    const query = { ...route.query };
+    delete query.spotify;
+    router.replace({ query });
+    return;
+  }
+
+  if (state === "error") {
+    toast.add({
+      title: "Spotify connection failed",
+      description: "Please retry the connection.",
+      color: "error",
+    });
+    const query = { ...route.query };
+    delete query.spotify;
+    router.replace({ query });
+  }
+};
+
+const savePlaylist = async () => {
+  if (!playlistInput.value.trim()) return;
+  savingPlaylist.value = true;
+  try {
+    await api.call("/spotify/playlist", {
+      method: "PATCH",
+      body: { playlist_url: playlistInput.value.trim() },
+    });
+    toast.add({ title: "Playlist updated", color: "success" });
+    showPlaylistInput.value = false;
+    playlistInput.value = "";
+    await loadSpotifyStatus();
+  } catch (e: any) {
+    toast.add({
+      title: "Could not update playlist",
+      description: e?.data?.error || e?.message || "Please try again.",
+      color: "error",
+    });
+  } finally {
+    savingPlaylist.value = false;
+  }
+};
+
+onMounted(async () => {
+  await Promise.all([loadTelegramStatus(), loadSpotifyStatus()]);
+  await handleSpotifyCallbackStatus();
+});
 </script>
