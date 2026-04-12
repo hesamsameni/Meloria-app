@@ -22,11 +22,22 @@ export const LIBRARY_CATEGORIES = [
   { value: "movie", label: "Movies", emoji: "🎬" },
   { value: "music", label: "Music", emoji: "🎵" },
   { value: "book", label: "Books", emoji: "📚" },
-  { value: "show", label: "Shows", emoji: "📺" },
+  { value: "show", label: "TV Shows", emoji: "📺" },
   { value: "article", label: "Articles", emoji: "📰" },
   { value: "idea", label: "Ideas", emoji: "💡" },
   { value: "note", label: "Notes", emoji: "📝" },
   { value: "place", label: "Places", emoji: "📍" },
+] as const;
+
+export const LIBRARY_CATEGORY_NAV_ITEMS = [
+  { to: "/library/movie", label: "Movies", icon: "i-lucide-film" },
+  { to: "/library/music", label: "Music", icon: "i-lucide-music-2" },
+  { to: "/library/show", label: "TV Shows", icon: "i-lucide-tv" },
+  { to: "/library/book", label: "Books", icon: "i-lucide-book-open" },
+  { to: "/library/place", label: "Places", icon: "i-lucide-map-pin" },
+  { to: "/library/note", label: "Notes", icon: "i-lucide-notebook-pen" },
+  { to: "/library/article", label: "Articles", icon: "i-lucide-newspaper" },
+  { to: "/library/idea", label: "Ideas", icon: "i-lucide-lightbulb" },
 ] as const;
 
 export const LIBRARY_STATUSES = [

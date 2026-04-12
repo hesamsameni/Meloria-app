@@ -3,7 +3,7 @@
     <SettingsAccountSection />
     <SettingsPlanSection />
     <SettingsAiModelSection />
-    <SettingsTelegramSection />
+    <SettingsIntegrationsSection />
     <SettingsApiTokensSection />
   </div>
 </template>
