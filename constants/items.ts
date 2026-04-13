@@ -1,14 +1,14 @@
-export const CATEGORY_EMOJI: Record<string, string> = {
-  movie: "🎬",
-  music: "🎵",
-  book: "📚",
-  show: "📺",
-  article: "📰",
-  place: "📍",
-  person: "👤",
-  idea: "💡",
-  note: "📝",
-  product: "🛍️",
+export const CATEGORY_ICON: Record<string, string> = {
+  movie: "i-lucide-film",
+  music: "i-lucide-music-2",
+  book: "i-lucide-book-open",
+  show: "i-lucide-tv",
+  article: "i-lucide-newspaper",
+  place: "i-lucide-map-pin",
+  person: "i-lucide-user-round",
+  idea: "i-lucide-lightbulb",
+  note: "i-lucide-notebook-pen",
+  product: "i-lucide-shopping-bag",
 };
 
 export const STATUS_OPTIONS = [
@@ -19,14 +19,14 @@ export const STATUS_OPTIONS = [
 ] as const;
 
 export const LIBRARY_CATEGORIES = [
-  { value: "movie", label: "Movies", emoji: "🎬" },
-  { value: "music", label: "Music", emoji: "🎵" },
-  { value: "book", label: "Books", emoji: "📚" },
-  { value: "show", label: "TV Shows", emoji: "📺" },
-  { value: "article", label: "Articles", emoji: "📰" },
-  { value: "idea", label: "Ideas", emoji: "💡" },
-  { value: "note", label: "Notes", emoji: "📝" },
-  { value: "place", label: "Places", emoji: "📍" },
+  { value: "movie", label: "Movies", icon: "i-lucide-film" },
+  { value: "music", label: "Music", icon: "i-lucide-music-2" },
+  { value: "book", label: "Books", icon: "i-lucide-book-open" },
+  { value: "show", label: "TV Shows", icon: "i-lucide-tv" },
+  { value: "article", label: "Articles", icon: "i-lucide-newspaper" },
+  { value: "idea", label: "Ideas", icon: "i-lucide-lightbulb" },
+  { value: "note", label: "Notes", icon: "i-lucide-notebook-pen" },
+  { value: "place", label: "Places", icon: "i-lucide-map-pin" },
 ] as const;
 
 export const LIBRARY_CATEGORY_NAV_ITEMS = [

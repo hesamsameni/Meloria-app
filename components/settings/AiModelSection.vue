@@ -23,7 +23,7 @@
     <!-- Model list -->
     <div v-else class="flex flex-col gap-3.5">
       <UCard
-        v-for="model in availableModels"
+        v-for="model in orderedModels"
         :key="model.model"
         class="border border-neutral-200/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/70 shadow-sm rounded-2xl transition-all duration-200"
         :class="{
@@ -126,6 +126,15 @@ const loadingModels = ref(false);
 const modelsError = ref<string | null>(null);
 const saving = ref(false);
 const pendingModel = ref<string | null>(null);
+
+const orderedModels = computed(() => {
+  const selected = preferredModel.value;
+  if (!selected) return availableModels.value;
+
+  return [...availableModels.value].sort(
+    (a, b) => Number(b.model === selected) - Number(a.model === selected),
+  );
+});
 
 const userPlan = computed(() => profile.value?.subscription || "free");
 

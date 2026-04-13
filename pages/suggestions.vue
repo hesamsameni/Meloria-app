@@ -1,7 +1,10 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <UCard class="text-center py-16">
-      <p class="text-4xl mb-4">✦</p>
+      <UIcon
+        name="i-lucide-sparkles"
+        class="w-10 h-10 mx-auto mb-4 text-neutral-400"
+      />
       <p class="text-sm font-medium text-neutral-900 dark:text-white mb-1">
         Coming soon
       </p>

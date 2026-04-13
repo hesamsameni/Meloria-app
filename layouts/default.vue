@@ -39,7 +39,7 @@
     <main class="flex-1 min-w-0">
       <div
         v-if="isAuthenticated"
-        class="md:hidden border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-950/90 backdrop-blur"
+        class="md:hidden sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-950/90 backdrop-blur supports-[backdrop-filter]:bg-white/75 dark:supports-[backdrop-filter]:bg-neutral-950/75"
       >
         <div class="flex items-center gap-3 px-4 py-3">
           <UButton

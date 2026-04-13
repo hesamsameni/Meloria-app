@@ -39,8 +39,14 @@
         class="space-y-3"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-base font-semibold text-neutral-900 dark:text-white">
-            {{ group.emoji }} {{ group.label }}
+          <h2
+            class="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2"
+          >
+            <UIcon
+              :name="group.icon"
+              class="w-4 h-4 text-neutral-500 dark:text-neutral-400"
+            />
+            {{ group.label }}
             <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-1">
               ({{ group.items.length }})
             </span>

@@ -50,8 +50,11 @@
         v-if="newToken"
         class="mb-3 border border-green-400/70 dark:border-green-700/70 bg-green-50/50 dark:bg-green-900/10 rounded-2xl"
       >
-        <p class="text-xs text-green-600 dark:text-green-400 font-medium mb-2">
-          ✓ Copy this token now — it won't be shown again
+        <p
+          class="text-xs text-green-600 dark:text-green-400 font-medium mb-2 inline-flex items-center gap-1.5"
+        >
+          <UIcon name="i-lucide-badge-check" class="w-3.5 h-3.5" />
+          Copy this token now - it won't be shown again
         </p>
         <div class="flex gap-2">
           <UInput
@@ -65,7 +68,10 @@
             size="sm"
             @click="copyToken"
           >
-            {{ copied ? "✓ Copied" : "Copy" }}
+            <span class="inline-flex items-center gap-1.5">
+              <UIcon v-if="copied" name="i-lucide-check" class="w-3.5 h-3.5" />
+              {{ copied ? "Copied" : "Copy" }}
+            </span>
           </UButton>
         </div>
       </UCard>
