@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Loading skeletons -->
-    <div v-if="loading" class="flex flex-col gap-2">
+    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <USkeleton
         v-for="i in skeletonCount"
         :key="i"
@@ -13,7 +13,7 @@
     <EmptyState v-else-if="items.length === 0" :description="emptyMessage" />
 
     <!-- Item list -->
-    <div v-else class="flex flex-col gap-2">
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <ItemCard
         v-for="item in items"
         :key="item.id"
