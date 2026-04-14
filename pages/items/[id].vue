@@ -161,6 +161,27 @@
         <UCard
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p
+                class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                Include in Taste Profile
+              </p>
+              <p class="text-xs text-neutral-400 mt-0.5">
+                Use this item when generating your taste profile
+              </p>
+            </div>
+            <USwitch
+              v-model="includeInTaste"
+              @update:model-value="saveIncludeInTaste"
+            />
+          </div>
+        </UCard>
+
+        <UCard
+          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        >
           <div class="flex items-start justify-between gap-4">
             <p class="text-xs text-neutral-400">
               Saved {{ fullDate }} via {{ item.source }}
@@ -208,6 +229,7 @@ const itemsService = createItemsService(api);
 const item = ref<Item | null>(null);
 const loading = ref(true);
 const userNotes = ref("");
+const includeInTaste = ref(true);
 
 const fullDate = computed(() =>
   item.value
@@ -257,6 +279,12 @@ const saveNotes = async () => {
   await itemsService.updateItem(item.value.id, { your_notes: userNotes.value });
 };
 
+const saveIncludeInTaste = async (value: boolean) => {
+  if (!item.value) return;
+  await itemsService.updateItem(item.value.id, { include_in_taste: value });
+  item.value.include_in_taste = value;
+};
+
 const deleteItem = async () => {
   if (!item.value) return;
   await itemsService.remove(item.value.id);
@@ -268,6 +296,7 @@ onMounted(async () => {
     const data = await itemsService.getById(route.params.id as string);
     item.value = data;
     userNotes.value = data.your_notes || "";
+    includeInTaste.value = data.include_in_taste ?? true;
   } finally {
     loading.value = false;
   }

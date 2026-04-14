@@ -41,14 +41,15 @@
         <UBadge
           :label="item.category"
           size="xs"
-          variant="soft"
+          variant="solid"
+          :icon="categoryIcon"
           color="primary"
         />
         <UBadge
           v-if="item.input_type === 'voice_transcript'"
           label="Voice"
           size="xs"
-          variant="soft"
+          variant="solid"
           color="neutral"
         />
       </div>
@@ -57,12 +58,18 @@
       <div
         class="absolute inset-x-0 bottom-0 p-5 sm:p-7 flex items-end gap-4 sm:gap-5"
       >
-        <!-- Poster (only when backdrop + artwork both exist) -->
+        <!-- Poster: movie/show poster when backdrop exists, or artist photo for music -->
         <img
           v-if="item.backdrop_url && item.artwork_url"
           :src="item.artwork_url"
           :alt="item.title || ''"
           class="w-[68px] sm:w-28 shrink-0 aspect-[2/3] rounded-xl object-cover shadow-2xl ring-1 ring-white/10"
+        />
+        <img
+          v-else-if="item.category === 'music' && item.artist_image_url"
+          :src="item.artist_image_url"
+          :alt="item.creator || ''"
+          class="w-[68px] sm:w-28 shrink-0 aspect-square rounded-xl object-cover shadow-2xl ring-1 ring-white/10"
         />
 
         <!-- Text -->

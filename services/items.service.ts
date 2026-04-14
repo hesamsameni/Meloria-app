@@ -55,11 +55,15 @@ export type Item = {
   spotify_id: string | null;
   spotify_url: string | null;
   preview_url: string | null;
+  artist_image_url: string | null;
   album_name: string | null;
   duration_ms: number | null;
   apple_music_url: string | null;
   youtube_url: string | null;
   deezer_url: string | null;
+
+  // taste profile
+  include_in_taste: boolean;
 
   // books
   open_library_id: string | null;
@@ -134,7 +138,7 @@ export const createItemsService = (
 
   const updateItem = async (
     id: string,
-    payload: Partial<Pick<Item, "status" | "your_notes">>,
+    payload: Partial<Pick<Item, "status" | "your_notes" | "include_in_taste">>,
   ): Promise<void> => {
     await api.call(`/items/${id}`, { method: "PATCH", body: payload });
   };

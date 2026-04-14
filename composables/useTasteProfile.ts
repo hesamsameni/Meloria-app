@@ -26,13 +26,22 @@ export const useTasteProfile = () => {
     }
   };
 
+  const { error: showError, success: showSuccess } = useGlobalToast();
+
   const generate = async () => {
     generating.value = true;
     try {
       const res = await service.generateTasteProfile();
       if (res.ok) {
+        showSuccess("Taste profile updated");
         await fetch();
       }
+    } catch (e: any) {
+      const message =
+        e?.data?.error ||
+        e?.response?.data?.error ||
+        "Failed to generate taste profile";
+      showError("Nothing to regenerate", message);
     } finally {
       generating.value = false;
     }
