@@ -160,34 +160,70 @@
             Capture habits
           </p>
         </template>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <div class="space-y-0.5">
-            <p class="text-xl font-semibold text-neutral-900 dark:text-white">
-              {{ behaviour.total_items }}
-            </p>
-            <p class="text-xs text-neutral-400">items saved</p>
+        <div class="grid grid-cols-2 gap-3">
+          <div
+            class="flex items-center gap-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 px-4 py-3"
+          >
+            <UIcon
+              name="i-lucide-layers"
+              class="w-4 h-4 text-neutral-400 shrink-0"
+            />
+            <div class="min-w-0">
+              <p class="text-xs text-neutral-400">Items saved</p>
+              <p
+                class="text-sm font-semibold text-neutral-900 dark:text-white truncate"
+              >
+                {{ behaviour.total_items }}
+              </p>
+            </div>
           </div>
-          <div class="space-y-0.5">
-            <p class="text-xl font-semibold text-neutral-900 dark:text-white">
-              {{ completionPercent }}%
-            </p>
-            <p class="text-xs text-neutral-400">completed</p>
+          <div
+            class="flex items-center gap-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 px-4 py-3"
+          >
+            <UIcon
+              name="i-lucide-check-circle"
+              class="w-4 h-4 text-neutral-400 shrink-0"
+            />
+            <div class="min-w-0">
+              <p class="text-xs text-neutral-400">Completed</p>
+              <p
+                class="text-sm font-semibold text-neutral-900 dark:text-white truncate"
+              >
+                {{ completionPercent }}%
+              </p>
+            </div>
           </div>
-          <div class="space-y-0.5">
-            <p
-              class="text-xl font-semibold text-neutral-900 dark:text-white capitalize"
-            >
-              {{ behaviour.peak_capture_time }}
-            </p>
-            <p class="text-xs text-neutral-400">peak time</p>
+          <div
+            class="flex items-center gap-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 px-4 py-3"
+          >
+            <UIcon
+              name="i-lucide-clock"
+              class="w-4 h-4 text-neutral-400 shrink-0"
+            />
+            <div class="min-w-0">
+              <p class="text-xs text-neutral-400">Peak time</p>
+              <p
+                class="text-sm font-semibold text-neutral-900 dark:text-white capitalize truncate"
+              >
+                {{ behaviour.peak_capture_time }}
+              </p>
+            </div>
           </div>
-          <div class="space-y-0.5">
-            <p
-              class="text-xl font-semibold text-neutral-900 dark:text-white capitalize"
-            >
-              {{ behaviour.most_active_source }}
-            </p>
-            <p class="text-xs text-neutral-400">top source</p>
+          <div
+            class="flex items-center gap-3 rounded-xl bg-neutral-50 dark:bg-neutral-900/60 px-4 py-3"
+          >
+            <UIcon
+              name="i-lucide-zap"
+              class="w-4 h-4 text-neutral-400 shrink-0"
+            />
+            <div class="min-w-0">
+              <p class="text-xs text-neutral-400">Top source</p>
+              <p
+                class="text-sm font-semibold text-neutral-900 dark:text-white capitalize truncate"
+              >
+                {{ behaviour.most_active_source }}
+              </p>
+            </div>
           </div>
         </div>
       </UCard>

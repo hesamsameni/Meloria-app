@@ -1,5 +1,9 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <!-- capture -->
+    <div class="mb-8">
+      <CaptureBar @captured="handleCaptured" />
+    </div>
     <!-- filters -->
     <div class="flex flex-col gap-3 mb-6">
       <UInput
@@ -61,7 +65,7 @@
         </div>
 
         <ItemList
-          :items="group.items.slice(0, 3)"
+          :items="group.items.slice(0, 4)"
           :show-status="true"
           :skeleton-count="3"
           empty-message="No items in this category"
@@ -139,6 +143,10 @@ const statusCount = (status: string) => {
   if (status === "in_progress") return items.totals.value.in_progress;
   if (status === "done") return items.totals.value.done;
   return 0;
+};
+
+const handleCaptured = async () => {
+  await Promise.all([items.fetch(), items.fetchTotals()]);
 };
 
 const handleLoadMore = () => items.loadMore(filterParams.value);
