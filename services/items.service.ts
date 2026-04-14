@@ -93,9 +93,15 @@ export const createItemsService = (
       offset?: number;
     } = {},
   ): Promise<Item[]> => {
-    return api.call<Item[]>("/mcp/search_items", {
-      method: "POST",
-      body: params,
+    const query = new URLSearchParams();
+    if (params.query) query.set("query", params.query);
+    if (params.category) query.set("category", params.category);
+    if (params.status) query.set("status", params.status);
+    if (params.limit != null) query.set("limit", String(params.limit));
+    if (params.offset != null) query.set("offset", String(params.offset));
+
+    return api.call<Item[]>(`/items/search?${query.toString()}`, {
+      method: "GET",
     });
   };
 
