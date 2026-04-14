@@ -24,11 +24,39 @@
 
     <ItemHero :item="item" @status-change="updateStatus" />
 
+    <div class="grid grid-cols-1 gap-5 sm:gap-6 mb-6">
+      <UCard
+        class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        v-if="item.category === 'movie' || item.category === 'show'"
+      >
+        <template #header>
+          <p
+            class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+          >
+            Cast & Crew
+          </p>
+        </template>
+        <ItemCastAndCrew :item="item" />
+      </UCard>
+    </div>
+
     <div
       class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-5 sm:gap-6"
     >
       <div class="space-y-5 sm:space-y-6">
-        <ItemEmbeds :item="item" />
+        <UCard
+          v-if="embedLabel"
+          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        >
+          <template #header>
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
+              {{ embedLabel }}
+            </p>
+          </template>
+          <ItemEmbeds :item="item" />
+        </UCard>
 
         <UCard
           v-if="item.description"
@@ -95,7 +123,15 @@
       <aside class="space-y-5 sm:space-y-6">
         <UCard
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+          v-if="item.category != 'place'"
         >
+          <template #header>
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
+              {{ linksLabel }}
+            </p>
+          </template>
           <ItemPlatformLinks :item="item" />
         </UCard>
 
@@ -183,11 +219,38 @@ const fullDate = computed(() =>
     : "",
 );
 
+const linksLabel = computed(() => {
+  const map: Record<string, string> = {
+    music: "Listen on",
+    movie: "Watch on",
+    show: "Watch on",
+    book: "Read on",
+    place: "Find on",
+  };
+  return map[item.value?.category || ""] || "Links";
+});
+
 const updateStatus = async (status: string) => {
   if (!item.value) return;
   await itemsService.updateItem(item.value.id, { status });
   item.value.status = status;
 };
+
+const mapQuery = computed(
+  () =>
+    item.value?.category === "place" &&
+    (item.value?.title || item.value?.raw_input),
+);
+
+const embedLabel = computed(() => {
+  if (!item.value) return null;
+  const { category, spotify_id, trailer_url } = item.value;
+  if (category === "music" && spotify_id) return "Preview";
+  if (category === "place" && mapQuery.value) return "Location";
+  if ((category === "movie" || category === "show") && trailer_url)
+    return "Trailer";
+  return null;
+});
 
 const saveNotes = async () => {
   if (!item.value) return;

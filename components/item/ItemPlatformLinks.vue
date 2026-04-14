@@ -1,11 +1,5 @@
 <template>
   <div>
-    <p
-      class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3"
-    >
-      {{ linksLabel }}
-    </p>
-
     <div class="flex flex-wrap gap-2">
       <template v-if="item.category === 'music'">
         <UButton
@@ -114,15 +108,4 @@
 import type { Item } from "~/services/items.service";
 
 const props = defineProps<{ item: Item }>();
-
-const linksLabel = computed(() => {
-  const map: Record<string, string> = {
-    music: "Listen on",
-    movie: "Watch on",
-    show: "Watch on",
-    book: "Read on",
-    place: "Find on",
-  };
-  return map[props.item.category] || "Links";
-});
 </script>

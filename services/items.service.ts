@@ -34,6 +34,22 @@ export type Item = {
 
   // tmdb (movies & shows)
   tmdb_id: string | null;
+  tmdb_cast:
+    | {
+        id: string;
+        name: string;
+        character: string | null;
+        profile_url: string | null;
+        source: string;
+      }[]
+    | null;
+  tmdb_director: {
+    id: string;
+    name: string;
+    profile_url: string | null;
+    source: string;
+  } | null;
+  trailer_url: string | null;
 
   // spotify (music)
   spotify_id: string | null;
