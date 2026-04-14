@@ -26,6 +26,8 @@ export const useItemsStore = defineStore("items", () => {
     total: 0,
     movies: 0,
     music: 0,
+    show: 0,
+    book: 0,
     saved: 0,
     in_progress: 0,
     done: 0,

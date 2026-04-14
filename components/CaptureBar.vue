@@ -1,9 +1,11 @@
 <template>
-  <div class="capture-shell border-0">
-    <div class="capture-bg rounded-2xl p-4 p-5">
+  <div>
+    <div
+      class="rounded-2xl border border-neutral-200/70 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-950 shadow-sm px-5 py-4"
+    >
       <div class="mb-3">
         <h3
-          class="text-lg text-xl font-semibold text-neutral-100 leading-tight"
+          class="text-lg text-xl font-semibold text-neutral-900 dark:text-white leading-tight"
         >
           Capture to Meloria
         </h3>
@@ -124,115 +126,6 @@ const handleCapture = async () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.capture-shell {
-  overflow: hidden;
-}
-
-.capture-bg {
-  --capture-accent-1: color-mix(
-    in srgb,
-    var(--color-primary-500) 26%,
-    transparent
-  );
-  --capture-accent-2: color-mix(
-    in srgb,
-    var(--color-primary-700) 26%,
-    transparent
-  );
-  --capture-surface-top: var(--color-neutral-800);
-  --capture-surface-bottom: var(--color-neutral-950);
-  --capture-border: color-mix(
-    in srgb,
-    var(--color-neutral-400) 24%,
-    transparent
-  );
-  --capture-shadow: color-mix(
-    in srgb,
-    var(--color-neutral-950) 92%,
-    transparent
-  );
-
-  background:
-    radial-gradient(
-      120% 120% at 0% 0%,
-      var(--capture-accent-1) 0%,
-      transparent 56%
-    ),
-    radial-gradient(
-      100% 110% at 100% 100%,
-      var(--capture-accent-2) 0%,
-      transparent 62%
-    ),
-    linear-gradient(
-      180deg,
-      var(--capture-surface-top) 0%,
-      var(--capture-surface-bottom) 100%
-    );
-  background-size:
-    130% 130%,
-    130% 130%,
-    100% 100%;
-  background-position:
-    0% 0%,
-    100% 100%,
-    50% 50%;
-  animation: captureGradientDrift 12s ease-in-out infinite;
-  border: 1px solid var(--capture-border);
-  box-shadow: 0 14px 36px -20px var(--capture-shadow);
-}
-
-:global(.light) .capture-bg {
-  --capture-accent-1: color-mix(
-    in srgb,
-    var(--color-primary-500) 16%,
-    transparent
-  );
-  --capture-accent-2: color-mix(
-    in srgb,
-    var(--color-primary-700) 12%,
-    transparent
-  );
-  --capture-surface-top: var(--color-neutral-100);
-  --capture-surface-bottom: var(--color-neutral-50);
-  --capture-border: color-mix(
-    in srgb,
-    var(--color-neutral-400) 45%,
-    transparent
-  );
-  --capture-shadow: color-mix(
-    in srgb,
-    var(--color-neutral-900) 20%,
-    transparent
-  );
-}
-
-@keyframes captureGradientDrift {
-  0% {
-    background-position:
-      0% 0%,
-      100% 100%,
-      50% 50%;
-  }
-  50% {
-    background-position:
-      8% 6%,
-      92% 94%,
-      50% 50%;
-  }
-  100% {
-    background-position:
-      4% 2%,
-      96% 98%,
-      50% 50%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .capture-bg {
-    animation: none;
-  }
 }
 
 .capture-cta {

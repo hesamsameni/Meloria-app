@@ -152,7 +152,7 @@ watch([activeStatus], () => {
 let searchTimer: ReturnType<typeof setTimeout>;
 watch(search, () => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => items.fetch(filterParams.value), 400);
+  searchTimer = setTimeout(() => items.fetch(filterParams.value), 600);
 });
 
 onMounted(() => {

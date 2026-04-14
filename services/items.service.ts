@@ -62,6 +62,8 @@ export type ItemTotals = {
   total: number;
   movies: number;
   music: number;
+  show: number;
+  book: number;
   saved: number;
   in_progress: number;
   done: number;

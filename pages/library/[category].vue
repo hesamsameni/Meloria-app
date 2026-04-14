@@ -122,6 +122,6 @@ watch(search, () => {
   searchTimer = setTimeout(() => {
     if (!selectedCategory.value) return;
     items.fetch(filterParams.value);
-  }, 400);
+  }, 600);
 });
 </script>
