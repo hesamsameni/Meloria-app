@@ -186,8 +186,10 @@
             <span
               class="text-sm font-medium capitalize"
               :class="{
-                'text-emerald-600 dark:text-emerald-400': item.confidence === 'high',
-                'text-amber-600 dark:text-amber-400': item.confidence === 'medium',
+                'text-emerald-600 dark:text-emerald-400':
+                  item.confidence === 'high',
+                'text-amber-600 dark:text-amber-400':
+                  item.confidence === 'medium',
                 'text-red-500 dark:text-red-400': item.confidence === 'low',
               }"
             >
@@ -195,11 +197,11 @@
             </span>
             <span class="text-xs text-neutral-400 ml-1">
               {{
-                item.confidence === 'high'
-                  ? '— AI is certain about this match'
-                  : item.confidence === 'medium'
-                  ? '— AI made a reasonable guess'
-                  : '— AI was unsure, verify manually'
+                item.confidence === "high"
+                  ? "— AI is certain about this match"
+                  : item.confidence === "medium"
+                    ? "— AI made a reasonable guess"
+                    : "— AI was unsure, verify manually"
               }}
             </span>
           </div>
