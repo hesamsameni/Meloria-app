@@ -3,12 +3,9 @@ export const CATEGORY_ICON: Record<string, string> = {
   music: "i-lucide-music-2",
   book: "i-lucide-book-open",
   show: "i-lucide-tv",
-  article: "i-lucide-newspaper",
-  place: "i-lucide-map-pin",
-  person: "i-lucide-user-round",
-  idea: "i-lucide-lightbulb",
-  note: "i-lucide-notebook-pen",
-  product: "i-lucide-shopping-bag",
+  podcast: "i-lucide-mic",
+  game: "i-lucide-gamepad-2",
+  anime: "i-lucide-tv-2",
 };
 
 export const STATUS_OPTIONS = [
@@ -23,10 +20,9 @@ export const LIBRARY_CATEGORIES = [
   { value: "music", label: "Music", icon: "i-lucide-music-2" },
   { value: "book", label: "Books", icon: "i-lucide-book-open" },
   { value: "show", label: "TV Shows", icon: "i-lucide-tv" },
-  { value: "article", label: "Articles", icon: "i-lucide-newspaper" },
-  { value: "idea", label: "Ideas", icon: "i-lucide-lightbulb" },
-  { value: "note", label: "Notes", icon: "i-lucide-notebook-pen" },
-  { value: "place", label: "Places", icon: "i-lucide-map-pin" },
+  { value: "podcast", label: "Podcasts", icon: "i-lucide-mic" },
+  { value: "game", label: "Games", icon: "i-lucide-gamepad-2" },
+  { value: "anime", label: "Anime", icon: "i-lucide-tv-2" },
 ] as const;
 
 export const LIBRARY_CATEGORY_NAV_ITEMS = [
@@ -34,10 +30,24 @@ export const LIBRARY_CATEGORY_NAV_ITEMS = [
   { to: "/library/music", label: "Music", icon: "i-lucide-music-2" },
   { to: "/library/show", label: "TV Shows", icon: "i-lucide-tv" },
   { to: "/library/book", label: "Books", icon: "i-lucide-book-open" },
-  { to: "/library/place", label: "Places", icon: "i-lucide-map-pin" },
-  { to: "/library/note", label: "Notes", icon: "i-lucide-notebook-pen" },
-  { to: "/library/article", label: "Articles", icon: "i-lucide-newspaper" },
-  { to: "/library/idea", label: "Ideas", icon: "i-lucide-lightbulb" },
+  {
+    to: "/library/podcast",
+    label: "Podcasts",
+    icon: "i-lucide-mic",
+    comingSoon: true,
+  },
+  {
+    to: "/library/game",
+    label: "Games",
+    icon: "i-lucide-gamepad-2",
+    comingSoon: true,
+  },
+  {
+    to: "/library/anime",
+    label: "Anime",
+    icon: "i-lucide-tv-2",
+    comingSoon: true,
+  },
 ] as const;
 
 export const LIBRARY_STATUSES = [

@@ -72,21 +72,42 @@
               v-if="isLibraryGroupOpen"
               class="ml-6 mt-1 flex flex-col gap-0.5"
             >
-              <NuxtLink
+              <template
                 v-for="categoryItem in libraryCategoryItems"
                 :key="categoryItem.to"
-                :to="categoryItem.to"
-                @click="emit('navigate')"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors"
-                :class="
-                  isActive(categoryItem.to)
-                    ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
-                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
-                "
               >
-                <UIcon :name="categoryItem.icon" class="w-3.5 h-3.5 shrink-0" />
-                {{ categoryItem.label }}
-              </NuxtLink>
+                <span
+                  v-if="(categoryItem as any).comingSoon"
+                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed select-none"
+                >
+                  <UIcon
+                    :name="categoryItem.icon"
+                    class="w-3.5 h-3.5 shrink-0"
+                  />
+                  {{ categoryItem.label }}
+                  <span
+                    class="ml-auto text-[10px] font-medium text-neutral-400 dark:text-neutral-600"
+                    >Soon</span
+                  >
+                </span>
+                <NuxtLink
+                  v-else
+                  :to="categoryItem.to"
+                  @click="emit('navigate')"
+                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors"
+                  :class="
+                    isActive(categoryItem.to)
+                      ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+                  "
+                >
+                  <UIcon
+                    :name="categoryItem.icon"
+                    class="w-3.5 h-3.5 shrink-0"
+                  />
+                  {{ categoryItem.label }}
+                </NuxtLink>
+              </template>
             </div>
           </Transition>
         </template>

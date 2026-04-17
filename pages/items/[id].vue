@@ -163,6 +163,49 @@
         </UCard>
 
         <UCard
+          v-if="item.confidence"
+          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        >
+          <template #header>
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
+              AI Confidence
+            </p>
+          </template>
+          <div class="flex items-center gap-2">
+            <UIcon
+              name="i-lucide-sparkles"
+              class="w-4 h-4 shrink-0"
+              :class="{
+                'text-emerald-500': item.confidence === 'high',
+                'text-amber-500': item.confidence === 'medium',
+                'text-red-400': item.confidence === 'low',
+              }"
+            />
+            <span
+              class="text-sm font-medium capitalize"
+              :class="{
+                'text-emerald-600 dark:text-emerald-400': item.confidence === 'high',
+                'text-amber-600 dark:text-amber-400': item.confidence === 'medium',
+                'text-red-500 dark:text-red-400': item.confidence === 'low',
+              }"
+            >
+              {{ item.confidence }}
+            </span>
+            <span class="text-xs text-neutral-400 ml-1">
+              {{
+                item.confidence === 'high'
+                  ? '— AI is certain about this match'
+                  : item.confidence === 'medium'
+                  ? '— AI made a reasonable guess'
+                  : '— AI was unsure, verify manually'
+              }}
+            </span>
+          </div>
+        </UCard>
+
+        <UCard
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <div class="flex items-center justify-between gap-4">

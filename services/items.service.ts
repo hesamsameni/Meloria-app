@@ -18,7 +18,7 @@ export type Item = {
   description: string | null;
   tags: string[] | null;
   ai_notes: string | null;
-  note_type: string | null;
+  confidence: string | null;
 
   // urls
   image_url: string | null;
