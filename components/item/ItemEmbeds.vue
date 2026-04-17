@@ -12,16 +12,6 @@
     />
 
     <iframe
-      v-else-if="mapSrc"
-      :src="mapSrc"
-      width="100%"
-      height="260"
-      loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade"
-      class="block rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70"
-    />
-
-    <iframe
       v-else-if="trailerSrc"
       :src="trailerSrc"
       width="100%"
@@ -47,13 +37,6 @@ const spotifySrc = computed(() =>
     ? `https://open.spotify.com/embed/track/${props.item.spotify_id}?utm_source=generator&theme=0`
     : null,
 );
-
-const mapSrc = computed(() => {
-  const { category, title, raw_input } = props.item;
-  return category === "place" && (title || raw_input)
-    ? `https://www.google.com/maps?q=${encodeURIComponent(raw_input)}&output=embed`
-    : null;
-});
 
 const trailerSrc = computed(() => {
   const { category, trailer_url } = props.item;
