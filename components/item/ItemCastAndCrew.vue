@@ -1,7 +1,48 @@
 <template>
   <div class="space-y-6">
+    <!-- Author (books) -->
+    <div
+      v-if="item.category === 'book' && item.author_name"
+      class="flex items-center gap-4"
+    >
+      <div class="relative shrink-0">
+        <img
+          v-if="item.author_photo_url"
+          :src="item.author_photo_url"
+          :alt="item.author_name"
+          class="w-14 h-14 rounded-2xl object-cover"
+          @error="
+            ($event.target as HTMLImageElement).style.display = 'none';
+            (
+              $event.target as HTMLImageElement
+            ).nextElementSibling!.removeAttribute('style');
+          "
+        />
+        <div
+          :style="item.author_photo_url ? 'display:none' : ''"
+          class="w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center"
+        >
+          <UIcon name="i-lucide-user" class="w-6 h-6 text-neutral-400" />
+        </div>
+        <span
+          class="absolute -bottom-1.5 -right-1.5 bg-primary-500 rounded-md px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-white leading-none"
+        >
+          Auth
+        </span>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+          {{ item.author_name }}
+        </p>
+        <p class="text-xs text-neutral-400 mt-0.5">Author</p>
+      </div>
+    </div>
+
     <!-- Director -->
-    <div v-if="item.tmdb_director" class="flex items-center gap-4">
+    <div
+      v-if="item.tmdb_director && Object.keys(item.tmdb_director).length > 0"
+      class="flex items-center gap-4"
+    >
       <div class="relative shrink-0">
         <img
           v-if="item.tmdb_director.profile_url"
@@ -79,7 +120,7 @@
     </div>
 
     <p
-      v-if="!item.tmdb_director && !item.tmdb_cast?.length"
+      v-if="!item.author_name && !item.tmdb_director && !item.tmdb_cast?.length"
       class="text-sm text-neutral-400 italic"
     >
       No cast information available.
