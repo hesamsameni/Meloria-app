@@ -24,9 +24,11 @@
 </template>
 
 <script setup lang="ts">
-const tab = ref('0')
+definePageMeta({ layout: false });
+
+const tab = ref("0");
 const tabs = [
-  { label: 'Sign in', value: '0' },
-  { label: 'Sign up', value: '1' },
-]
+  { label: "Sign in", value: "0" },
+  { label: "Sign up", value: "1" },
+];
 </script>

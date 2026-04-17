@@ -33,10 +33,10 @@
                 {{ item.title || item.raw_input?.slice(0, 60) || "Untitled" }}
               </p>
               <p
-                v-if="item.creator"
+                v-if="item.tmdb_director?.name || item.creator"
                 class="text-xs sm:text-sm text-white/80 mt-1 truncate"
               >
-                {{ item.creator }}
+                {{ item.tmdb_director?.name || item.creator }}
               </p>
             </div>
             <span class="text-xs text-white/80 shrink-0 mt-0.5">{{

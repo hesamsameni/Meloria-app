@@ -68,7 +68,7 @@
         <img
           v-else-if="item.category === 'music' && item.artist_image_url"
           :src="item.artist_image_url"
-          :alt="item.creator || ''"
+          :alt="item.tmdb_director?.name || item.creator || ''"
           class="w-[68px] sm:w-28 shrink-0 aspect-square rounded-xl object-cover shadow-2xl ring-1 ring-white/10"
         />
 
@@ -79,8 +79,11 @@
           >
             {{ item.title || "Untitled" }}
           </h1>
-          <p v-if="item.creator" class="text-sm text-white/65 mt-1 truncate">
-            {{ item.creator }}
+          <p
+            v-if="item.creator || item.tmdb_director?.name"
+            class="text-sm text-white/65 mt-1 truncate"
+          >
+            {{ item.tmdb_director?.name || item.creator }}
           </p>
 
           <!-- Meta -->
