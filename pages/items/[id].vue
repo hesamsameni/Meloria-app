@@ -14,13 +14,28 @@
       />
     </div>
 
-    <NuxtLink
-      to="/library"
-      class="inline-flex items-center gap-2 rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-white/75 dark:bg-neutral-950/70 backdrop-blur px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-6"
-    >
-      <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
-      Back to library
-    </NuxtLink>
+    <div class="flex justify-between">
+      <NuxtLink
+        to="/library"
+        class="inline-flex items-center gap-2 rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-white/75 dark:bg-neutral-950/70 backdrop-blur px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-6"
+      >
+        <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
+        Back to library
+      </NuxtLink>
+
+      <!-- Edit Button -->
+      <div
+        class="inline-flex items-center gap-2 bg-white/75 dark:bg-neutral-950/70 px-3 py-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-6"
+      >
+        <UButton
+          size="sm"
+          variant="ghost"
+          icon="i-lucide-pencil"
+          label="Edit item"
+          @click="openEditModal"
+        />
+      </div>
+    </div>
 
     <ItemHero :item="item" @status-change="updateStatus" />
 
@@ -163,6 +178,51 @@
         </UCard>
 
         <UCard
+          v-if="item.confidence"
+          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        >
+          <template #header>
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
+              AI Confidence
+            </p>
+          </template>
+          <div class="flex items-center gap-2">
+            <UIcon
+              name="i-lucide-sparkles"
+              class="w-4 h-4 shrink-0"
+              :class="{
+                'text-emerald-500': item.confidence === 'high',
+                'text-amber-500': item.confidence === 'medium',
+                'text-red-400': item.confidence === 'low',
+              }"
+            />
+            <span
+              class="text-sm font-medium capitalize"
+              :class="{
+                'text-emerald-600 dark:text-emerald-400':
+                  item.confidence === 'high',
+                'text-amber-600 dark:text-amber-400':
+                  item.confidence === 'medium',
+                'text-red-500 dark:text-red-400': item.confidence === 'low',
+              }"
+            >
+              {{ item.confidence }}
+            </span>
+            <span class="text-xs text-neutral-400 ml-1">
+              {{
+                item.confidence === "high"
+                  ? "— AI is certain about this match"
+                  : item.confidence === "medium"
+                    ? "— AI made a reasonable guess"
+                    : "— AI was unsure, verify manually"
+              }}
+            </span>
+          </div>
+        </UCard>
+
+        <UCard
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <div class="flex items-center justify-between gap-4">
@@ -201,6 +261,56 @@
         </UCard>
       </aside>
     </div>
+
+    <!-- Edit Item Modal -->
+    <UModal v-model:open="editModalOpen" title="Edit Item">
+      <template #body>
+        <div class="space-y-4">
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Correct the details below and we'll re-enrich the item with fresh
+            data.
+          </p>
+          <UFormField label="Title" required>
+            <UInput
+              v-model="editForm.title"
+              placeholder="Item title"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField label="Category" required>
+            <USelect
+              v-model="editForm.category"
+              :items="categoryOptions"
+              placeholder="Select category"
+              class="w-full"
+            />
+          </UFormField>
+          <UFormField label="Creator">
+            <UInput
+              v-model="editForm.creator"
+              placeholder="Director / Artist / Author"
+              class="w-full"
+            />
+          </UFormField>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton
+            variant="ghost"
+            color="neutral"
+            label="Cancel"
+            @click="editModalOpen = false"
+          />
+          <UButton
+            label="Save & Re-enrich"
+            :loading="editLoading"
+            :disabled="!editForm.title || !editForm.category"
+            @click="submitEdit"
+          />
+        </div>
+      </template>
+    </UModal>
   </div>
 
   <div v-else-if="loading" class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -234,6 +344,55 @@ const item = ref<Item | null>(null);
 const loading = ref(true);
 const userNotes = ref("");
 const includeInTaste = ref(true);
+
+// Edit modal state
+const editModalOpen = ref(false);
+const editLoading = ref(false);
+const editForm = ref({ title: "", category: "", creator: "" });
+
+const categoryOptions = [
+  { label: "Movie", value: "movie" },
+  { label: "Show", value: "show" },
+  { label: "Book", value: "book" },
+  { label: "Music", value: "music" },
+  { label: "Podcast", value: "podcast" },
+  { label: "Game", value: "game" },
+  { label: "Anime", value: "anime" },
+  { label: "Place", value: "place" },
+];
+
+const openEditModal = () => {
+  if (!item.value) return;
+  editForm.value = {
+    title: item.value.title || "",
+    category: item.value.category || "",
+    creator: item.value.creator || "",
+  };
+  editModalOpen.value = true;
+};
+
+const toast = useGlobalToast();
+
+const submitEdit = async () => {
+  if (!item.value) return;
+  editLoading.value = true;
+  try {
+    const updated = await itemsService.reprocess(item.value.id, {
+      title: editForm.value.title,
+      category: editForm.value.category,
+      creator: editForm.value.creator.trim() || undefined,
+    });
+    item.value = updated;
+    userNotes.value = updated.your_notes || "";
+    includeInTaste.value = updated.include_in_taste ?? true;
+    editModalOpen.value = false;
+    toast.success("Item updated and re-enriched.");
+  } catch (e: any) {
+    toast.error(e?.message || "Failed to re-enrich item.");
+  } finally {
+    editLoading.value = false;
+  }
+};
 
 const fullDate = computed(() =>
   item.value
