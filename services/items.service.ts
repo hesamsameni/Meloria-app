@@ -67,6 +67,8 @@ export type Item = {
 
   // books
   open_library_id: string | null;
+  author_name: string | null;
+  author_photo_url: string | null;
   amazon_url: string | null;
   goodreads_url: string | null;
   audible_url: string | null;
@@ -87,6 +89,18 @@ export type ItemTotals = {
   saved: number;
   in_progress: number;
   done: number;
+};
+
+export type BulkImportRecord = {
+  id: string;
+  created_at: string;
+  completed_at: string | null;
+  user_id: string;
+  total: number;
+  success: number;
+  failed: number;
+  category_counts: Record<string, number> | null;
+  limit_reached: boolean | null;
 };
 
 export const createItemsService = (
@@ -153,6 +167,16 @@ export const createItemsService = (
     });
   };
 
+  const bulkImport = async (
+    text: string,
+  ): Promise<{ queued: number; message: string }> => {
+    return api.call("/ingest/bulk", { method: "POST", body: { text } });
+  };
+
+  const getBulkImportStatus = async (): Promise<BulkImportRecord[]> => {
+    return api.call("/ingest/bulk/status", { method: "GET" });
+  };
+
   return {
     capture,
     search,
@@ -161,5 +185,7 @@ export const createItemsService = (
     updateItem,
     remove,
     getTotals,
+    bulkImport,
+    getBulkImportStatus,
   };
 };

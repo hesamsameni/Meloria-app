@@ -27,7 +27,11 @@
     <div class="grid grid-cols-1 gap-5 sm:gap-6 mb-6">
       <UCard
         class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
-        v-if="item.category === 'movie' || item.category === 'show'"
+        v-if="
+          item.author_name ||
+          (item.tmdb_director && Object.keys(item.tmdb_director).length > 0) ||
+          item.tmdb_cast?.length
+        "
       >
         <template #header>
           <p

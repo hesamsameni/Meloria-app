@@ -1,47 +1,66 @@
 <template>
-  <div>
-    <div
-      class="rounded-2xl border border-neutral-200/70 dark:border-neutral-700/50 bg-gradient-to-r from-neutral-100 to-neutral-50 dark:from-neutral-800 dark:to-neutral-950 shadow-sm px-5 py-4"
-    >
-      <div class="mb-3">
-        <h3
-          class="text-lg text-xl font-semibold text-neutral-900 dark:text-white leading-tight"
+  <div
+    class="rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm overflow-hidden"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between px-4 pt-4 pb-2">
+      <span
+        class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 tracking-wide uppercase"
+        >Capture</span
+      >
+      <NuxtLink
+        to="/import"
+        class="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 dark:text-neutral-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+      >
+        <UIcon name="i-heroicons-arrow-up-tray" class="w-3.5 h-3.5 shrink-0" />
+        Bulk import
+      </NuxtLink>
+    </div>
+
+    <!-- Input area -->
+    <div class="px-4 pb-4">
+      <UTextarea
+        v-model="input"
+        :placeholder="placeholder"
+        :rows="3"
+        autoresize
+        class="capture-textarea w-full"
+        @keydown.meta.enter="handleCapture"
+        @keydown.ctrl.enter="handleCapture"
+      />
+
+      <!-- Footer row -->
+      <div
+        class="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-800"
+      >
+        <span
+          class="text-xs text-neutral-400 dark:text-neutral-600 tabular-nums"
         >
-          Capture to Meloria
-        </h3>
+          {{
+            input.trim().length > 0
+              ? `${input.trim().length} chars`
+              : "⌘ + Enter to capture"
+          }}
+        </span>
+        <UButton
+          @click="handleCapture"
+          :loading="loading"
+          :disabled="!input.trim()"
+          color="primary"
+          size="sm"
+          class="capture-cta rounded-lg px-4"
+        >
+          Capture
+        </UButton>
       </div>
-      <div class="flex items-stretch flex-col">
-        <UTextarea
-          v-model="input"
-          :placeholder="placeholder"
-          :rows="3"
-          autoresize
-          class="capture-textarea"
-          @keydown.meta.enter="handleCapture"
-          @keydown.ctrl.enter="handleCapture"
-        />
+    </div>
 
-        <div class="flex justify-between items-center mt-3 mb-3">
-          <p class="text-xs text-neutral-400">
-            {{ input.trim().length }} chars
-          </p>
-          <div>
-            <UButton
-              @click="handleCapture"
-              :loading="loading"
-              :disabled="!input.trim()"
-              color="primary"
-              size="lg"
-              class="capture-cta"
-            >
-              Capture
-            </UButton>
-          </div>
-        </div>
-      </div>
-
-      <!-- feedback -->
-      <Transition name="fade">
+    <!-- Feedback -->
+    <Transition name="slide-fade">
+      <div
+        v-if="lastCaptured || error"
+        class="border-t border-neutral-100 dark:border-neutral-800 px-4 py-3"
+      >
         <UAlert
           v-if="lastCaptured"
           color="success"
@@ -53,11 +72,8 @@
           "
           :close-button="{ onClick: reset }"
         />
-      </Transition>
-
-      <Transition name="fade">
         <UAlert
-          v-if="error"
+          v-else-if="error"
           color="error"
           variant="soft"
           title="Something went wrong"
@@ -77,8 +93,8 @@
             <span v-else>{{ error }}</span>
           </template>
         </UAlert>
-      </Transition>
-    </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -128,17 +144,31 @@ const handleCapture = async () => {
   opacity: 0;
 }
 
-.capture-cta {
-  width: 100%;
-  margin-top: 0.6rem;
-  box-shadow: 0 10px 22px -12px
-    color-mix(in srgb, var(--color-primary-500) 75%, transparent);
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
-@media (max-width: 640px) {
-  .capture-cta {
-    width: 100%;
-    min-width: 0;
-  }
+.capture-cta {
+  box-shadow: 0 6px 18px -6px
+    color-mix(in srgb, var(--color-primary-500) 60%, transparent);
+  transition: box-shadow 0.2s ease;
+}
+
+.capture-cta:hover:not(:disabled) {
+  box-shadow: 0 8px 22px -6px
+    color-mix(in srgb, var(--color-primary-500) 80%, transparent);
+}
+
+:deep(.capture-textarea textarea) {
+  background: transparent !important;
+  resize: none;
 }
 </style>
