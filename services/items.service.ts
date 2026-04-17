@@ -157,6 +157,16 @@ export const createItemsService = (
     await api.call(`/items/${id}`, { method: "PATCH", body: payload });
   };
 
+  const reprocess = async (
+    id: string,
+    payload: { title: string; category: string; creator?: string },
+  ): Promise<Item> => {
+    return api.call<Item>(`/items/${id}/reprocess`, {
+      method: "POST",
+      body: payload,
+    });
+  };
+
   const remove = async (id: string): Promise<void> => {
     await api.call(`/items/${id}`, { method: "DELETE" });
   };
@@ -183,6 +193,7 @@ export const createItemsService = (
     updateStatus,
     getById,
     updateItem,
+    reprocess,
     remove,
     getTotals,
     bulkImport,

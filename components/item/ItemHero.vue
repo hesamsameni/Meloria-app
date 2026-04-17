@@ -39,7 +39,7 @@
       <!-- Top badges -->
       <div class="absolute top-4 left-4 flex items-center gap-2">
         <UBadge
-          :label="item.category"
+          :label="item.category ? item.category.toUpperCase() : 'UNCATEGORIZED'"
           size="xs"
           variant="solid"
           :icon="categoryIcon"
