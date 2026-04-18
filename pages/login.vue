@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
+useHead({ title: "Sign In" });
 
 const tab = ref("0");
 const tabs = [

@@ -458,6 +458,7 @@ onMounted(async () => {
   try {
     const data = await itemsService.getById(route.params.id as string);
     item.value = data;
+    useHead({ title: data.title || "Item" });
     userNotes.value = data.your_notes || "";
     includeInTaste.value = data.include_in_taste ?? true;
   } finally {

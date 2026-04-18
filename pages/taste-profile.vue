@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 const { setPageHeader } = usePageHeader();
+useHead({ title: "Taste Profile" });
 const { tasteProfile, loading, generating, notFound, fetch, generate } =
   useTasteProfile();
 

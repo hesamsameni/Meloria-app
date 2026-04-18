@@ -18,6 +18,6 @@
 
 <script setup lang="ts">
 const { setPageHeader } = usePageHeader();
-
+useHead({ title: "Suggestions" });
 setPageHeader("Suggestions", "Based on your taste profile");
 </script>

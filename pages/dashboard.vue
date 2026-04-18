@@ -99,6 +99,7 @@ const route = useRoute();
 const router = useRouter();
 const toast = useGlobalToast();
 const { setPageHeader } = usePageHeader();
+useHead({ title: "Dashboard" });
 
 const recentItems = computed(() => items.items.value);
 

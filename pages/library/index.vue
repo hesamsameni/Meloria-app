@@ -102,7 +102,7 @@ import type { Item } from "~/services/items.service";
 
 const items = useItems();
 const { setPageHeader } = usePageHeader();
-
+useHead({ title: "Library" });
 setPageHeader("Library", "Everything you've captured");
 
 const search = ref("");

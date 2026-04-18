@@ -171,7 +171,7 @@ import {
 } from "~/services/items.service";
 
 const { setPageHeader } = usePageHeader();
-
+useHead({ title: "Bulk Import" });
 setPageHeader("Bulk Import", "Import multiple items at once");
 
 const api = useApiService();

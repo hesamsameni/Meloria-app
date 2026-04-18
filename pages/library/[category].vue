@@ -98,9 +98,11 @@ const filtered = computed(() =>
 watchEffect(() => {
   if (!selectedCategory.value) {
     setPageHeader("Library", "Unknown category");
+    useHead({ title: "Library" });
     return;
   }
 
+  useHead({ title: selectedCategory.value.label });
   setPageHeader(
     selectedCategory.value.label,
     `Browse your ${selectedCategory.value.label.toLowerCase()}`,

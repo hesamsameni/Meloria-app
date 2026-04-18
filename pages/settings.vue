@@ -10,6 +10,6 @@
 
 <script setup lang="ts">
 const { setPageHeader } = usePageHeader();
-
+useHead({ title: "Settings" });
 setPageHeader("Settings", "Manage your account information and API access");
 </script>
