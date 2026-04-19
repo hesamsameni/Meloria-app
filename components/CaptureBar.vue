@@ -10,7 +10,7 @@
       >
       <NuxtLink
         to="/import"
-        class="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 dark:text-neutral-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+        class="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium text-neutral-400 dark:text-neutral-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
       >
         <UIcon name="i-heroicons-arrow-up-tray" class="w-3.5 h-3.5 shrink-0" />
         Bulk import
@@ -99,9 +99,10 @@
 </template>
 
 <script setup lang="ts">
+import type { Item } from "~/services/items.service";
 import { useCapture } from "~/composables/useCapture";
 
-const emit = defineEmits<{ captured: [] }>();
+const emit = defineEmits<{ captured: [item: Item] }>();
 
 const { loading, lastCaptured, error, capture, reset } = useCapture();
 
@@ -129,7 +130,7 @@ const handleCapture = async () => {
   const item = await capture(input.value, source);
   if (item) {
     input.value = "";
-    emit("captured");
+    emit("captured", item);
   }
 };
 </script>

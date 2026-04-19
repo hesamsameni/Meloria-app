@@ -93,6 +93,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Item } from "~/services/items.service";
+
 const { user } = useAuth();
 const { displayLabel } = useProfile();
 const items = useItems();
@@ -112,8 +114,18 @@ const stats = computed(() => [
   { label: "Books", value: items.totals.value.book },
 ]);
 
-const handleCaptured = async () => {
-  await Promise.all([items.fetch(), items.fetchTotals()]);
+const handleCaptured = (newItem: Item) => {
+  items.items.value.unshift(newItem);
+  items.totals.value.total++;
+  const catKey = (
+    { movie: "movies", music: "music", show: "show", book: "book" } as Record<
+      string,
+      string
+    >
+  )[newItem.category];
+  if (catKey) (items.totals.value as Record<string, number>)[catKey]++;
+  const statusKey = newItem.status as keyof typeof items.totals.value;
+  if (statusKey in items.totals.value) items.totals.value[statusKey]++;
 };
 
 const greeting = computed(() => {

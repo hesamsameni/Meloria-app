@@ -11,7 +11,7 @@
         icon="i-lucide-search"
       />
 
-      <div class="flex items-center gap-1.5">
+      <div class="flex flex-wrap items-center gap-1.5">
         <UButton
           v-for="s in statuses"
           :key="s.value"
@@ -98,9 +98,6 @@ const filterParams = computed(() => ({
 
 const filtered = computed(() =>
   items.items.value.filter((item: Item) => {
-    if (!selectedCategory.value) return false;
-
-    const matchCategory = item.category === selectedCategory.value.value;
     const matchSearch =
       !search.value ||
       item.title?.toLowerCase().includes(search.value.toLowerCase()) ||
@@ -108,7 +105,7 @@ const filtered = computed(() =>
     const matchStatus =
       activeStatus.value === "all" || item.status === activeStatus.value;
 
-    return matchCategory && matchSearch && matchStatus;
+    return matchSearch && matchStatus;
   }),
 );
 
