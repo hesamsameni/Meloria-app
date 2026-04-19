@@ -1,5 +1,9 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <!-- capture -->
+    <div class="mb-8">
+      <CaptureBar @captured="handleCaptured" />
+    </div>
     <div class="flex flex-col gap-3 mb-6">
       <UInput
         v-model="search"
@@ -17,6 +21,12 @@
           @click="activeStatus = s.value"
         >
           {{ s.label }}
+          <UBadge
+            v-if="statusCount(s.value)"
+            :label="String(statusCount(s.value))"
+            size="xs"
+            class="ml-1"
+          />
         </UButton>
       </div>
     </div>
@@ -27,7 +37,7 @@
       :loading="items.loading.value"
       :show-status="true"
       empty-message="No items in this category yet"
-      @status-change="items.updateStatus"
+      @status-change="handleStatusChange"
     />
 
     <EmptyState
@@ -69,6 +79,13 @@ const categoryParam = computed(() => {
   return Array.isArray(raw) ? raw[0] : raw;
 });
 
+const handleCaptured = async () => {
+  await Promise.all([
+    items.fetch(filterParams.value),
+    items.fetchTotals({ category: selectedCategory.value?.value }),
+  ]);
+};
+
 const selectedCategory = computed(() =>
   LIBRARY_CATEGORIES.find((c) => c.value === categoryParam.value),
 );
@@ -95,6 +112,14 @@ const filtered = computed(() =>
   }),
 );
 
+const statusCount = (value: string | undefined | null) => {
+  if (!value) return null;
+  const t = items.totals.value || {};
+  if (value === "all") return t.total ?? 0;
+  // @ts-ignore
+  return t[value] ?? 0;
+};
+
 watchEffect(() => {
   if (!selectedCategory.value) {
     setPageHeader("Library", "Unknown category");
@@ -118,6 +143,16 @@ watch(
   { immediate: true },
 );
 
+// Fetch totals scoped to the selected category so status buttons show counts
+watch(
+  selectedCategory,
+  () => {
+    if (!selectedCategory.value) return;
+    items.fetchTotals({ category: selectedCategory.value.value });
+  },
+  { immediate: true },
+);
+
 let searchTimer: ReturnType<typeof setTimeout>;
 watch(search, () => {
   clearTimeout(searchTimer);
@@ -126,4 +161,13 @@ watch(search, () => {
     items.fetch(filterParams.value);
   }, 600);
 });
+
+const handleStatusChange = (id: string, status: string) => {
+  items.updateLocalStatus(id, status);
+  if (selectedCategory.value) {
+    items.fetchTotals({ category: selectedCategory.value.value });
+  } else {
+    items.fetchTotals();
+  }
+};
 </script>

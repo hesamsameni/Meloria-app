@@ -70,6 +70,7 @@
       <ItemList
         :items="recentItems"
         :loading="items.loading.value"
+        :show-status="true"
         empty-message="Nothing captured yet — use the bar above to add your first item"
       />
     </div>

@@ -17,5 +17,6 @@ export const useItems = () => {
     loadMore: store.loadMore,
     fetchTotals: store.fetchTotals,
     updateStatus: store.updateStatus,
+    updateLocalStatus: store.updateLocalStatus,
   };
 };

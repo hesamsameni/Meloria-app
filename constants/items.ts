@@ -9,10 +9,10 @@ export const CATEGORY_ICON: Record<string, string> = {
 };
 
 export const STATUS_OPTIONS = [
-  { label: "Saved", value: "saved" },
+  { label: "Want to", value: "want_to" },
   { label: "In progress", value: "in_progress" },
-  { label: "Done", value: "done" },
-  { label: "Skipped", value: "skipped" },
+  { label: "Finished", value: "finished" },
+  { label: "Not for me", value: "not_for_me" },
 ] as const;
 
 export const LIBRARY_CATEGORIES = [
@@ -52,9 +52,10 @@ export const LIBRARY_CATEGORY_NAV_ITEMS = [
 
 export const LIBRARY_STATUSES = [
   { value: "all", label: "All" },
-  { value: "saved", label: "Saved" },
+  { value: "want_to", label: "Want to" },
   { value: "in_progress", label: "In progress" },
-  { value: "done", label: "Done" },
+  { value: "finished", label: "Finished" },
+  { value: "not_for_me", label: "Not for me" },
 ] as const;
 
 export const SUBSCRIPTION_PLANS = [

@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <ItemHero :item="item" @status-change="updateStatus" />
+    <ItemHero :item="item" @status-change="handleStatusChange" />
 
     <div class="grid grid-cols-1 gap-5 sm:gap-6 mb-6">
       <UCard
@@ -262,6 +262,54 @@
       </aside>
     </div>
 
+    <!-- Reflection Modal (shown when marking an item as Finished) -->
+    <UModal v-model:open="reflectionModalOpen" title="How was it? ✨">
+      <template #body>
+        <div class="space-y-4">
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            You finished
+            <span class="font-medium text-neutral-800 dark:text-neutral-200">{{
+              item?.title
+            }}</span
+            >. Take a moment to capture your thoughts — optional, but useful for
+            your taste profile.
+          </p>
+          <UFormField label="Your reflection">
+            <UTextarea
+              v-model="reflectionNote"
+              placeholder="What did you think? Would you recommend it?"
+              :rows="4"
+              class="w-full"
+              autofocus
+            />
+          </UFormField>
+          <button
+            v-if="item"
+            class="inline-flex items-center gap-1.5 text-xs text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+            @click="goToDiscussion"
+          >
+            <UIcon name="i-lucide-message-circle" class="w-3.5 h-3.5" />
+            Discuss {{ item.title }} with AI
+          </button>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton
+            variant="ghost"
+            color="neutral"
+            label="Skip"
+            @click="saveReflection(false)"
+          />
+          <UButton
+            label="Save reflection"
+            :loading="reflectionLoading"
+            @click="saveReflection(true)"
+          />
+        </div>
+      </template>
+    </UModal>
+
     <!-- Edit Item Modal -->
     <UModal v-model:open="editModalOpen" title="Edit Item">
       <template #body>
@@ -419,6 +467,63 @@ const updateStatus = async (status: string) => {
   if (!item.value) return;
   await itemsService.updateItem(item.value.id, { status });
   item.value.status = status;
+};
+
+// Reflection modal
+const reflectionModalOpen = ref(false);
+const reflectionNote = ref("");
+const reflectionLoading = ref(false);
+let pendingStatus = "";
+
+const handleStatusChange = async (status: string) => {
+  if (!item.value) return;
+  if (status === "finished") {
+    // Apply the status immediately, then ask for a reflection
+    await itemsService.updateItem(item.value.id, {
+      status,
+      finished_at: new Date().toISOString(),
+    });
+    item.value.status = status;
+    item.value.finished_at = new Date().toISOString();
+    pendingStatus = status;
+    reflectionNote.value = "";
+    reflectionModalOpen.value = true;
+  } else {
+    // If moving away from finished → want_to, clear the reflection note
+    if (
+      item.value.status === "finished" &&
+      status === "want_to" &&
+      item.value.reflection_note
+    ) {
+      await itemsService.updateItem(item.value.id, { reflection_note: null });
+      item.value.reflection_note = null;
+    }
+    await updateStatus(status);
+  }
+};
+
+const saveReflection = async (withNote: boolean) => {
+  if (!item.value) return;
+  reflectionLoading.value = true;
+  try {
+    if (withNote && reflectionNote.value.trim()) {
+      await itemsService.updateItem(item.value.id, {
+        reflection_note: reflectionNote.value.trim(),
+      });
+      item.value.reflection_note = reflectionNote.value.trim();
+    }
+  } finally {
+    reflectionLoading.value = false;
+    reflectionModalOpen.value = false;
+    reflectionNote.value = "";
+  }
+};
+
+const goToDiscussion = async () => {
+  if (!item.value) return;
+  const id = item.value.id;
+  await saveReflection(false);
+  await navigateTo(`/items/${id}/discussion`);
 };
 
 const mapQuery = computed(

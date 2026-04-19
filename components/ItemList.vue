@@ -1,11 +1,14 @@
 <template>
   <div>
     <!-- Loading skeletons -->
-    <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div
+      v-if="loading"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+    >
       <USkeleton
         v-for="i in skeletonCount"
         :key="i"
-        class="h-20 w-full rounded-xl"
+        class="h-64 w-full rounded-xl"
       />
     </div>
 
@@ -13,12 +16,13 @@
     <EmptyState v-else-if="items.length === 0" :description="emptyMessage" />
 
     <!-- Item list -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
       <ItemCard
         v-for="item in items"
         :key="item.id"
         :item="item"
         :show-status="showStatus"
+        class="h-full"
         @status-change="(id, status) => $emit('status-change', id, status)"
       />
     </div>
@@ -38,7 +42,7 @@ withDefaults(
   }>(),
   {
     emptyMessage: "Nothing here yet",
-    skeletonCount: 4,
+    skeletonCount: 3,
     showStatus: false,
   },
 );
