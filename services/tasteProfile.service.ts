@@ -7,17 +7,27 @@ export type TasteProfileData = {
     favourite_directors: string[];
     favourite_eras: string[];
     patterns: string;
+    reflection_themes?: string;
   } | null;
   music: {
     favourite_genres: string[];
     favourite_artists: string[];
     patterns: string;
+    reflection_themes?: string;
   } | null;
   books: {
     favourite_genres: string[];
     favourite_authors: string[];
     patterns: string;
+    reflection_themes?: string;
   } | null;
+  shows: {
+    favourite_genres: string[];
+    patterns: string;
+    reflection_themes?: string;
+  } | null;
+  aspiration_vs_reality?: string;
+  personality_traits?: string[];
   cross_category_insights: string[];
   capture_behaviour: {
     most_active_source: string;

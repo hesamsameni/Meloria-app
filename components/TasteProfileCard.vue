@@ -28,7 +28,8 @@
             No taste profile yet
           </p>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
-            Runs automatically every day at 2 AM, or you can generate it now.
+            Runs automatically every week at 2 AM on Fridays, or you can
+            generate it now.
           </p>
         </div>
         <UButton
@@ -71,7 +72,7 @@
       <!-- Category sections -->
       <div
         v-if="filledCategorySections.length"
-        class="grid grid-cols-1 sm:grid-cols-3 gap-4"
+        class="grid grid-cols-1 sm:grid-cols-2 gap-4"
       >
         <UCard
           v-for="section in filledCategorySections"
@@ -102,6 +103,16 @@
                 >{{ genre }}</UBadge
               >
             </div>
+            <div v-if="section.eras?.length" class="flex flex-wrap gap-1.5">
+              <UBadge
+                v-for="era in section.eras"
+                :key="era"
+                size="sm"
+                color="neutral"
+                variant="soft"
+                >{{ era }}</UBadge
+              >
+            </div>
             <div v-if="section.creators?.length" class="flex flex-wrap gap-1.5">
               <UBadge
                 v-for="creator in section.creators.slice(0, 3)"
@@ -117,9 +128,71 @@
             >
               {{ section.data.patterns }}
             </p>
+            <p
+              v-if="(section.data as any).reflection_themes"
+              class="text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed border-t border-neutral-100 dark:border-neutral-800 pt-2.5 mt-0.5"
+            >
+              <UIcon
+                name="i-lucide-quote"
+                class="w-3 h-3 inline mr-1 opacity-60"
+              />
+              {{ (section.data as any).reflection_themes }}
+            </p>
           </div>
         </UCard>
       </div>
+
+      <!-- Personality traits -->
+      <UCard
+        v-if="profile.profile?.personality_traits?.length"
+        class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+      >
+        <template #header>
+          <p
+            class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+          >
+            Personality
+          </p>
+        </template>
+        <ul class="space-y-2">
+          <li
+            v-for="(trait, i) in profile.profile.personality_traits"
+            :key="i"
+            class="flex items-start gap-2.5 text-sm text-neutral-600 dark:text-neutral-300"
+          >
+            <UIcon
+              name="i-lucide-user-round"
+              class="w-3.5 h-3.5 text-primary-500 shrink-0 mt-0.5"
+            />
+            <span>{{ trait }}</span>
+          </li>
+        </ul>
+      </UCard>
+
+      <!-- Aspiration vs reality -->
+      <UCard
+        v-if="profile.profile?.aspiration_vs_reality"
+        class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+      >
+        <template #header>
+          <p
+            class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+          >
+            Aspiration vs reality
+          </p>
+        </template>
+        <div class="flex items-start gap-2.5">
+          <UIcon
+            name="i-lucide-trending-up"
+            class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"
+          />
+          <p
+            class="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed"
+          >
+            {{ profile.profile.aspiration_vs_reality }}
+          </p>
+        </div>
+      </UCard>
 
       <!-- Cross-category insights -->
       <UCard
@@ -265,6 +338,7 @@ const categorySections = computed(() => [
     icon: "i-lucide-clapperboard",
     data: props.profile?.profile?.movies,
     creators: (props.profile?.profile?.movies as any)?.favourite_directors,
+    eras: (props.profile?.profile?.movies as any)?.favourite_eras,
   },
   {
     key: "music",
@@ -272,6 +346,7 @@ const categorySections = computed(() => [
     icon: "i-lucide-music",
     data: props.profile?.profile?.music,
     creators: (props.profile?.profile?.music as any)?.favourite_artists,
+    eras: undefined,
   },
   {
     key: "books",
@@ -279,6 +354,15 @@ const categorySections = computed(() => [
     icon: "i-lucide-book-open",
     data: props.profile?.profile?.books,
     creators: (props.profile?.profile?.books as any)?.favourite_authors,
+    eras: undefined,
+  },
+  {
+    key: "shows",
+    label: "Shows",
+    icon: "i-lucide-tv-2",
+    data: props.profile?.profile?.shows,
+    creators: undefined,
+    eras: undefined,
   },
 ]);
 
@@ -289,6 +373,7 @@ const filledCategorySections = computed(
       label: string;
       icon: string;
       creators: string[] | undefined;
+      eras: string[] | undefined;
       data: NonNullable<(typeof categorySections.value)[number]["data"]>;
     }>,
 );

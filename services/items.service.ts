@@ -72,6 +72,10 @@ export type Item = {
   amazon_url: string | null;
   goodreads_url: string | null;
   audible_url: string | null;
+
+  // journey
+  finished_at: string | null;
+  reflection_note: string | null;
 };
 
 export type CapturePayload = {
@@ -86,9 +90,10 @@ export type ItemTotals = {
   music: number;
   show: number;
   book: number;
-  saved: number;
+  want_to: number;
   in_progress: number;
-  done: number;
+  finished: number;
+  not_for_me: number;
 };
 
 export type BulkImportRecord = {
@@ -152,7 +157,16 @@ export const createItemsService = (
 
   const updateItem = async (
     id: string,
-    payload: Partial<Pick<Item, "status" | "your_notes" | "include_in_taste">>,
+    payload: Partial<
+      Pick<
+        Item,
+        | "status"
+        | "your_notes"
+        | "include_in_taste"
+        | "finished_at"
+        | "reflection_note"
+      >
+    >,
   ): Promise<void> => {
     await api.call(`/items/${id}`, { method: "PATCH", body: payload });
   };
@@ -171,8 +185,13 @@ export const createItemsService = (
     await api.call(`/items/${id}`, { method: "DELETE" });
   };
 
-  const getTotals = async (): Promise<ItemTotals> => {
-    return api.call<ItemTotals>("/items/totals", {
+  const getTotals = async (
+    params: { category?: string } = {},
+  ): Promise<ItemTotals> => {
+    const q = new URLSearchParams();
+    if (params.category) q.set("category", params.category);
+    const url = `/items/totals${q.toString() ? `?${q.toString()}` : ""}`;
+    return api.call<ItemTotals>(url, {
       method: "GET",
     });
   };

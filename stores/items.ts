@@ -7,7 +7,7 @@ import {
 } from "~/services/items.service";
 import { useAuthStore } from "./auth";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 21;
 
 export const useItemsStore = defineStore("items", () => {
   const config = useRuntimeConfig();
@@ -28,16 +28,17 @@ export const useItemsStore = defineStore("items", () => {
     music: 0,
     show: 0,
     book: 0,
-    saved: 0,
+    want_to: 0,
     in_progress: 0,
-    done: 0,
+    finished: 0,
+    not_for_me: 0,
   });
   const totalsLoading = ref(false);
 
-  const fetchTotals = async () => {
+  const fetchTotals = async (params: { category?: string } = {}) => {
     totalsLoading.value = true;
     try {
-      totals.value = await itemsService.getTotals();
+      totals.value = await itemsService.getTotals(params);
     } catch (e: any) {
       error.value = e?.message || "Failed to load totals";
     } finally {
@@ -46,17 +47,18 @@ export const useItemsStore = defineStore("items", () => {
   };
 
   const fetch = async (params: Record<string, any> = {}) => {
+    const limit = params.limit ?? PAGE_SIZE;
     loading.value = true;
     error.value = null;
     offset.value = 0;
     try {
       const results = await itemsService.search({
         ...params,
-        limit: PAGE_SIZE,
+        limit,
         offset: 0,
       });
       items.value = results;
-      hasMore.value = results.length === PAGE_SIZE;
+      hasMore.value = results.length === limit;
     } catch (e: any) {
       error.value = e.data?.error || e.message || "Failed to load items";
     } finally {
@@ -91,6 +93,13 @@ export const useItemsStore = defineStore("items", () => {
     fetchTotals();
   };
 
+  // Used when the API call has already been made by the caller (e.g. ItemCard)
+  const updateLocalStatus = (id: string, status: string) => {
+    const item = items.value.find((i) => i.id === id);
+    if (item) item.status = status;
+    fetchTotals();
+  };
+
   return {
     items,
     loading,
@@ -103,5 +112,6 @@ export const useItemsStore = defineStore("items", () => {
     loadMore,
     fetchTotals,
     updateStatus,
+    updateLocalStatus,
   };
 });

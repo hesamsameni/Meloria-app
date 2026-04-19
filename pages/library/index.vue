@@ -32,13 +32,13 @@
       </div>
     </div>
 
-    <div v-if="items.loading.value" class="flex flex-col gap-3">
+    <div v-if="globalLoading" class="flex flex-col gap-3">
       <USkeleton v-for="i in 4" :key="i" class="h-24 w-full rounded-xl" />
     </div>
 
     <div v-else class="space-y-8">
       <section
-        v-for="group in groupedCategories"
+        v-for="group in activeGroups"
         :key="group.value"
         class="space-y-3"
       >
@@ -51,12 +51,15 @@
               class="w-4 h-4 text-neutral-500 dark:text-neutral-400"
             />
             {{ group.label }}
-            <span class="text-xs text-neutral-500 dark:text-neutral-400 ml-1">
-              ({{ group.items.length }})
-            </span>
+            <span
+              v-if="categoryTotal(group.value) !== null"
+              class="text-xs font-normal text-neutral-500 dark:text-neutral-400"
+              >({{ categoryTotal(group.value) }})</span
+            >
           </h2>
 
           <NuxtLink
+            v-if="group.hasMore"
             :to="`/library/${group.value}`"
             class="text-xs text-neutral-500 hover:text-primary-500 transition-colors"
           >
@@ -65,106 +68,131 @@
         </div>
 
         <ItemList
-          :items="group.items.slice(0, 4)"
+          :items="group.items"
           :show-status="true"
           :skeleton-count="3"
           empty-message="No items in this category"
-          @status-change="items.updateStatus"
+          @status-change="items.updateLocalStatus"
         />
       </section>
 
       <EmptyState
-        v-if="groupedCategories.length === 0"
+        v-if="activeGroups.length === 0"
         description="No items match your filters"
       />
-    </div>
-
-    <!-- load more -->
-    <div
-      v-if="items.hasMore.value && !items.loading.value"
-      class="mt-6 text-center"
-    >
-      <UButton
-        variant="outline"
-        color="neutral"
-        size="sm"
-        :loading="items.loadingMore.value"
-        @click="handleLoadMore"
-      >
-        Load more
-      </UButton>
     </div>
   </div>
 </template>
 <script setup lang="ts">
 import { LIBRARY_CATEGORIES, LIBRARY_STATUSES } from "~/constants/items";
-import type { Item } from "~/services/items.service";
+import { createApiService } from "~/services/api";
+import { createItemsService, type Item } from "~/services/items.service";
 
+const config = useRuntimeConfig();
+const auth = useAuth();
 const items = useItems();
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Library" });
 setPageHeader("Library", "Everything you've captured");
 
+const api = createApiService(config.public.apiUrl, auth.getToken);
+const itemsService = createItemsService(api);
+
 const search = ref("");
 const activeStatus = ref("all");
-
-const categories = LIBRARY_CATEGORIES;
 const statuses = LIBRARY_STATUSES;
 
-const filterParams = computed(() => ({
-  ...(activeStatus.value !== "all" ? { status: activeStatus.value } : {}),
-  ...(search.value ? { query: search.value } : {}),
-}));
+const PREVIEW_LIMIT = 6;
 
-const filtered = computed(() =>
-  items.items.value.filter((item: Item) => {
-    const matchSearch =
-      !search.value ||
-      item.title?.toLowerCase().includes(search.value.toLowerCase()) ||
-      item.creator?.toLowerCase().includes(search.value.toLowerCase());
-    const matchStatus =
-      activeStatus.value === "all" || item.status === activeStatus.value;
-    return matchSearch && matchStatus;
-  }),
+type CategoryGroup = {
+  value: string;
+  label: string;
+  icon: string;
+  items: Item[];
+  loading: boolean;
+  hasMore: boolean;
+};
+
+const groups = ref<CategoryGroup[]>(
+  LIBRARY_CATEGORIES.map((cat) => ({
+    ...cat,
+    items: [],
+    loading: true,
+    hasMore: false,
+  })),
 );
 
-const groupedCategories = computed(() => {
-  return categories
-    .map((category) => ({
-      ...category,
-      items: filtered.value.filter((item) => item.category === category.value),
-    }))
-    .filter((group) => group.items.length > 0);
-});
+const globalLoading = ref(true);
+
+const activeGroups = computed(() =>
+  groups.value.filter((g) => g.items.length > 0),
+);
+
+const loadAll = async () => {
+  globalLoading.value = true;
+  const status = activeStatus.value !== "all" ? activeStatus.value : undefined;
+  const query = search.value || undefined;
+
+  await Promise.all(
+    groups.value.map(async (group) => {
+      group.loading = true;
+      try {
+        const results = await itemsService.search({
+          category: group.value,
+          limit: PREVIEW_LIMIT + 1,
+          ...(status ? { status } : {}),
+          ...(query ? { query } : {}),
+        });
+        group.items = results.slice(0, PREVIEW_LIMIT);
+        group.hasMore = results.length > PREVIEW_LIMIT;
+      } catch {
+        group.items = [];
+        group.hasMore = false;
+      } finally {
+        group.loading = false;
+      }
+    }),
+  );
+
+  globalLoading.value = false;
+};
+
+const CATEGORY_TOTAL_MAP: Record<string, keyof typeof items.totals.value> = {
+  movie: "movies",
+  music: "music",
+  show: "show",
+  book: "book",
+};
+
+const categoryTotal = (catValue: string): number | null => {
+  const key = CATEGORY_TOTAL_MAP[catValue];
+  if (!key) return null;
+  return items.totals.value[key] as number;
+};
 
 const statusCount = (status: string) => {
   if (status === "all") return items.totals.value.total;
-  if (status === "saved") return items.totals.value.saved;
+  if (status === "want_to") return items.totals.value.want_to;
   if (status === "in_progress") return items.totals.value.in_progress;
-  if (status === "done") return items.totals.value.done;
+  if (status === "finished") return items.totals.value.finished;
+  if (status === "not_for_me") return items.totals.value.not_for_me;
   return 0;
 };
 
 const handleCaptured = async () => {
-  await Promise.all([items.fetch(), items.fetchTotals()]);
+  await Promise.all([loadAll(), items.fetchTotals()]);
 };
 
-const handleLoadMore = () => items.loadMore(filterParams.value);
+watch(activeStatus, () => loadAll());
 
-// re-fetch when filters change
-watch([activeStatus], () => {
-  items.fetch(filterParams.value);
-});
-
-// debounce search
 let searchTimer: ReturnType<typeof setTimeout>;
 watch(search, () => {
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => items.fetch(filterParams.value), 600);
+  searchTimer = setTimeout(() => loadAll(), 600);
 });
 
 onMounted(() => {
-  items.fetch();
+  loadAll();
   items.fetchTotals();
 });
 </script>

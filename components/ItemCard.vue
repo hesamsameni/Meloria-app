@@ -1,236 +1,220 @@
 <template>
   <div
-    class="group rounded-2xl border border-neutral-200/80 dark:border-neutral-800/80 bg-white/95 dark:bg-neutral-950/85 shadow-sm hover:shadow-lg hover:shadow-neutral-200/50 dark:hover:shadow-black/20 transition-all duration-300 overflow-hidden"
+    class="group flex flex-col h-full overflow-hidden rounded-xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-md transition-shadow duration-200"
   >
-    <NuxtLink :to="`/items/${item.id}`" class="block relative">
-      <div class="relative h-56 sm:h-64 bg-neutral-100 dark:bg-neutral-900">
+    <NuxtLink :to="`/items/${item.id}`" class="block">
+      <div class="relative h-48 bg-neutral-100 dark:bg-neutral-900">
         <img
           v-if="item.artwork_url"
           :src="item.artwork_url"
           :alt="item.title || ''"
-          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          class="w-full h-full object-cover transition-transform duration-400 group-hover:scale-105"
         />
-        <div
-          v-else
-          class="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800"
-        >
+        <div v-else class="w-full h-full flex items-center justify-center">
           <UIcon
             :name="categoryIcon"
-            class="w-14 h-14 text-neutral-500 dark:text-neutral-400"
+            class="w-12 h-12 text-neutral-400 dark:text-neutral-500"
           />
         </div>
 
-        <div
-          class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent"
-        />
+        <div class="absolute left-3 top-3">
+          <UBadge
+            :label="item.category.toUpperCase()"
+            size="xs"
+            variant="solid"
+            color="primary"
+          />
+        </div>
 
-        <div class="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-white">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <p
-                class="text-base sm:text-lg font-semibold leading-tight truncate"
-              >
-                {{ item.title || item.raw_input?.slice(0, 60) || "Untitled" }}
-              </p>
-              <p
-                v-if="item.tmdb_director?.name || item.creator"
-                class="text-xs sm:text-sm text-white/80 mt-1 truncate"
-              >
-                {{ item.tmdb_director?.name || item.creator }}
-              </p>
-            </div>
-            <span class="text-xs text-white/80 shrink-0 mt-0.5">{{
-              timeAgo
-            }}</span>
-          </div>
-
-          <div
-            v-if="
-              item.release_year ||
-              item.external_rating ||
-              item.runtime ||
-              item.album_name
-            "
-            class="mt-2.5 flex items-center gap-2 text-xs text-white/80 flex-wrap"
+        <div class="absolute right-3 top-3">
+          <span
+            class="inline-flex items-center px-2 py-0.5 text-xs rounded bg-black/50 text-white"
+            >{{ timeAgo }}</span
           >
-            <span v-if="item.release_year">{{ item.release_year }}</span>
-            <span v-if="item.release_year && item.external_rating">•</span>
-            <span
-              v-if="item.external_rating"
-              class="inline-flex items-center gap-1"
-            >
-              <UIcon name="i-lucide-star" class="w-3 h-3" />
-              {{ item.external_rating }}
-            </span>
-            <span
-              v-if="item.runtime && (item.release_year || item.external_rating)"
-              >•</span
-            >
-            <span v-if="item.runtime">{{ formatRuntime(item.runtime) }}</span>
-            <span v-if="item.album_name">• {{ item.album_name }}</span>
-          </div>
         </div>
       </div>
     </NuxtLink>
 
-    <div class="p-4 sm:p-5 flex flex-col gap-3.5">
-      <p
-        v-if="item.description && isNote"
-        class="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed line-clamp-2"
-      >
-        {{ item.description }}
-      </p>
-
-      <div class="flex items-center gap-2 flex-wrap">
-        <UBadge
-          :label="item.category"
-          size="xs"
-          variant="soft"
-          color="primary"
-        />
-        <UBadge
-          v-if="
-            item.input_type === 'voice_transcript' ||
-            item.input_type === 'voice'
-          "
-          size="xs"
-          variant="soft"
-          color="primary"
+    <div class="p-4 flex flex-col flex-1">
+      <div class="min-h-[48px]">
+        <p
+          class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate"
         >
-          <span class="inline-flex items-center gap-1">
-            <UIcon name="i-lucide-mic" class="w-3 h-3" />
-            Voice
-          </span>
-        </UBadge>
-        <UBadge
-          :label="item.source"
-          size="xs"
-          variant="outline"
-          color="neutral"
-        />
-        <UBadge
-          v-for="tag in (item.tags || []).slice(0, 2)"
-          :key="tag"
-          :label="tag"
-          size="xs"
-          variant="outline"
-          color="neutral"
-        />
+          {{ item.title || item.raw_input?.slice(0, 60) || "Untitled" }}
+        </p>
+        <p
+          v-if="item.tmdb_director?.name || item.creator"
+          class="mt-1 text-xs text-neutral-500 dark:text-neutral-400 truncate"
+        >
+          {{ item.tmdb_director?.name || item.creator }}
+        </p>
       </div>
 
-      <div class="flex items-center gap-2 flex-wrap pt-1">
-        <template v-if="item.category === 'music'">
-          <UButton
-            v-if="item.spotify_url"
-            :to="item.spotify_url"
-            target="_blank"
-            size="sm"
+      <div class="mt-3 flex items-center gap-2">
+        <div
+          class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto whitespace-nowrap"
+        >
+          <UBadge
+            v-if="item.source"
+            class="inline-flex shrink-0"
+            :label="item.source"
+            size="xs"
+            variant="outline"
             color="neutral"
-            variant="soft"
-            label="Spotify"
           />
-          <UButton
-            v-if="item.apple_music_url"
-            :to="item.apple_music_url"
-            target="_blank"
-            size="sm"
+          <UBadge
+            v-for="tag in (item.tags || []).slice(0, 2)"
+            :key="tag"
+            class="inline-flex shrink-0"
+            :label="tag"
+            size="xs"
+            variant="outline"
             color="neutral"
-            variant="soft"
-            label="Apple Music"
           />
-          <UButton
-            v-if="item.youtube_url"
-            :to="item.youtube_url"
-            target="_blank"
-            size="sm"
-            color="neutral"
-            variant="soft"
-            label="YouTube"
-          />
-        </template>
+        </div>
+        <div
+          v-if="item.external_rating"
+          class="ml-2 flex-shrink-0 inline-flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-300"
+        >
+          <UIcon name="i-lucide-star" class="w-3.5 h-3.5 text-yellow-400" />
+          <span class="text-xs">{{ item.external_rating }}</span>
+        </div>
+      </div>
 
-        <template v-if="item.category === 'movie' || item.category === 'show'">
-          <UButton
-            v-if="item.tmdb_id"
-            :to="`https://www.themoviedb.org/${item.category === 'show' ? 'tv' : 'movie'}/${item.tmdb_id}`"
-            target="_blank"
-            size="sm"
-            color="neutral"
-            variant="soft"
-            label="TMDB"
-          />
-          <UButton
-            :to="`https://www.google.com/search?q=${encodeURIComponent((item.title || '') + ' watch online')}`"
-            target="_blank"
-            size="sm"
-            color="neutral"
-            variant="soft"
-            label="Where to watch"
-          />
-        </template>
+      <div class="mt-3">
+        <div
+          class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
+        >
+          <span v-if="item.release_year">{{ item.release_year }}</span>
+          <span v-if="item.runtime">• {{ formatRuntime(item.runtime) }}</span>
+          <span v-if="item.album_name">• {{ item.album_name }}</span>
+        </div>
+      </div>
 
-        <template v-if="item.category === 'book'">
-          <UButton
-            v-if="item.goodreads_url"
-            :to="item.goodreads_url"
-            target="_blank"
-            size="sm"
-            color="neutral"
-            variant="soft"
-            label="Goodreads"
-          />
-          <UButton
-            v-if="item.amazon_url"
-            :to="item.amazon_url"
-            target="_blank"
-            size="sm"
-            color="neutral"
-            variant="soft"
-            label="Amazon"
-          />
-          <UButton
-            v-if="item.audible_url"
-            :to="item.audible_url"
-            target="_blank"
-            size="sm"
-            color="neutral"
-            variant="soft"
-            label="Audible"
-          />
-        </template>
-
+      <div
+        v-if="showStatus"
+        class="mt-auto pt-3 border-t border-neutral-100 dark:border-neutral-800/60"
+      >
         <USelect
-          v-if="showStatus"
-          :model-value="
-            item.status as
-              | 'saved'
-              | 'in_progress'
-              | 'done'
-              | 'skipped'
-              | undefined
-          "
+          :model-value="item.status as any"
           :items="statusOptions"
           size="sm"
-          class="w-32 ml-auto"
-          @update:model-value="$emit('status-change', item.id, $event)"
+          class="w-full"
+          @update:model-value="onSelectChange($event as string)"
         />
       </div>
     </div>
+
+    <UModal v-model:open="reflectionOpen" title="How was it? ✨">
+      <template #body>
+        <div class="space-y-4">
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            You finished
+            <span class="font-medium text-neutral-800 dark:text-neutral-200">{{
+              item.title
+            }}</span
+            >.
+          </p>
+          <UFormField label="Your reflection">
+            <UTextarea
+              v-model="reflectionNote"
+              placeholder="What did you think? Would you recommend it?"
+              :rows="4"
+              class="w-full"
+              autofocus
+            />
+          </UFormField>
+          <button
+            class="inline-flex items-center gap-1.5 text-sm text-primary-500 hover:text-primary-600 transition-colors"
+            @click="goToDiscussion"
+          >
+            <UIcon name="i-lucide-message-circle" class="w-4 h-4" />
+            Discuss with AI
+          </button>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton
+            variant="ghost"
+            color="neutral"
+            label="Skip"
+            @click="saveReflection(false)"
+          />
+          <UButton
+            label="Save reflection"
+            :loading="reflectionLoading"
+            @click="saveReflection(true)"
+          />
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Item } from "~/services/items.service";
 import { CATEGORY_ICON, STATUS_OPTIONS } from "~/constants/items";
+import { createItemsService } from "~/services/items.service";
 
 const props = defineProps<{
   item: Item;
   showStatus?: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   "status-change": [id: string, status: string];
 }>();
+
+const api = useApiService();
+const itemsService = createItemsService(api);
+const router = useRouter();
+
+const reflectionOpen = ref(false);
+const reflectionNote = ref("");
+const reflectionLoading = ref(false);
+
+const onSelectChange = async (status: string) => {
+  if (status === "finished") {
+    await itemsService.updateItem(props.item.id, {
+      status,
+      finished_at: new Date().toISOString(),
+    });
+    emit("status-change", props.item.id, status);
+    reflectionNote.value = "";
+    reflectionOpen.value = true;
+  } else {
+    if (
+      props.item.status === "finished" &&
+      status === "want_to" &&
+      props.item.reflection_note
+    ) {
+      await itemsService.updateItem(props.item.id, { reflection_note: null });
+    }
+    await itemsService.updateItem(props.item.id, { status });
+    emit("status-change", props.item.id, status);
+  }
+};
+
+const saveReflection = async (withNote: boolean) => {
+  reflectionLoading.value = true;
+  try {
+    if (withNote && reflectionNote.value.trim()) {
+      await itemsService.updateItem(props.item.id, {
+        reflection_note: reflectionNote.value.trim(),
+      });
+    }
+  } finally {
+    reflectionLoading.value = false;
+    reflectionOpen.value = false;
+    reflectionNote.value = "";
+  }
+};
+
+const goToDiscussion = async () => {
+  await saveReflection(false);
+  router.push(`/items/${props.item.id}/discussion`);
+};
 
 const statusOptions = [...STATUS_OPTIONS];
 
