@@ -206,6 +206,12 @@ export const createItemsService = (
     return api.call("/ingest/bulk/status", { method: "GET" });
   };
 
+  const getReflectPending = async (): Promise<{ pending: boolean }> => {
+    return api.call<{ pending: boolean }>("/items/reflect-pending", {
+      method: "GET",
+    });
+  };
+
   const getReflectionQuestions = async (
     id: string,
   ): Promise<{ questions: Array<{ type: string; question: string }> }> => {
@@ -238,6 +244,7 @@ export const createItemsService = (
     getTotals,
     bulkImport,
     getBulkImportStatus,
+    getReflectPending,
     getReflectionQuestions,
     synthesizeReflection,
   };

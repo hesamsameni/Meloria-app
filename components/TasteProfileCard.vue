@@ -93,50 +93,20 @@
             </div>
           </template>
           <div class="space-y-3">
-            <div class="flex flex-wrap gap-1.5">
-              <UBadge
-                v-for="genre in section.data.favourite_genres?.slice(0, 4)"
-                :key="genre"
-                size="sm"
-                color="neutral"
-                variant="outline"
-                >{{ genre }}</UBadge
-              >
-            </div>
-            <div v-if="section.eras?.length" class="flex flex-wrap gap-1.5">
-              <UBadge
-                v-for="era in section.eras"
-                :key="era"
-                size="sm"
-                color="neutral"
-                variant="soft"
-                >{{ era }}</UBadge
-              >
-            </div>
-            <div v-if="section.creators?.length" class="flex flex-wrap gap-1.5">
-              <UBadge
-                v-for="creator in section.creators.slice(0, 3)"
-                :key="creator"
-                size="sm"
-                color="primary"
-                variant="soft"
-                >{{ creator }}</UBadge
-              >
-            </div>
             <p
               class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed"
             >
               {{ section.data.patterns }}
             </p>
             <p
-              v-if="(section.data as any).reflection_themes"
+              v-if="section.data.reflection_themes"
               class="text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed border-t border-neutral-100 dark:border-neutral-800 pt-2.5 mt-0.5"
             >
               <UIcon
                 name="i-lucide-quote"
                 class="w-3 h-3 inline mr-1 opacity-60"
               />
-              {{ (section.data as any).reflection_themes }}
+              {{ section.data.reflection_themes }}
             </p>
           </div>
         </UCard>
@@ -336,31 +306,31 @@ const categorySections = computed(() => [
     key: "movies",
     label: "Cinema",
     icon: "i-lucide-clapperboard",
-    data: props.profile?.profile?.movies,
-    creators: (props.profile?.profile?.movies as any)?.favourite_directors,
-    eras: (props.profile?.profile?.movies as any)?.favourite_eras,
+    data: props.profile?.profile?.categories?.movies,
+    creators: undefined,
+    eras: undefined,
   },
   {
     key: "music",
     label: "Music",
     icon: "i-lucide-music",
-    data: props.profile?.profile?.music,
-    creators: (props.profile?.profile?.music as any)?.favourite_artists,
+    data: props.profile?.profile?.categories?.music,
+    creators: undefined,
     eras: undefined,
   },
   {
     key: "books",
     label: "Books",
     icon: "i-lucide-book-open",
-    data: props.profile?.profile?.books,
-    creators: (props.profile?.profile?.books as any)?.favourite_authors,
+    data: props.profile?.profile?.categories?.books,
+    creators: undefined,
     eras: undefined,
   },
   {
     key: "shows",
     label: "Shows",
     icon: "i-lucide-tv-2",
-    data: props.profile?.profile?.shows,
+    data: props.profile?.profile?.categories?.shows,
     creators: undefined,
     eras: undefined,
   },
@@ -372,8 +342,6 @@ const filledCategorySections = computed(
       key: string;
       label: string;
       icon: string;
-      creators: string[] | undefined;
-      eras: string[] | undefined;
       data: NonNullable<(typeof categorySections.value)[number]["data"]>;
     }>,
 );

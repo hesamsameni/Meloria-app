@@ -188,7 +188,14 @@ const { user, signOut } = useAuth();
 const { profile, displayLabel } = useProfile();
 const route = useRoute();
 
-const navItems = NAV_ITEMS;
+const { hasPending, refresh: refreshReflect } = useReflectPending();
+onMounted(refreshReflect);
+
+const navItems = computed(() =>
+  NAV_ITEMS.filter(
+    (item) => item.to !== "/reflect" || hasPending.value !== false,
+  ),
+);
 const libraryCategoryItems = LIBRARY_CATEGORY_NAV_ITEMS;
 
 const isLibraryActive = computed(
@@ -209,6 +216,7 @@ const isActive = (to: string) => {
 };
 
 const handleSignOut = async () => {
+  localStorage.removeItem("meloria:reflect-pending");
   await signOut();
   emit("navigate");
 };
