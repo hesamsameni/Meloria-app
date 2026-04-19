@@ -40,10 +40,10 @@
 
         <!-- Footer row -->
         <div
-          class="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-800"
+          class="flex items-center justify-between gap-3 pt-3 border-t border-neutral-100 dark:border-neutral-800"
         >
           <span
-            class="text-xs text-neutral-400 dark:text-neutral-600 tabular-nums"
+            class="text-xs text-neutral-400 dark:text-neutral-600 tabular-nums truncate min-w-0"
             >{{
               lineCount > 0
                 ? `${lineCount} / 200 items`
@@ -56,9 +56,9 @@
             :disabled="lineCount === 0 || submitting"
             color="primary"
             size="sm"
-            class="import-cta rounded-lg px-4"
+            class="import-cta rounded-lg px-4 shrink-0 whitespace-nowrap"
           >
-            Import {{ lineCount > 0 ? lineCount : "" }} items
+            Import {{ lineCount > 0 ? lineCount : "" }} Items
           </UButton>
         </div>
       </div>

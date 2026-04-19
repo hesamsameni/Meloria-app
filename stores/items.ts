@@ -86,18 +86,28 @@ export const useItemsStore = defineStore("items", () => {
     }
   };
 
+  const patchStatusTotals = (oldStatus: string, newStatus: string) => {
+    const t = totals.value as Record<string, number>;
+    if (t[oldStatus] !== undefined) t[oldStatus]--;
+    if (t[newStatus] !== undefined) t[newStatus]++;
+  };
+
   const updateStatus = async (id: string, status: string) => {
     await itemsService.updateStatus(id, status);
     const item = items.value.find((i) => i.id === id);
-    if (item) item.status = status;
-    fetchTotals();
+    if (item) {
+      patchStatusTotals(item.status, status);
+      item.status = status;
+    }
   };
 
   // Used when the API call has already been made by the caller (e.g. ItemCard)
   const updateLocalStatus = (id: string, status: string) => {
     const item = items.value.find((i) => i.id === id);
-    if (item) item.status = status;
-    fetchTotals();
+    if (item) {
+      patchStatusTotals(item.status, status);
+      item.status = status;
+    }
   };
 
   return {

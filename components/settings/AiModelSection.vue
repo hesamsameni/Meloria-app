@@ -121,7 +121,7 @@ const modelsService = createModelsService(api);
 const toast = useGlobalToast();
 
 const preferredModel = ref("");
-const availableModels = ref<AvailableModel[]>([]);
+const availableModels = useState<AvailableModel[]>("availableModels", () => []);
 const loadingModels = ref(false);
 const modelsError = ref<string | null>(null);
 const saving = ref(false);
@@ -193,7 +193,9 @@ watch(
   { immediate: true },
 );
 
-onMounted(() => {
-  loadModels();
+onMounted(async () => {
+  if (availableModels.value.length === 0) {
+    await loadModels();
+  }
 });
 </script>

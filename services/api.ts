@@ -5,11 +5,30 @@ export const createApiService = (
   apiUrl: string,
   getToken: () => Promise<string | null>,
 ) => {
+  let _cachedToken: string | null = null;
+  let _tokenExpiry = 0;
+  let _tokenPromise: Promise<string | null> | null = null;
+
+  const getValidToken = (): Promise<string | null> => {
+    const now = Date.now();
+    if (_cachedToken && now < _tokenExpiry)
+      return Promise.resolve(_cachedToken);
+    if (!_tokenPromise) {
+      _tokenPromise = getToken().then((t) => {
+        _cachedToken = t;
+        _tokenExpiry = Date.now() + 50_000;
+        _tokenPromise = null;
+        return t;
+      });
+    }
+    return _tokenPromise;
+  };
+
   const call = async <T>(
     path: string,
     options: Record<string, any> = {},
   ): Promise<T> => {
-    const token = await getToken();
+    const token = await getValidToken();
 
     const isFormData =
       typeof FormData !== "undefined" && options?.body instanceof FormData;

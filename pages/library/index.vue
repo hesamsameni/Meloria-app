@@ -12,7 +12,7 @@
         icon="i-lucide-search"
       />
 
-      <div class="flex items-center gap-1.5">
+      <div class="flex flex-wrap items-center gap-1.5">
         <UButton
           v-for="s in statuses"
           :key="s.value"
@@ -85,17 +85,14 @@
 </template>
 <script setup lang="ts">
 import { LIBRARY_CATEGORIES, LIBRARY_STATUSES } from "~/constants/items";
-import { createApiService } from "~/services/api";
 import { createItemsService, type Item } from "~/services/items.service";
 
-const config = useRuntimeConfig();
-const auth = useAuth();
 const items = useItems();
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Library" });
 setPageHeader("Library", "Everything you've captured");
 
-const api = createApiService(config.public.apiUrl, auth.getToken);
+const api = useApiService();
 const itemsService = createItemsService(api);
 
 const search = ref("");
@@ -128,7 +125,10 @@ const activeGroups = computed(() =>
   groups.value.filter((g) => g.items.length > 0),
 );
 
+let _loadGeneration = 0;
+
 const loadAll = async () => {
+  const gen = ++_loadGeneration;
   globalLoading.value = true;
   const status = activeStatus.value !== "all" ? activeStatus.value : undefined;
   const query = search.value || undefined;
@@ -143,9 +143,11 @@ const loadAll = async () => {
           ...(status ? { status } : {}),
           ...(query ? { query } : {}),
         });
+        if (gen !== _loadGeneration) return;
         group.items = results.slice(0, PREVIEW_LIMIT);
         group.hasMore = results.length > PREVIEW_LIMIT;
       } catch {
+        if (gen !== _loadGeneration) return;
         group.items = [];
         group.hasMore = false;
       } finally {
@@ -154,7 +156,7 @@ const loadAll = async () => {
     }),
   );
 
-  globalLoading.value = false;
+  if (gen === _loadGeneration) globalLoading.value = false;
 };
 
 const CATEGORY_TOTAL_MAP: Record<string, keyof typeof items.totals.value> = {
