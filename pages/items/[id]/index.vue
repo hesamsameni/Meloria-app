@@ -250,7 +250,9 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p class="text-xs font-medium uppercase tracking-widest text-neutral-400">
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
               Data Sources
             </p>
           </template>
@@ -261,8 +263,8 @@
               target="_blank"
               rel="noopener noreferrer"
               class="text-neutral-500 dark:text-neutral-300 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white transition-colors"
-            >The Movie Database (TMDB)</a>.
-            TMDB is not endorsed or certified by Meloria.
+              >The Movie Database (TMDB)</a
+            >. TMDB is not endorsed or certified by Meloria.
           </p>
         </UCard>
 
@@ -271,7 +273,9 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p class="text-xs font-medium uppercase tracking-widest text-neutral-400">
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
               Data Sources
             </p>
           </template>
@@ -282,14 +286,16 @@
               target="_blank"
               rel="noopener noreferrer"
               class="text-neutral-500 dark:text-neutral-300 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white transition-colors"
-            >Spotify</a>
+              >Spotify</a
+            >
             and
             <a
               href="https://www.deezer.com"
               target="_blank"
               rel="noopener noreferrer"
               class="text-neutral-500 dark:text-neutral-300 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white transition-colors"
-            >Deezer</a>.
+              >Deezer</a
+            >.
           </p>
         </UCard>
 
@@ -298,7 +304,9 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p class="text-xs font-medium uppercase tracking-widest text-neutral-400">
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
               Data Sources
             </p>
           </template>
@@ -309,7 +317,8 @@
               target="_blank"
               rel="noopener noreferrer"
               class="text-neutral-500 dark:text-neutral-300 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white transition-colors"
-            >Open Library</a>.
+              >Open Library</a
+            >.
           </p>
         </UCard>
 
