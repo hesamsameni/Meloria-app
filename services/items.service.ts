@@ -206,6 +206,33 @@ export const createItemsService = (
     return api.call("/ingest/bulk/status", { method: "GET" });
   };
 
+  const getReflectPending = async (): Promise<{ pending: boolean }> => {
+    return api.call<{ pending: boolean }>("/items/reflect-pending", {
+      method: "GET",
+    });
+  };
+
+  const getReflectionQuestions = async (
+    id: string,
+  ): Promise<{ questions: Array<{ type: string; question: string }> }> => {
+    return api.call(`/items/${id}/reflection-questions`, { method: "POST" });
+  };
+
+  const synthesizeReflection = async (
+    id: string,
+    payload: {
+      questions: Array<{ type: string; question: string }>;
+      answers: string[];
+      user_rate: number | null;
+      free_text?: string;
+    },
+  ): Promise<{ reflection_note: string; rating: number | null }> => {
+    return api.call(`/items/${id}/reflection-synthesize`, {
+      method: "POST",
+      body: payload,
+    });
+  };
+
   return {
     capture,
     search,
@@ -217,5 +244,8 @@ export const createItemsService = (
     getTotals,
     bulkImport,
     getBulkImportStatus,
+    getReflectPending,
+    getReflectionQuestions,
+    synthesizeReflection,
   };
 };

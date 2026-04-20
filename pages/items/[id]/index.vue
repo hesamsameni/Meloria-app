@@ -22,19 +22,6 @@
         <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
         Back to library
       </NuxtLink>
-
-      <!-- Edit Button -->
-      <div
-        class="inline-flex items-center gap-2 bg-white/75 dark:bg-neutral-950/70 px-3 py-1.5 text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-6"
-      >
-        <UButton
-          size="sm"
-          variant="ghost"
-          icon="i-lucide-pencil"
-          label="Edit item"
-          @click="openEditModal"
-        />
-      </div>
     </div>
 
     <ItemHero :item="item" @status-change="handleStatusChange" />
@@ -188,37 +175,52 @@
               AI Confidence
             </p>
           </template>
-          <div class="flex items-center gap-2">
-            <UIcon
-              name="i-lucide-sparkles"
-              class="w-4 h-4 shrink-0"
-              :class="{
-                'text-emerald-500': item.confidence === 'high',
-                'text-amber-500': item.confidence === 'medium',
-                'text-red-400': item.confidence === 'low',
-              }"
-            />
-            <span
-              class="text-sm font-medium capitalize"
-              :class="{
-                'text-emerald-600 dark:text-emerald-400':
-                  item.confidence === 'high',
-                'text-amber-600 dark:text-amber-400':
-                  item.confidence === 'medium',
-                'text-red-500 dark:text-red-400': item.confidence === 'low',
-              }"
-            >
-              {{ item.confidence }}
-            </span>
-            <span class="text-xs text-neutral-400 ml-1">
-              {{
-                item.confidence === "high"
-                  ? "— AI is certain about this match"
-                  : item.confidence === "medium"
-                    ? "— AI made a reasonable guess"
-                    : "— AI was unsure, verify manually"
-              }}
-            </span>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <span
+                class="inline-flex items-center gap-1.5 text-sm font-semibold capitalize"
+                :class="{
+                  'text-emerald-600 dark:text-emerald-400':
+                    item.confidence === 'high',
+                  'text-amber-600 dark:text-amber-400':
+                    item.confidence === 'medium',
+                  'text-red-500 dark:text-red-400': item.confidence === 'low',
+                }"
+              >
+                <span
+                  class="w-2 h-2 rounded-full shrink-0"
+                  :class="{
+                    'bg-emerald-500': item.confidence === 'high',
+                    'bg-amber-500': item.confidence === 'medium',
+                    'bg-red-400': item.confidence === 'low',
+                  }"
+                />
+                {{ item.confidence }}
+              </span>
+              <span class="text-xs text-neutral-400">
+                {{
+                  item.confidence === "high"
+                    ? "— AI is certain about this match"
+                    : item.confidence === "medium"
+                      ? "— AI made a reasonable guess"
+                      : "— AI was unsure, verify manually"
+                }}
+              </span>
+            </div>
+            <div class="flex items-end justify-between gap-3">
+              <p class="text-xs text-neutral-400 leading-relaxed">
+                Something look off? Edit the title, creator, or category and
+                re-fetch to get the correct data.
+              </p>
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="primary"
+                icon="i-lucide-pencil"
+                label="Edit"
+                @click="openEditModal"
+              />
+            </div>
           </div>
         </UCard>
 
@@ -263,26 +265,129 @@
     </div>
 
     <!-- Reflection Modal (shown when marking an item as Finished) -->
-    <UModal v-model:open="reflectionModalOpen" title="How was it? ✨">
+    <UModal
+      v-model:open="reflectionModalOpen"
+      :title="
+        reflectionStep === 'answering'
+          ? `How was ${item?.title}? ✨`
+          : reflectionStep === 'synthesizing'
+            ? 'Saving your reflection…'
+            : 'Generating questions…'
+      "
+      :dismissible="reflectionStep === 'answering'"
+      :ui="{
+        content:
+          'max-w-2xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
+      }"
+    >
       <template #body>
-        <div class="space-y-4">
+        <!-- Loading: skeleton while questions are generated -->
+        <div v-if="reflectionStep === 'loading'" class="space-y-5 py-1 sm:py-2">
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
-            You finished
+            Preparing questions for
             <span class="font-medium text-neutral-800 dark:text-neutral-200">{{
               item?.title
             }}</span
-            >. Take a moment to capture your thoughts — optional, but useful for
-            your taste profile.
+            >…
           </p>
-          <UFormField label="Your reflection">
+          <div class="space-y-3">
+            <div
+              v-for="n in 3"
+              :key="n"
+              class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3"
+            >
+              <USkeleton class="h-4 w-2/3 rounded" />
+              <USkeleton class="mt-2 h-14 w-full rounded-lg" />
+            </div>
+          </div>
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3"
+          >
+            <USkeleton class="h-4 w-20 rounded" />
+            <div class="mt-2 grid grid-cols-3 gap-2">
+              <USkeleton class="h-10 rounded-lg" />
+              <USkeleton class="h-10 rounded-lg" />
+              <USkeleton class="h-10 rounded-lg" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Answering: questions + rating + optional free text -->
+        <div
+          v-else-if="reflectionStep === 'answering'"
+          class="space-y-5 py-1 sm:py-2"
+        >
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Answer as much or as little as you like — your answers will be
+            shaped into a personal note.
+          </p>
+
+          <!-- Questions -->
+          <div
+            v-for="(q, i) in reflectionQuestions"
+            :key="i"
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3"
+          >
+            <label
+              class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              {{ q.question }}
+            </label>
             <UTextarea
-              v-model="reflectionNote"
-              placeholder="What did you think? Would you recommend it?"
-              :rows="4"
-              class="w-full"
-              autofocus
+              v-model="reflectionAnswers[i]"
+              placeholder="Your thoughts…"
+              :rows="3"
+              class="mt-2 w-full"
             />
-          </UFormField>
+          </div>
+
+          <!-- Rating -->
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-2"
+          >
+            <p
+              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              Overall
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                v-for="opt in ratingOptions"
+                :key="opt.value"
+                class="rounded-lg border py-2.5 text-sm font-medium transition-colors"
+                :class="
+                  reflectionRating === opt.value
+                    ? 'border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
+                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600'
+                "
+                @click="
+                  reflectionRating =
+                    reflectionRating === opt.value ? null : opt.value
+                "
+              >
+                {{ opt.emoji }} {{ opt.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Optional free text -->
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-1.5"
+          >
+            <label class="text-sm text-neutral-500 dark:text-neutral-400"
+              >Anything else?
+              <span class="text-neutral-300 dark:text-neutral-600"
+                >(optional)</span
+              ></label
+            >
+            <UTextarea
+              v-model="reflectionFreeText"
+              placeholder="Anything the questions didn't capture…"
+              :rows="3"
+              class="w-full"
+            />
+          </div>
+
           <button
             v-if="item"
             class="inline-flex items-center gap-1.5 text-xs text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -292,19 +397,38 @@
             Discuss {{ item.title }} with AI
           </button>
         </div>
+
+        <!-- Synthesizing -->
+        <div
+          v-else-if="reflectionStep === 'synthesizing'"
+          class="py-8 flex flex-col items-center gap-3 text-center"
+        >
+          <UIcon
+            name="i-lucide-sparkles"
+            class="w-7 h-7 text-primary-500 animate-pulse"
+          />
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Writing your reflection…
+          </p>
+        </div>
       </template>
+
       <template #footer>
-        <div class="flex justify-end gap-2">
+        <div
+          class="flex justify-end gap-2 border-t border-neutral-200/70 dark:border-neutral-800/70 pt-3"
+        >
           <UButton
+            v-if="reflectionStep === 'answering'"
             variant="ghost"
             color="neutral"
             label="Skip"
-            @click="saveReflection(false)"
+            @click="skipReflection"
           />
           <UButton
+            v-if="reflectionStep === 'answering'"
             label="Save reflection"
-            :loading="reflectionLoading"
-            @click="saveReflection(true)"
+            :disabled="!hasAnyAnswer"
+            @click="submitReflection"
           />
         </div>
       </template>
@@ -470,24 +594,54 @@ const updateStatus = async (status: string) => {
 };
 
 // Reflection modal
+type ReflectionStep = "loading" | "answering" | "synthesizing";
 const reflectionModalOpen = ref(false);
-const reflectionNote = ref("");
-const reflectionLoading = ref(false);
-let pendingStatus = "";
+const reflectionStep = ref<ReflectionStep>("loading");
+const reflectionQuestions = ref<Array<{ type: string; question: string }>>([]);
+const reflectionAnswers = ref<string[]>(["", "", ""]);
+const reflectionRating = ref<number | null>(null);
+const reflectionFreeText = ref("");
+
+const ratingOptions = [
+  { value: 5, label: "Loved it", emoji: "❤️" },
+  { value: 3, label: "Neutral", emoji: "😐" },
+  { value: 1, label: "Didn't like it", emoji: "👎" },
+];
+
+const hasAnyAnswer = computed(
+  () =>
+    reflectionAnswers.value.some((a) => a.trim().length > 0) ||
+    reflectionFreeText.value.trim().length > 0 ||
+    reflectionRating.value !== null,
+);
 
 const handleStatusChange = async (status: string) => {
   if (!item.value) return;
   if (status === "finished") {
-    // Apply the status immediately, then ask for a reflection
+    // Apply status immediately so the UI updates, then open modal
     await itemsService.updateItem(item.value.id, {
       status,
       finished_at: new Date().toISOString(),
     });
     item.value.status = status;
     item.value.finished_at = new Date().toISOString();
-    pendingStatus = status;
-    reflectionNote.value = "";
+
+    // Open modal in loading state and kick off question generation in parallel
+    reflectionStep.value = "loading";
+    reflectionQuestions.value = [];
+    reflectionAnswers.value = ["", "", ""];
+    reflectionRating.value = null;
+    reflectionFreeText.value = "";
     reflectionModalOpen.value = true;
+
+    try {
+      const result = await itemsService.getReflectionQuestions(item.value.id);
+      reflectionQuestions.value = result.questions;
+      reflectionStep.value = "answering";
+    } catch {
+      // If question generation fails, just close without blocking the user
+      reflectionModalOpen.value = false;
+    }
   } else {
     // If moving away from finished → want_to, clear the reflection note
     if (
@@ -502,27 +656,33 @@ const handleStatusChange = async (status: string) => {
   }
 };
 
-const saveReflection = async (withNote: boolean) => {
+const submitReflection = async () => {
   if (!item.value) return;
-  reflectionLoading.value = true;
+  reflectionStep.value = "synthesizing";
   try {
-    if (withNote && reflectionNote.value.trim()) {
-      await itemsService.updateItem(item.value.id, {
-        reflection_note: reflectionNote.value.trim(),
-      });
-      item.value.reflection_note = reflectionNote.value.trim();
-    }
+    const result = await itemsService.synthesizeReflection(item.value.id, {
+      questions: reflectionQuestions.value,
+      answers: reflectionAnswers.value,
+      user_rate: reflectionRating.value,
+      free_text: reflectionFreeText.value,
+    });
+    item.value.reflection_note = result.reflection_note;
+    if (result.rating != null) item.value.rating = result.rating;
   } finally {
-    reflectionLoading.value = false;
     reflectionModalOpen.value = false;
-    reflectionNote.value = "";
+    reflectionStep.value = "loading";
   }
+};
+
+const skipReflection = () => {
+  reflectionModalOpen.value = false;
+  reflectionStep.value = "loading";
 };
 
 const goToDiscussion = async () => {
   if (!item.value) return;
   const id = item.value.id;
-  await saveReflection(false);
+  reflectionModalOpen.value = false;
   await navigateTo(`/items/${id}/discussion`);
 };
 

@@ -105,46 +105,168 @@
       </div>
     </div>
 
-    <UModal v-model:open="reflectionOpen" title="How was it? ✨">
+    <UModal
+      v-model:open="reflectionOpen"
+      :title="
+        reflectionStep === 'answering'
+          ? `How was ${item.title}? ✨`
+          : reflectionStep === 'synthesizing'
+            ? 'Saving your reflection…'
+            : 'Generating questions…'
+      "
+      :dismissible="reflectionStep === 'answering'"
+      :ui="{
+        content:
+          'max-w-2xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
+      }"
+    >
       <template #body>
-        <div class="space-y-4">
+        <!-- Loading skeleton -->
+        <div v-if="reflectionStep === 'loading'" class="space-y-5 py-1 sm:py-2">
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
-            You finished
+            Preparing questions for
             <span class="font-medium text-neutral-800 dark:text-neutral-200">{{
               item.title
             }}</span
-            >.
+            >…
           </p>
-          <UFormField label="Your reflection">
+          <div class="space-y-3">
+            <div
+              v-for="n in 3"
+              :key="n"
+              class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3"
+            >
+              <USkeleton class="h-4 w-2/3 rounded" />
+              <USkeleton class="mt-2 h-14 w-full rounded-lg" />
+            </div>
+          </div>
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3"
+          >
+            <USkeleton class="h-4 w-20 rounded" />
+            <div class="mt-2 grid grid-cols-3 gap-2">
+              <USkeleton class="h-10 rounded-lg" />
+              <USkeleton class="h-10 rounded-lg" />
+              <USkeleton class="h-10 rounded-lg" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Answering -->
+        <div
+          v-else-if="reflectionStep === 'answering'"
+          class="space-y-5 py-1 sm:py-2"
+        >
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Answer as much or as little as you like — your answers will be
+            shaped into a personal note.
+          </p>
+
+          <div
+            v-for="(q, i) in reflectionQuestions"
+            :key="i"
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3"
+          >
+            <label
+              class="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              {{ q.question }}
+            </label>
             <UTextarea
-              v-model="reflectionNote"
-              placeholder="What did you think? Would you recommend it?"
-              :rows="4"
-              class="w-full"
-              autofocus
+              v-model="reflectionAnswers[i]"
+              placeholder="Your thoughts…"
+              :rows="3"
+              class="mt-2 w-full"
             />
-          </UFormField>
+          </div>
+
+          <!-- Rating -->
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-2"
+          >
+            <p
+              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              Overall
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                v-for="opt in ratingOptions"
+                :key="opt.value"
+                class="rounded-lg border py-2.5 text-sm font-medium transition-colors"
+                :class="
+                  reflectionRating === opt.value
+                    ? 'border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
+                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600'
+                "
+                @click="
+                  reflectionRating =
+                    reflectionRating === opt.value ? null : opt.value
+                "
+              >
+                {{ opt.emoji }} {{ opt.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Free text -->
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-1.5"
+          >
+            <label class="text-sm text-neutral-500 dark:text-neutral-400"
+              >Anything else?
+              <span class="text-neutral-300 dark:text-neutral-600"
+                >(optional)</span
+              ></label
+            >
+            <UTextarea
+              v-model="reflectionFreeText"
+              placeholder="Anything the questions didn't capture…"
+              :rows="3"
+              class="w-full"
+            />
+          </div>
+
           <button
-            class="inline-flex items-center gap-1.5 text-sm text-primary-500 hover:text-primary-600 transition-colors"
+            class="inline-flex items-center gap-1.5 text-xs text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
             @click="goToDiscussion"
           >
-            <UIcon name="i-lucide-message-circle" class="w-4 h-4" />
-            Discuss with AI
+            <UIcon name="i-lucide-message-circle" class="w-3.5 h-3.5" />
+            Discuss {{ item.title }} with AI
           </button>
         </div>
+
+        <!-- Synthesizing -->
+        <div
+          v-else-if="reflectionStep === 'synthesizing'"
+          class="py-8 flex flex-col items-center gap-3 text-center"
+        >
+          <UIcon
+            name="i-lucide-sparkles"
+            class="w-7 h-7 text-primary-500 animate-pulse"
+          />
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Writing your reflection…
+          </p>
+        </div>
       </template>
+
       <template #footer>
-        <div class="flex justify-end gap-2">
+        <div
+          class="flex justify-end gap-2 border-t border-neutral-200/70 dark:border-neutral-800/70 pt-3"
+        >
           <UButton
+            v-if="reflectionStep === 'answering'"
             variant="ghost"
             color="neutral"
             label="Skip"
-            @click="saveReflection(false)"
+            @click="skipReflection"
           />
           <UButton
+            v-if="reflectionStep === 'answering'"
             label="Save reflection"
-            :loading="reflectionLoading"
-            @click="saveReflection(true)"
+            :disabled="!hasAnyAnswer"
+            @click="submitReflection"
           />
         </div>
       </template>
@@ -171,18 +293,52 @@ const itemsService = createItemsService(api);
 const router = useRouter();
 
 const reflectionOpen = ref(false);
-const reflectionNote = ref("");
-const reflectionLoading = ref(false);
+type ReflectionStep = "loading" | "answering" | "synthesizing";
+const reflectionStep = ref<ReflectionStep>("loading");
+const reflectionQuestions = ref<Array<{ type: string; question: string }>>([]);
+const reflectionAnswers = ref<string[]>(["", "", ""]);
+const reflectionRating = ref<number | null>(null);
+const reflectionFreeText = ref("");
+
+const ratingOptions = [
+  { value: 5, label: "Loved it", emoji: "❤️" },
+  { value: 3, label: "Neutral", emoji: "😐" },
+  { value: 1, label: "Didn't like it", emoji: "👎" },
+];
+
+const hasAnyAnswer = computed(
+  () =>
+    reflectionAnswers.value.some((a) => a.trim().length > 0) ||
+    reflectionFreeText.value.trim().length > 0 ||
+    reflectionRating.value !== null,
+);
 
 const onSelectChange = async (status: string) => {
   if (status === "finished") {
+    const now = new Date().toISOString();
     await itemsService.updateItem(props.item.id, {
       status,
-      finished_at: new Date().toISOString(),
+      finished_at: now,
     });
+    // Update local item
+    props.item.status = status;
+    props.item.finished_at = now;
     emit("status-change", props.item.id, status);
-    reflectionNote.value = "";
+
+    reflectionStep.value = "loading";
+    reflectionQuestions.value = [];
+    reflectionAnswers.value = ["", "", ""];
+    reflectionRating.value = null;
+    reflectionFreeText.value = "";
     reflectionOpen.value = true;
+
+    try {
+      const result = await itemsService.getReflectionQuestions(props.item.id);
+      reflectionQuestions.value = result.questions;
+      reflectionStep.value = "answering";
+    } catch {
+      reflectionOpen.value = false;
+    }
   } else {
     if (
       props.item.status === "finished" &&
@@ -192,27 +348,34 @@ const onSelectChange = async (status: string) => {
       await itemsService.updateItem(props.item.id, { reflection_note: null });
     }
     await itemsService.updateItem(props.item.id, { status });
+    // Update local item
+    props.item.status = status;
     emit("status-change", props.item.id, status);
   }
 };
 
-const saveReflection = async (withNote: boolean) => {
-  reflectionLoading.value = true;
+const submitReflection = async () => {
+  reflectionStep.value = "synthesizing";
   try {
-    if (withNote && reflectionNote.value.trim()) {
-      await itemsService.updateItem(props.item.id, {
-        reflection_note: reflectionNote.value.trim(),
-      });
-    }
+    await itemsService.synthesizeReflection(props.item.id, {
+      questions: reflectionQuestions.value,
+      answers: reflectionAnswers.value,
+      user_rate: reflectionRating.value,
+      free_text: reflectionFreeText.value,
+    });
   } finally {
-    reflectionLoading.value = false;
     reflectionOpen.value = false;
-    reflectionNote.value = "";
+    reflectionStep.value = "loading";
   }
 };
 
+const skipReflection = () => {
+  reflectionOpen.value = false;
+  reflectionStep.value = "loading";
+};
+
 const goToDiscussion = async () => {
-  await saveReflection(false);
+  reflectionOpen.value = false;
   router.push(`/items/${props.item.id}/discussion`);
 };
 

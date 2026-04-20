@@ -1,30 +1,17 @@
 import type { createApiService } from "./api";
 
+export type TasteProfileCategoryData = {
+  patterns: string;
+  reflection_themes?: string;
+} | null;
+
 export type TasteProfileData = {
   summary: string;
-  movies: {
-    favourite_genres: string[];
-    favourite_directors: string[];
-    favourite_eras: string[];
-    patterns: string;
-    reflection_themes?: string;
-  } | null;
-  music: {
-    favourite_genres: string[];
-    favourite_artists: string[];
-    patterns: string;
-    reflection_themes?: string;
-  } | null;
-  books: {
-    favourite_genres: string[];
-    favourite_authors: string[];
-    patterns: string;
-    reflection_themes?: string;
-  } | null;
-  shows: {
-    favourite_genres: string[];
-    patterns: string;
-    reflection_themes?: string;
+  categories: {
+    movies?: TasteProfileCategoryData;
+    music?: TasteProfileCategoryData;
+    books?: TasteProfileCategoryData;
+    shows?: TasteProfileCategoryData;
   } | null;
   aspiration_vs_reality?: string;
   personality_traits?: string[];
