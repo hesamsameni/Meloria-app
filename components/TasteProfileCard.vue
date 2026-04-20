@@ -28,8 +28,22 @@
             No taste profile yet
           </p>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
-            Runs automatically every week at 2 AM on Fridays, or you can
+            Runs automatically every week on Tuesdays and Fridays, or you can
             generate it now.
+          </p>
+        </div>
+        <div class="space-y-1">
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Reflect on your finished items to help the AI understand your taste
+            better.
+
+            <NuxtLink
+              to="/reflect"
+              class="ml-1 inline-flex items-center gap-1 text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors"
+            >
+              Go reflect
+              <UIcon name="i-lucide-arrow-right" class="w-3 h-3" />
+            </NuxtLink>
           </p>
         </div>
         <UButton
