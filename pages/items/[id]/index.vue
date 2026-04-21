@@ -264,7 +264,7 @@
               rel="noopener noreferrer"
               class="text-neutral-500 dark:text-neutral-300 underline underline-offset-2 hover:text-neutral-900 dark:hover:text-white transition-colors"
               >The Movie Database (TMDB)</a
-            >. TMDB is not endorsed or certified by Meloria.
+            >. Meloria is not endorsed or certified by TMDB.
           </p>
         </UCard>
 
@@ -354,7 +354,7 @@
       :dismissible="reflectionStep === 'answering'"
       :ui="{
         content:
-          'max-w-2xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
+          'max-w-4xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
       }"
     >
       <template #body>

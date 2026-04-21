@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <UCard class="text-center py-16">
       <UIcon
         name="i-lucide-sparkles"
