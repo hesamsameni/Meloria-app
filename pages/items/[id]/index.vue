@@ -583,6 +583,7 @@
 
 <script setup lang="ts">
 import { createItemsService, type Item } from "~/services/items.service";
+import { useItemsStore } from "~/stores/items";
 
 const route = useRoute();
 const router = useRouter();
@@ -793,6 +794,7 @@ const saveIncludeInTaste = async (value: boolean) => {
 const deleteItem = async () => {
   if (!item.value) return;
   await itemsService.remove(item.value.id);
+  useItemsStore().fetchTotals({ force: true });
   router.push("/library");
 };
 

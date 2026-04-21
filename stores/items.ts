@@ -22,7 +22,44 @@ export const useItemsStore = defineStore("items", () => {
   const hasMore = ref(true);
   const offset = ref(0);
   const error = ref<string | null>(null);
-  const totals = ref<ItemTotals>({
+  const TOTALS_CACHE_KEY = "meloria:item-totals";
+
+  const loadCachedTotals = (): ItemTotals | null => {
+    if (typeof localStorage === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(TOTALS_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const saveCachedTotals = (data: ItemTotals) => {
+    if (typeof localStorage === "undefined") return;
+    try {
+      localStorage.setItem(TOTALS_CACHE_KEY, JSON.stringify(data));
+    } catch {}
+  };
+
+  const cached = loadCachedTotals();
+  const totals = ref<ItemTotals>(
+    cached ?? {
+      total: 0,
+      movies: 0,
+      music: 0,
+      show: 0,
+      book: 0,
+      want_to: 0,
+      in_progress: 0,
+      finished: 0,
+      not_for_me: 0,
+    },
+  );
+  const totalsLoading = ref(false);
+  const totalsLoaded = ref(!!cached);
+
+  // Category-scoped totals (for library page status filters)
+  const categoryTotals = ref<ItemTotals>({
     total: 0,
     movies: 0,
     music: 0,
@@ -33,17 +70,40 @@ export const useItemsStore = defineStore("items", () => {
     finished: 0,
     not_for_me: 0,
   });
-  const totalsLoading = ref(false);
+  const categoryTotalsLoading = ref(false);
 
-  const fetchTotals = async (params: { category?: string } = {}) => {
+  // Fetches global totals; skips if cached unless force: true
+  const fetchTotals = async (params: { force?: boolean } = {}) => {
+    if (!params.force && totalsLoaded.value) return;
     totalsLoading.value = true;
     try {
-      totals.value = await itemsService.getTotals(params);
+      const data = await itemsService.getTotals({});
+      totals.value = data;
+      totalsLoaded.value = true;
+      saveCachedTotals(data);
     } catch (e: any) {
       error.value = e?.message || "Failed to load totals";
     } finally {
       totalsLoading.value = false;
     }
+  };
+
+  // Fetches totals scoped to a category; always fetches, never touches global totals
+  const fetchCategoryTotals = async (category: string) => {
+    categoryTotalsLoading.value = true;
+    try {
+      categoryTotals.value = await itemsService.getTotals({ category });
+    } catch (e: any) {
+      error.value = e?.message || "Failed to load category totals";
+    } finally {
+      categoryTotalsLoading.value = false;
+    }
+  };
+
+  const deleteItem = async (id: string) => {
+    await itemsService.remove(id);
+    items.value = items.value.filter((i) => i.id !== id);
+    await fetchTotals({ force: true });
   };
 
   const fetch = async (params: Record<string, any> = {}) => {
@@ -118,10 +178,15 @@ export const useItemsStore = defineStore("items", () => {
     error,
     totals,
     totalsLoading,
+    totalsLoaded,
+    categoryTotals,
+    categoryTotalsLoading,
     fetch,
     loadMore,
     fetchTotals,
+    fetchCategoryTotals,
     updateStatus,
     updateLocalStatus,
+    deleteItem,
   };
 });
