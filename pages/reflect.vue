@@ -1,29 +1,5 @@
 <template>
   <div class="max-w-lg mx-auto px-4 sm:px-6 py-6 sm:py-10">
-    <!-- Intro -->
-    <div
-      v-if="!loading"
-      class="mb-8 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-neutral-50 dark:bg-neutral-900/50 px-5 py-4 flex gap-4 items-start"
-    >
-      <div
-        class="shrink-0 w-8 h-8 rounded-lg bg-primary-500/10 dark:bg-primary-500/15 flex items-center justify-center mt-0.5"
-      >
-        <UIcon name="i-lucide-lightbulb" class="w-4 h-4 text-primary-500" />
-      </div>
-      <div>
-        <p class="text-sm font-medium text-neutral-900 dark:text-white mb-0.5">
-          Reflections make your taste profile richer
-        </p>
-        <p
-          class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed"
-        >
-          A quick note on what you thought of a finished item helps Meloria
-          understand your taste more deeply — so recommendations, suggestions,
-          and your AI taste profile actually reflect <em>you</em>.
-        </p>
-      </div>
-    </div>
-
     <!-- Loading -->
     <div
       v-if="loading"
@@ -245,23 +221,30 @@
           Reflect
         </button>
       </div>
+    </div>
 
-      <!-- Keyboard hint -->
-      <p
-        class="text-center text-xs text-neutral-400 dark:text-neutral-600 mt-4"
+    <!-- Description of Reflects -->
+    <div
+      v-if="!loading"
+      class="mb-8 mt-8 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-neutral-50 dark:bg-neutral-900/50 px-5 py-4 flex gap-4 items-start"
+    >
+      <div
+        class="shrink-0 w-8 h-8 rounded-lg bg-primary-500/10 dark:bg-primary-500/15 flex items-center justify-center mt-0.5"
       >
-        Press
-        <kbd
-          class="px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700 text-[10px] font-mono"
-          >←</kbd
+        <UIcon name="i-lucide-lightbulb" class="w-4 h-4 text-primary-500" />
+      </div>
+      <div>
+        <p class="text-sm font-medium text-neutral-900 dark:text-white mb-0.5">
+          Reflections make your taste profile richer
+        </p>
+        <p
+          class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed"
         >
-        to skip,
-        <kbd
-          class="px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700 text-[10px] font-mono"
-          >→</kbd
-        >
-        to reflect
-      </p>
+          A quick note on what you thought of a finished item helps Meloria
+          understand your taste more deeply — so recommendations, suggestions,
+          and your AI taste profile actually reflect <em>you</em>.
+        </p>
+      </div>
     </div>
 
     <!-- Reflection Modal -->
