@@ -1,8 +1,10 @@
 import { createItemsService, type Item } from "~/services/items.service";
+import { useItemsStore } from "~/stores/items";
 
 export const useCapture = () => {
   const api = useApiService();
   const itemsService = createItemsService(api);
+  const itemsStore = useItemsStore();
 
   const loading = ref(false);
   const lastCaptured = ref<Item | null>(null);
@@ -30,6 +32,7 @@ export const useCapture = () => {
     try {
       const item = await itemsService.capture({ content, source });
       lastCaptured.value = item;
+      itemsStore.fetchTotals({ force: true });
       return item;
     } catch (e: any) {
       const baseMessage = e?.data?.error || e?.message || "Failed to capture";

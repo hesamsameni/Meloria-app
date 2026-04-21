@@ -106,6 +106,12 @@
                     class="w-3.5 h-3.5 shrink-0"
                   />
                   {{ categoryItem.label }}
+                  <span
+                    v-if="getCategoryCount(categoryItem.to) !== null"
+                    class="ml-auto text-[10px] tabular-nums text-neutral-400 dark:text-neutral-600"
+                  >
+                    {{ getCategoryCount(categoryItem.to) }}
+                  </span>
                 </NuxtLink>
               </template>
             </div>
@@ -169,6 +175,7 @@
 <script setup lang="ts">
 import { LIBRARY_CATEGORY_NAV_ITEMS } from "~/constants/items";
 import { NAV_ITEMS } from "~/constants/navigation";
+import { useItemsStore } from "~/stores/items";
 
 withDefaults(
   defineProps<{
@@ -187,9 +194,28 @@ const emit = defineEmits<{
 const { user, signOut } = useAuth();
 const { profile, displayLabel } = useProfile();
 const route = useRoute();
+const itemsStore = useItemsStore();
 
 const { hasPending, refresh: refreshReflect } = useReflectPending();
-onMounted(refreshReflect);
+onMounted(() => {
+  refreshReflect();
+  itemsStore.fetchTotals();
+});
+
+const CATEGORY_TOTALS_MAP: Record<string, keyof typeof itemsStore.totals> = {
+  movie: "movies",
+  music: "music",
+  show: "show",
+  book: "book",
+};
+
+const getCategoryCount = (to: string): number | null => {
+  const cat = to.split("/").pop() ?? "";
+  const key = CATEGORY_TOTALS_MAP[cat];
+  if (!key) return null;
+  const count = (itemsStore.totals as Record<string, number>)[key];
+  return typeof count === "number" ? count : null;
+};
 
 const navItems = computed(() =>
   NAV_ITEMS.filter(

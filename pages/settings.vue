@@ -1,7 +1,6 @@
 <template>
   <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <SettingsAccountSection />
-    <SettingsPlanSection />
     <SettingsAiModelSection />
     <SettingsIntegrationsSection />
     <SettingsApiTokensSection />

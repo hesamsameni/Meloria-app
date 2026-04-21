@@ -82,8 +82,11 @@ const categoryParam = computed(() => {
 const handleCaptured = async () => {
   await Promise.all([
     items.fetch(filterParams.value),
-    items.fetchTotals({ category: selectedCategory.value?.value }),
+    ...(selectedCategory.value
+      ? [items.fetchCategoryTotals(selectedCategory.value.value)]
+      : []),
   ]);
+  items.fetchTotals({ force: true });
 };
 
 const selectedCategory = computed(() =>
@@ -111,8 +114,8 @@ const filtered = computed(() =>
 
 const statusCount = (value: string | undefined | null) => {
   if (!value) return null;
-  const t = items.totals.value || {};
-  if (value === "all") return t.total ?? 0;
+  const t = items.categoryTotals.value || {};
+  if (value === "all") return (t as any).total ?? 0;
   // @ts-ignore
   return t[value] ?? 0;
 };
@@ -140,12 +143,12 @@ watch(
   { immediate: true },
 );
 
-// Fetch totals scoped to the selected category so status buttons show counts
+// Fetch category-scoped totals so status buttons show category-specific counts
 watch(
   selectedCategory,
   () => {
     if (!selectedCategory.value) return;
-    items.fetchTotals({ category: selectedCategory.value.value });
+    items.fetchCategoryTotals(selectedCategory.value.value);
   },
   { immediate: true },
 );
@@ -162,9 +165,7 @@ watch(search, () => {
 const handleStatusChange = (id: string, status: string) => {
   items.updateLocalStatus(id, status);
   if (selectedCategory.value) {
-    items.fetchTotals({ category: selectedCategory.value.value });
-  } else {
-    items.fetchTotals();
+    items.fetchCategoryTotals(selectedCategory.value.value);
   }
 };
 </script>
