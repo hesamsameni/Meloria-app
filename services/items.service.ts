@@ -78,6 +78,16 @@ export type Item = {
   reflection_note: string | null;
 };
 
+export type TonightRecommendation = {
+  title: string;
+  category: string;
+  reason: string;
+  is_from_library: boolean;
+  mood_match: string;
+  saved_at?: string;
+  item?: Item;
+};
+
 export type CapturePayload = {
   content: string;
   input_type?: string;
@@ -233,6 +243,18 @@ export const createItemsService = (
     });
   };
 
+  const getWhatTonight = async (
+    params: { mood?: string; excludeTitle?: string } = {},
+  ): Promise<TonightRecommendation> => {
+    return api.call<TonightRecommendation>("/items/tonight", {
+      method: "POST",
+      body: {
+        mood: params.mood || null,
+        exclude_title: params.excludeTitle || null,
+      },
+    });
+  };
+
   return {
     capture,
     search,
@@ -247,5 +269,6 @@ export const createItemsService = (
     getReflectPending,
     getReflectionQuestions,
     synthesizeReflection,
+    getWhatTonight,
   };
 };
