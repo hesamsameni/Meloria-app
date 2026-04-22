@@ -62,10 +62,12 @@ export const SUBSCRIPTION_PLANS = [
   { tier: "free", name: "Free", description: "30 per month" },
   { tier: "pro", name: "Pro", description: "120 per month" },
   { tier: "ultimate", name: "Ultimate", description: "Unlimited usage" },
+  { tier: "test", name: "Test Plan", description: "Test plan for development" },
 ] as const;
 
 export const TIER_RANK: Record<string, number> = {
   free: 0,
   pro: 1,
   ultimate: 2,
+  test: 3,
 };

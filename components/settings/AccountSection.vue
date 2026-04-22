@@ -123,6 +123,16 @@
             >
               Upgrade to Ultimate
             </UButton>
+            <UButton
+              v-if="user?.id === '628f565c-3a64-4959-b3e2-7e71304e162d'"
+              size="sm"
+              color="primary"
+              variant="outline"
+              :loading="billingLoading === 'test'"
+              @click="upgradeTo('test')"
+            >
+              Upgrade to Test Plan
+            </UButton>
           </template>
 
           <!-- Pro → upgrade or cancel -->
@@ -148,6 +158,19 @@
 
           <!-- Ultimate → cancel only -->
           <template v-else-if="currentPlan === 'ultimate'">
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              :loading="billingLoading === 'cancel'"
+              @click="cancelPlan"
+            >
+              Cancel subscription
+            </UButton>
+          </template>
+
+          <!-- Test → cancel only -->
+          <template v-else-if="currentPlan === 'test'">
             <UButton
               size="sm"
               color="neutral"
@@ -213,6 +236,8 @@ const planBadgeClass = computed(() => {
     return "bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-400";
   if (currentPlan.value === "pro")
     return "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400";
+  if (currentPlan.value === "test")
+    return "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400";
   return "bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400";
 });
 
