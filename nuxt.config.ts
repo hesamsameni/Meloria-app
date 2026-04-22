@@ -11,6 +11,9 @@ export default defineNuxtConfig({
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
       apiUrl: process.env.NUXT_PUBLIC_API_URL || "http://localhost:3000",
+      proPriceLabel: process.env.NUXT_PUBLIC_PRO_PRICE_LABEL || "4.99 Euros",
+      ultimatePriceLabel:
+        process.env.NUXT_PUBLIC_ULTIMATE_PRICE_LABEL || "9.99 Euros",
     },
   },
   app: {

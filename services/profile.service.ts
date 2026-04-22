@@ -7,6 +7,7 @@ export type UserProfile = {
   username: string | null;
   avatar_url: string | null;
   subscription: SubscriptionTier;
+  subscription_status: string | null;
   preferred_model: string;
   display_name: string | null;
   current_period_end: string | null;
