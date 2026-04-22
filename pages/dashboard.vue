@@ -5,6 +5,9 @@
       <CaptureBar @captured="handleCaptured" />
     </div>
 
+    <!-- what tonight button -->
+    <WhatTonightButton />
+
     <!-- recent -->
     <div>
       <div class="flex items-center justify-between mb-4">
