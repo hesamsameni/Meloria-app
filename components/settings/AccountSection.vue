@@ -88,7 +88,7 @@
                 class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
                 :class="planBadgeClass"
               >
-                Active
+                {{ planStatusLabel }}
               </span>
             </p>
             <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
@@ -98,7 +98,8 @@
               v-if="nextBillingDate"
               class="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5"
             >
-              Renews on {{ nextBillingDate }}
+              {{ isCanceling ? "Expires on" : "Renews on" }}
+              {{ nextBillingDate }}
             </p>
           </div>
         </div>
@@ -113,6 +114,9 @@
               @click="upgradeTo('pro')"
             >
               Upgrade to Pro
+              <span v-if="proPriceLabel" class="ml-1 opacity-75 font-normal"
+                >· {{ proPriceLabel }}</span
+              >
             </UButton>
             <UButton
               size="sm"
@@ -122,6 +126,11 @@
               @click="upgradeTo('ultimate')"
             >
               Upgrade to Ultimate
+              <span
+                v-if="ultimatePriceLabel"
+                class="ml-1 opacity-75 font-normal"
+                >· {{ ultimatePriceLabel }}</span
+              >
             </UButton>
             <UButton
               v-if="user?.id === '628f565c-3a64-4959-b3e2-7e71304e162d'"
@@ -135,46 +144,22 @@
             </UButton>
           </template>
 
-          <!-- Pro → upgrade or cancel -->
-          <template v-else-if="currentPlan === 'pro'">
+          <!-- Paid users → manage billing options -->
+          <template v-else>
             <UButton
               size="sm"
-              color="primary"
-              :loading="billingLoading === 'ultimate'"
-              @click="upgradeTo('ultimate')"
+              color="neutral"
+              variant="outline"
+              :loading="billingLoading === 'portal'"
+              @click="openBillingPortal"
             >
-              Upgrade to Ultimate
+              Manage billing
             </UButton>
             <UButton
+              v-if="!isCanceling"
               size="sm"
               color="error"
               variant="outline"
-              :loading="billingLoading === 'cancel'"
-              @click="cancelPlan"
-            >
-              Cancel subscription
-            </UButton>
-          </template>
-
-          <!-- Ultimate → cancel only -->
-          <template v-else-if="currentPlan === 'ultimate'">
-            <UButton
-              size="sm"
-              color="neutral"
-              variant="ghost"
-              :loading="billingLoading === 'cancel'"
-              @click="cancelPlan"
-            >
-              Cancel subscription
-            </UButton>
-          </template>
-
-          <!-- Test → cancel only -->
-          <template v-else-if="currentPlan === 'test'">
-            <UButton
-              size="sm"
-              color="neutral"
-              variant="ghost"
               :loading="billingLoading === 'cancel'"
               @click="cancelPlan"
             >
@@ -200,6 +185,9 @@ const { profile, loading, error, displayLabel, updateProfile, uploadAvatar } =
   useProfile();
 const api = useApiService();
 const billingService = createBillingService(api);
+const config = useRuntimeConfig();
+const proPriceLabel = config.public.proPriceLabel;
+const ultimatePriceLabel = config.public.ultimatePriceLabel;
 
 const avatarInput = ref<HTMLInputElement | null>(null);
 const displayName = ref(profile.value?.display_name || "");
@@ -207,6 +195,10 @@ const billingLoading = ref<string | null>(null);
 const billingError = ref<string | null>(null);
 
 const currentPlan = computed(() => profile.value?.subscription || "free");
+const subscriptionStatus = computed(
+  () => profile.value?.subscription_status || null,
+);
+const isCanceling = computed(() => subscriptionStatus.value === "canceling");
 
 const planLabel = computed(() => {
   const plan = SUBSCRIPTION_PLANS.find((p) => p.tier === currentPlan.value);
@@ -231,7 +223,18 @@ const nextBillingDate = computed(() => {
   });
 });
 
+const planStatusLabel = computed(() => {
+  if (currentPlan.value === "free") return "Free";
+  if (subscriptionStatus.value === "canceling") return "Canceling";
+  if (subscriptionStatus.value === "past_due") return "Past Due";
+  return "Active";
+});
+
 const planBadgeClass = computed(() => {
+  if (subscriptionStatus.value === "canceling")
+    return "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400";
+  if (subscriptionStatus.value === "past_due")
+    return "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400";
   if (currentPlan.value === "ultimate")
     return "bg-primary-100 text-primary-700 dark:bg-primary-500/20 dark:text-primary-400";
   if (currentPlan.value === "pro")
@@ -281,6 +284,20 @@ const upgradeTo = async (tier: string) => {
 
 const cancelPlan = async () => {
   billingLoading.value = "cancel";
+  billingError.value = null;
+  try {
+    const { url } = await billingService.portal();
+    window.location.href = url;
+  } catch (e: any) {
+    billingError.value =
+      e?.data?.error || e?.message || "Something went wrong.";
+  } finally {
+    billingLoading.value = null;
+  }
+};
+
+const openBillingPortal = async () => {
+  billingLoading.value = "portal";
   billingError.value = null;
   try {
     const { url } = await billingService.portal();
