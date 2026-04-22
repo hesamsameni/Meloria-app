@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (loading.value) await init();
 
-  const publicRoutes = ["/login"];
+  const publicRoutes = ["/login", "/welcome"];
   const isPublic = publicRoutes.includes(to.path);
 
   if (!user.value && !isPublic) return navigateTo("/login");
