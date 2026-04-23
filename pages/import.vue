@@ -70,28 +70,39 @@
         v-if="processing"
         class="rounded-2xl border border-primary-200/60 dark:border-primary-700/40 bg-primary-50/50 dark:bg-primary-950/30 px-5 py-4 mb-4 flex items-start justify-between gap-4"
       >
-        <div class="flex items-start gap-3">
-          <UIcon
-            name="i-lucide-loader-circle"
-            class="animate-spin text-primary-500 size-5 mt-0.5 shrink-0"
-          />
-          <div>
-            <p class="font-medium text-neutral-900 dark:text-white text-sm">
-              Processing {{ queuedCount }} items in the background…
-            </p>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-              This may take a few minutes. Results will appear below.
-            </p>
+        <div class="min-w-0 flex-1">
+          <p class="font-medium text-neutral-900 dark:text-white text-sm mb-2">
+            Processing {{ queuedCount }} items in the background…
+          </p>
+          <div class="processing-lines">
+            <div
+              v-for="line in processingLines"
+              :key="line.index"
+              class="processing-line"
+              :class="{ muted: line.state === 'queued' }"
+            >
+              <span class="line-label">{{ line.label }}</span>
+              <span v-if="line.state === 'done'" class="line-check">✓</span>
+              <span v-else-if="line.state === 'active'" class="line-spinner"
+                >⟳</span
+              >
+            </div>
           </div>
         </div>
         <UButton
           variant="ghost"
           size="xs"
-          :loading="pollingLoading"
           @click="pollStatus"
-          class="shrink-0"
+          class="shrink-0 refresh-btn"
         >
-          Refresh
+          <span class="refresh-btn-label">
+            <span
+              class="refresh-btn-spinner"
+              :class="{ active: pollingLoading }"
+              >⟳</span
+            >
+            <span>Refresh</span>
+          </span>
         </UButton>
       </div>
     </Transition>
@@ -182,17 +193,37 @@ const submitting = ref(false);
 const processing = ref(false);
 const pollingLoading = ref(false);
 const queuedCount = ref(0);
+const queuedItems = ref<string[]>([]);
+const processedCount = ref(0);
 const recentImports = ref<BulkImportRecord[]>([]);
 const error = ref<string | null>(null);
 
-const lineCount = computed(() => {
-  const separator = text.value.includes("\n") ? /\n/ : /,/;
-  return text.value
+const parseImportInput = (value: string): string[] => {
+  const separator = value.includes("\n") ? /\n/ : /,/;
+  return value
     .split(separator)
     .map((l) => l.trim())
     .filter((l) => l.length > 1)
     .filter((l) => !l.match(/^[-#*=]+$/))
-    .slice(0, 200).length;
+    .slice(0, 200);
+};
+
+const lineCount = computed(() => {
+  return parseImportInput(text.value).length;
+});
+
+const processingLines = computed(() => {
+  const lines = queuedItems.value;
+  const doneCount = Math.min(processedCount.value, lines.length);
+  return lines.map((label, index) => {
+    if (index < doneCount) {
+      return { index, label, state: "done" as const };
+    }
+    if (index === doneCount && doneCount < lines.length) {
+      return { index, label, state: "active" as const };
+    }
+    return { index, label, state: "queued" as const };
+  });
 });
 
 let pollInterval: ReturnType<typeof setInterval> | null = null;
@@ -222,6 +253,9 @@ const handleSubmit = async () => {
   submitting.value = true;
   error.value = null;
   try {
+    const parsedItems = parseImportInput(text.value);
+    queuedItems.value = parsedItems;
+    processedCount.value = 0;
     const result = await itemsService.bulkImport(text.value);
     queuedCount.value = result.queued;
     processing.value = true;
@@ -244,9 +278,14 @@ const pollStatus = async () => {
     const all = await itemsService.getBulkImportStatus();
     // Only show completed records in recent imports
     recentImports.value = all.filter((r) => r.completed_at);
+    const activeRecord = all.find((r) => !r.completed_at);
+    if (activeRecord) {
+      processedCount.value = activeRecord.success + activeRecord.failed;
+    }
     // Stop processing banner if the latest record (including pending) is done
     if (all.length > 0 && all[0].completed_at) {
       processing.value = false;
+      processedCount.value = queuedItems.value.length;
     }
   } catch {
     // silently ignore poll errors
@@ -309,5 +348,78 @@ onMounted(pollStatus);
 .import-cta:hover:not(:disabled) {
   box-shadow: 0 8px 22px -6px
     color-mix(in srgb, var(--color-primary-500) 80%, transparent);
+}
+
+.processing-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.processing-line {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 12px;
+  color: rgb(82 82 91);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.dark .processing-line {
+  color: rgb(161 161 170);
+}
+
+.line-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.processing-line.muted {
+  opacity: 0.45;
+}
+
+.line-check {
+  color: rgb(34 197 94);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.line-spinner {
+  color: var(--color-primary-500);
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.refresh-btn-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.refresh-btn-spinner {
+  width: 1em;
+  display: inline-block;
+  text-align: center;
+  opacity: 0;
+  color: var(--color-primary-500);
+}
+
+.refresh-btn-spinner.active {
+  opacity: 1;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

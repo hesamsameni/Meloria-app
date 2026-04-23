@@ -38,14 +38,18 @@ export const createTasteProfileService = (
   api: ReturnType<typeof createApiService>,
 ) => {
   const getTasteProfile = async (): Promise<TasteProfile> => {
-    return api.call<TasteProfile>("/taste-profile", { method: "GET" });
+    return api.call<TasteProfile>("/intelligence/taste-profile", {
+      method: "GET",
+    });
   };
 
   const generateTasteProfile = async (): Promise<{
     ok: boolean;
     profile: TasteProfileData;
   }> => {
-    return api.call("/taste-profile/generate", { method: "POST" });
+    return api.call("/intelligence/taste-profile/generate", {
+      method: "POST",
+    });
   };
 
   return { getTasteProfile, generateTasteProfile };

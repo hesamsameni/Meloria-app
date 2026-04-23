@@ -246,7 +246,7 @@ export const createItemsService = (
   const getWhatTonight = async (
     params: { mood?: string; excludeTitle?: string } = {},
   ): Promise<TonightRecommendation> => {
-    return api.call<TonightRecommendation>("/items/tonight", {
+    return api.call<TonightRecommendation>("/intelligence/tonight", {
       method: "POST",
       body: {
         mood: params.mood || null,

@@ -8,7 +8,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const publicRoutes = ["/login", "/welcome"];
   const isPublic = publicRoutes.includes(to.path);
+  const isLoginRoute = to.path === "/login";
 
   if (!user.value && !isPublic) return navigateTo("/login");
-  if (user.value && isPublic) return navigateTo("/dashboard");
+  if (user.value && isLoginRoute) return navigateTo("/dashboard");
 });
