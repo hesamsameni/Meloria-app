@@ -217,9 +217,13 @@ const getCategoryCount = (to: string): number | null => {
   return typeof count === "number" ? count : null;
 };
 
+const { isAdmin } = useProfile();
+
 const navItems = computed(() =>
   NAV_ITEMS.filter(
-    (item) => item.to !== "/reflect" || hasPending.value !== false,
+    (item) =>
+      (item.to !== "/reflect" || hasPending.value !== false) &&
+      (item.adminOnly !== true || isAdmin.value),
   ),
 );
 const libraryCategoryItems = LIBRARY_CATEGORY_NAV_ITEMS;

@@ -3,6 +3,7 @@ import { createApiService } from "~/services/api";
 import {
   createProfileService,
   type UserProfile,
+  type UserRole,
 } from "~/services/profile.service";
 import { useAuthStore } from "./auth";
 
@@ -70,6 +71,10 @@ export const useProfileStore = defineStore("profile", () => {
       "",
   );
 
+  const isAdmin = computed(() => profile.value?.role === "admin");
+
+  const hasRole = (role: UserRole) => profile.value?.role === role;
+
   // Auto-fetch profile whenever the logged-in user changes
   watch(
     () => authStore.user?.id,
@@ -85,6 +90,8 @@ export const useProfileStore = defineStore("profile", () => {
     loading,
     error,
     displayLabel,
+    isAdmin,
+    hasRole,
     fetchProfile,
     updateProfile,
     uploadAvatar,
