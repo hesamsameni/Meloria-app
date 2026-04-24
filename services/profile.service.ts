@@ -2,6 +2,8 @@ import type { createApiService } from "./api";
 
 export type SubscriptionTier = "free" | "pro" | "ultimate" | string;
 
+export type UserRole = "user" | "admin" | "staff" | "marketing" | "support";
+
 export type UserProfile = {
   id: string;
   username: string | null;
@@ -11,6 +13,7 @@ export type UserProfile = {
   preferred_model: string;
   display_name: string | null;
   current_period_end: string | null;
+  role: UserRole;
   created_at: string | null;
   updated_at: string | null;
 };
