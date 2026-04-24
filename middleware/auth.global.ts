@@ -15,8 +15,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Admin-only routes
   if (to.path.startsWith("/admin")) {
-    const { isAdmin, loading: profileLoading, fetchProfile } = useProfile();
-    if (profileLoading.value) await fetchProfile();
+    const { isAdmin, profile, fetchProfile } = useProfile();
+    if (!profile.value) await fetchProfile();
     if (!isAdmin.value) return navigateTo("/dashboard");
   }
 });

@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
     <!-- Stats cards -->
     <div class="grid gap-4 sm:grid-cols-3">
       <div
@@ -420,6 +420,8 @@
 
 <script setup lang="ts">
 import { useAdminStore } from "~/stores/admin";
+
+definePageMeta({ layout: "default" });
 
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Admin Dashboard" });
