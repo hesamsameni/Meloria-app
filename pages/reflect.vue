@@ -423,6 +423,7 @@ setPageHeader("Reflect", "Turn finished items into lasting memories");
 
 const api = useApiService();
 const itemsService = createItemsService(api);
+const posthog = usePostHog();
 
 // --- Data ---
 const allItems = ref<Item[]>([]);
@@ -523,6 +524,7 @@ async function animateOut(direction: "left" | "right") {
 // --- Skip ---
 async function skip() {
   if (!currentItem.value) return;
+  posthog?.capture("reflection_skipped", { category: currentItem.value.category });
   skipped.value.push(currentItem.value);
   await animateOut("left");
 }
@@ -585,6 +587,10 @@ async function submitReflection() {
       answers: reflectionAnswers.value,
       user_rate: reflectionRating.value,
       free_text: reflectionFreeText.value,
+    });
+    posthog?.capture("reflection_submitted", {
+      category: currentItem.value.category,
+      has_rating: reflectionRating.value !== null,
     });
     reflectionOpen.value = false;
     reflectionStep.value = "loading";

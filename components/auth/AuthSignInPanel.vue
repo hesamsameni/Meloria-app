@@ -74,6 +74,7 @@
 
 <script setup lang="ts">
 const { signInWithEmail, signInWithMagicLink, signInWithGoogle } = useAuth();
+const posthog = usePostHog();
 
 const method = ref<"google" | "magic" | "password">("google");
 const error = ref("");
@@ -97,6 +98,7 @@ const handleGoogle = async () => {
   loadingGoogle.value = true;
   error.value = "";
   try {
+    posthog?.capture("user_signed_in", { method: "google" });
     await signInWithGoogle();
   } catch (e: any) {
     error.value = e.message || "Google sign-in failed";
@@ -112,6 +114,7 @@ const handleMagicLink = async () => {
   try {
     await signInWithMagicLink(magicEmail.value);
     magicSent.value = true;
+    posthog?.capture("user_signed_in", { method: "magic_link" });
   } catch (e: any) {
     error.value = e.message || "Could not send magic link";
   } finally {
@@ -124,6 +127,8 @@ const handleEmailSignIn = async () => {
   loadingEmail.value = true;
   try {
     await signInWithEmail(email.value, password.value);
+    posthog?.identify(email.value);
+    posthog?.capture("user_signed_in", { method: "email" });
     await navigateTo("/dashboard");
   } catch (e: any) {
     error.value = e.message || "Invalid email or password";

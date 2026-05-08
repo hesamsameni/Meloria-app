@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
 
-  modules: ["@nuxt/ui", "@pinia/nuxt"],
+  modules: ["@nuxt/ui", "@pinia/nuxt", "@posthog/nuxt"],
 
   css: ["~/assets/css/main.css"], // add this line
 
@@ -14,6 +14,17 @@ export default defineNuxtConfig({
       proPriceLabel: process.env.NUXT_PUBLIC_PRO_PRICE_LABEL || "4.99 Euros",
       ultimatePriceLabel:
         process.env.NUXT_PUBLIC_ULTIMATE_PRICE_LABEL || "9.99 Euros",
+      posthog: {
+        publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
+        host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+      },
+    },
+  },
+  posthogConfig: {
+    publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
+    host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+    clientConfig: {
+      capture_exceptions: true,
     },
   },
   app: {

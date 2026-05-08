@@ -56,6 +56,7 @@ const items = useItems();
 const route = useRoute();
 const router = useRouter();
 const toast = useGlobalToast();
+const posthog = usePostHog();
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Dashboard" });
 
@@ -94,7 +95,12 @@ onMounted(() => {
   items.fetch();
   items.fetchTotals(); // uses localStorage cache, no-op if already loaded
 
+  if (user.value?.email) {
+    posthog?.identify(user.value.email);
+  }
+
   if (route.query.upgraded === "true") {
+    posthog?.capture("upgrade_completed");
     toast.success(
       "You're all upgraded!",
       "Your subscription is now active. Enjoy the new features.",

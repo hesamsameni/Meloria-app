@@ -60,6 +60,7 @@ import { SUBSCRIPTION_PLANS, TIER_RANK } from "~/constants/items";
 const { profile } = useProfile();
 const api = useApiService();
 const billingService = createBillingService(api);
+const posthog = usePostHog();
 
 const billingLoading = ref<string | null>(null);
 const billingError = ref<string | null>(null);
@@ -80,6 +81,11 @@ const selectPlan = async (tier: string) => {
   try {
     const isDowngrade =
       TIER_RANK[tier] < TIER_RANK[currentPlan.value] || tier === "free";
+    posthog?.capture("upgrade_plan_clicked", {
+      from_plan: currentPlan.value,
+      to_plan: tier,
+      action: isDowngrade ? "downgrade" : "upgrade",
+    });
     const { url } = isDowngrade
       ? await billingService.portal()
       : await billingService.checkout(tier);
