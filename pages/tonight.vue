@@ -264,6 +264,7 @@ const itemsService = createItemsService(api);
 const router = useRouter();
 const toast = useGlobalToast();
 const { capture } = useCapture();
+const posthog = usePostHog();
 
 const mood = ref("");
 const loading = ref(false);
@@ -273,6 +274,9 @@ const savedItem = ref<Item | null>(null);
 
 const getRecommendation = async () => {
   loading.value = true;
+  posthog?.capture("tonight_recommendation_requested", {
+    has_mood: !!mood.value,
+  });
   try {
     const result = await itemsService.getWhatTonight({
       mood: mood.value || undefined,
@@ -313,6 +317,10 @@ const saveToLibrary = async () => {
     const item = await capture(recommendation.value.title, "tonight");
     if (item) {
       savedItem.value = item;
+      posthog?.capture("tonight_item_saved_to_library", {
+        category: item.category,
+        title: item.title,
+      });
       toast.success(
         "Saved to library",
         `${item.title} has been added to your library`,

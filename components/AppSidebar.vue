@@ -193,6 +193,7 @@ const emit = defineEmits<{
 
 const { user, signOut } = useAuth();
 const { profile, displayLabel } = useProfile();
+const posthog = usePostHog();
 const route = useRoute();
 const itemsStore = useItemsStore();
 
@@ -247,6 +248,8 @@ const isActive = (to: string) => {
 
 const handleSignOut = async () => {
   localStorage.removeItem("meloria:reflect-pending");
+  posthog?.capture("user_signed_out");
+  posthog?.reset();
   await signOut();
   emit("navigate");
 };

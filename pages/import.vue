@@ -187,6 +187,7 @@ setPageHeader("Bulk Import", "Import multiple items at once");
 
 const api = useApiService();
 const itemsService = createItemsService(api);
+const posthog = usePostHog();
 
 const text = ref("");
 const submitting = ref(false);
@@ -259,6 +260,7 @@ const handleSubmit = async () => {
     const result = await itemsService.bulkImport(text.value);
     queuedCount.value = result.queued;
     processing.value = true;
+    posthog?.capture("bulk_import_submitted", { item_count: parsedItems.length });
     text.value = "";
     // Initial poll after short delay, then keep polling every 5s
     setTimeout(async () => {

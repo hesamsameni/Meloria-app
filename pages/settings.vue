@@ -6,6 +6,7 @@
       <SettingsAiModelSection />
     </div>
     <SettingsApiTokensSection />
+    <SettingsSuggestionsSection />
   </div>
 </template>
 

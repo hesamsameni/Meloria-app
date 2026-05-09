@@ -300,6 +300,32 @@
           v-else-if="reflectionStep === 'answering'"
           class="space-y-5 py-1 sm:py-2"
         >
+          <!-- Rating — top, quick to fill in -->
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-2"
+          >
+            <p
+              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              How was it?
+            </p>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                v-for="opt in ratingOptions"
+                :key="opt.value"
+                class="rounded-lg border py-2.5 text-sm font-medium transition-colors"
+                :class="
+                  reflectionRating === opt.value
+                    ? 'border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
+                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600'
+                "
+                @click="selectRating(opt.value)"
+              >
+                {{ opt.emoji }} {{ opt.label }}
+              </button>
+            </div>
+          </div>
+
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
             Answer as much or as little as you like — your answers will be
             shaped into a personal note.
@@ -321,35 +347,6 @@
               :rows="3"
               class="mt-2 w-full"
             />
-          </div>
-
-          <!-- Rating -->
-          <div
-            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-2"
-          >
-            <p
-              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              Overall
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                v-for="opt in ratingOptions"
-                :key="opt.value"
-                class="rounded-lg border py-2.5 text-sm font-medium transition-colors"
-                :class="
-                  reflectionRating === opt.value
-                    ? 'border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
-                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600'
-                "
-                @click="
-                  reflectionRating =
-                    reflectionRating === opt.value ? null : opt.value
-                "
-              >
-                {{ opt.emoji }} {{ opt.label }}
-              </button>
-            </div>
           </div>
 
           <!-- Free text -->
@@ -423,6 +420,7 @@ setPageHeader("Reflect", "Turn finished items into lasting memories");
 
 const api = useApiService();
 const itemsService = createItemsService(api);
+const posthog = usePostHog();
 
 // --- Data ---
 const allItems = ref<Item[]>([]);
@@ -523,6 +521,9 @@ async function animateOut(direction: "left" | "right") {
 // --- Skip ---
 async function skip() {
   if (!currentItem.value) return;
+  posthog?.capture("reflection_skipped", {
+    category: currentItem.value.category,
+  });
   skipped.value.push(currentItem.value);
   await animateOut("left");
 }
@@ -547,6 +548,15 @@ const ratingOptions = [
   { value: 3, label: "Neutral", emoji: "😐" },
   { value: 1, label: "Didn't like it", emoji: "👎" },
 ];
+
+function selectRating(value: number) {
+  const newVal = reflectionRating.value === value ? null : value;
+  reflectionRating.value = newVal;
+  if (currentItem.value)
+    itemsService
+      .updateItem(currentItem.value.id, { rating: newVal })
+      .catch(() => {});
+}
 
 const hasAnyAnswer = computed(
   () =>
@@ -585,6 +595,10 @@ async function submitReflection() {
       answers: reflectionAnswers.value,
       user_rate: reflectionRating.value,
       free_text: reflectionFreeText.value,
+    });
+    posthog?.capture("reflection_submitted", {
+      category: currentItem.value.category,
+      has_rating: reflectionRating.value !== null,
     });
     reflectionOpen.value = false;
     reflectionStep.value = "loading";

@@ -84,6 +84,7 @@
 
 <script setup lang="ts">
 const { signUpWithEmail, signInWithMagicLink, signInWithGoogle } = useAuth();
+const posthog = usePostHog();
 
 const method = ref<"google" | "magic" | "password">("google");
 const error = ref("");
@@ -109,6 +110,7 @@ const handleGoogle = async () => {
   loadingGoogle.value = true;
   error.value = "";
   try {
+    posthog?.capture("user_signed_up", { method: "google" });
     await signInWithGoogle();
   } catch (e: any) {
     error.value = e.message || "Google sign-up failed";
@@ -124,6 +126,7 @@ const handleMagicLink = async () => {
   try {
     await signInWithMagicLink(magicEmail.value);
     magicSent.value = true;
+    posthog?.capture("user_signed_up", { method: "magic_link" });
   } catch (e: any) {
     error.value = e.message || "Could not send magic link";
   } finally {
@@ -138,6 +141,8 @@ const handleEmailSignUp = async () => {
   try {
     await signUpWithEmail(email.value, password.value);
     signUpSuccess.value = true;
+    posthog?.identify(email.value);
+    posthog?.capture("user_signed_up", { method: "email" });
   } catch (e: any) {
     error.value = e.message || "Could not create account";
   } finally {

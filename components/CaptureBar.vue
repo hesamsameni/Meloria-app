@@ -105,6 +105,7 @@ import { useCapture } from "~/composables/useCapture";
 const emit = defineEmits<{ captured: [item: Item] }>();
 
 const { loading, lastCaptured, error, capture, reset } = useCapture();
+const posthog = usePostHog();
 
 const input = ref("");
 const source = "Meloria Dashboard";
@@ -129,6 +130,10 @@ const upgradeParts = computed(() => {
 const handleCapture = async () => {
   const item = await capture(input.value, source);
   if (item) {
+    posthog?.capture("item_captured", {
+      category: item.category,
+      source: source,
+    });
     input.value = "";
     emit("captured", item);
   }
