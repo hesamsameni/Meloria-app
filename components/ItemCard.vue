@@ -115,6 +115,11 @@
             : 'Generating questions…'
       "
       :dismissible="reflectionStep === 'answering'"
+      @update:open="
+        (val) => {
+          if (!val) applyPendingStatusChange();
+        }
+      "
       :ui="{
         content:
           'max-w-4xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
@@ -157,6 +162,32 @@
           v-else-if="reflectionStep === 'answering'"
           class="space-y-5 py-1 sm:py-2"
         >
+          <!-- Rating — top, quick to fill in -->
+          <div
+            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-2"
+          >
+            <p
+              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              How was it?
+            </p>
+            <div class="grid grid-cols-3 gap-2">
+              <button
+                v-for="opt in ratingOptions"
+                :key="opt.value"
+                class="rounded-lg border py-2.5 text-sm font-medium transition-colors"
+                :class="
+                  reflectionRating === opt.value
+                    ? 'border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
+                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600'
+                "
+                @click="selectRating(opt.value)"
+              >
+                {{ opt.emoji }} {{ opt.label }}
+              </button>
+            </div>
+          </div>
+
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
             Answer as much or as little as you like — your answers will be
             shaped into a personal note.
@@ -178,35 +209,6 @@
               :rows="3"
               class="mt-2 w-full"
             />
-          </div>
-
-          <!-- Rating -->
-          <div
-            class="rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 p-3 space-y-2"
-          >
-            <p
-              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
-            >
-              Overall
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <button
-                v-for="opt in ratingOptions"
-                :key="opt.value"
-                class="rounded-lg border py-2.5 text-sm font-medium transition-colors"
-                :class="
-                  reflectionRating === opt.value
-                    ? 'border-neutral-900 dark:border-white bg-neutral-900 dark:bg-white text-white dark:text-neutral-900'
-                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-neutral-400 dark:hover:border-neutral-600'
-                "
-                @click="
-                  reflectionRating =
-                    reflectionRating === opt.value ? null : opt.value
-                "
-              >
-                {{ opt.emoji }} {{ opt.label }}
-              </button>
-            </div>
           </div>
 
           <!-- Free text -->
@@ -299,12 +301,32 @@ const reflectionQuestions = ref<Array<{ type: string; question: string }>>([]);
 const reflectionAnswers = ref<string[]>(["", "", ""]);
 const reflectionRating = ref<number | null>(null);
 const reflectionFreeText = ref("");
+// Pending status/date applied only after modal closes — prevents card unmounting mid-modal
+const pendingStatus = ref<string | null>(null);
+const pendingFinishedAt = ref<string | null>(null);
+
+function applyPendingStatusChange() {
+  if (pendingStatus.value) {
+    props.item.status = pendingStatus.value;
+    if (pendingFinishedAt.value)
+      props.item.finished_at = pendingFinishedAt.value;
+    emit("status-change", props.item.id, pendingStatus.value);
+    pendingStatus.value = null;
+    pendingFinishedAt.value = null;
+  }
+}
 
 const ratingOptions = [
   { value: 5, label: "Loved it", emoji: "❤️" },
   { value: 3, label: "Neutral", emoji: "😐" },
   { value: 1, label: "Didn't like it", emoji: "👎" },
 ];
+
+function selectRating(value: number) {
+  const newVal = reflectionRating.value === value ? null : value;
+  reflectionRating.value = newVal;
+  itemsService.updateItem(props.item.id, { rating: newVal }).catch(() => {});
+}
 
 const hasAnyAnswer = computed(
   () =>
@@ -320,10 +342,11 @@ const onSelectChange = async (status: string) => {
       status,
       finished_at: now,
     });
-    // Update local item
-    props.item.status = status;
-    props.item.finished_at = now;
-    emit("status-change", props.item.id, status);
+    // Defer the local mutation + emit until the modal closes so the card is not
+    // removed from filtered lists (e.g. status-filtered sub-library pages) while
+    // the reflection modal is still open.
+    pendingStatus.value = status;
+    pendingFinishedAt.value = now;
 
     reflectionStep.value = "loading";
     reflectionQuestions.value = [];
@@ -338,6 +361,7 @@ const onSelectChange = async (status: string) => {
       reflectionStep.value = "answering";
     } catch {
       reflectionOpen.value = false;
+      applyPendingStatusChange();
     }
   } else {
     if (
@@ -366,16 +390,19 @@ const submitReflection = async () => {
   } finally {
     reflectionOpen.value = false;
     reflectionStep.value = "loading";
+    applyPendingStatusChange();
   }
 };
 
 const skipReflection = () => {
   reflectionOpen.value = false;
   reflectionStep.value = "loading";
+  applyPendingStatusChange();
 };
 
 const goToDiscussion = async () => {
   reflectionOpen.value = false;
+  applyPendingStatusChange();
   router.push(`/items/${props.item.id}/discussion`);
 };
 

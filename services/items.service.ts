@@ -118,6 +118,35 @@ export type BulkImportRecord = {
   limit_reached: boolean | null;
 };
 
+export type Suggestion = {
+  id: string;
+  user_id: string;
+  batch_id: string;
+  title: string;
+  category: string;
+  creator: string | null;
+  artwork_url: string | null;
+  backdrop_url: string | null;
+  external_rating: number | null;
+  release_year: string | null;
+  description: string | null;
+  tmdb_id: string | null;
+  reason: string;
+  cross_category_connection: string | null;
+  mood_match: string;
+  ai_confidence: number;
+  status: string;
+  expires_at: string;
+  created_at: string;
+  library_item_id: string | null;
+};
+
+export type SuggestionsResponse = {
+  suggestions: Suggestion[];
+  refresh_eligible: boolean;
+  batch_created_at: string | null;
+};
+
 export const createItemsService = (
   api: ReturnType<typeof createApiService>,
 ) => {
@@ -171,6 +200,7 @@ export const createItemsService = (
       Pick<
         Item,
         | "status"
+        | "rating"
         | "your_notes"
         | "include_in_taste"
         | "finished_at"
@@ -255,6 +285,48 @@ export const createItemsService = (
     });
   };
 
+  const getSuggestions = async (): Promise<SuggestionsResponse> => {
+    return api.call<SuggestionsResponse>("/intelligence/suggestions", {
+      method: "GET",
+    });
+  };
+
+  const generateSuggestions = async (): Promise<Suggestion[]> => {
+    return api.call<Suggestion[]>("/intelligence/suggestions/generate", {
+      method: "POST",
+    });
+  };
+
+  const dismissSuggestion = async (id: string): Promise<void> => {
+    await api.call(`/intelligence/suggestions/${id}/dismiss`, {
+      method: "PATCH",
+    });
+  };
+
+  const saveSuggestion = async (
+    id: string,
+  ): Promise<{ success: boolean; item: Item }> => {
+    return api.call(`/intelligence/suggestions/${id}/save`, {
+      method: "POST",
+    });
+  };
+
+  const getDismissedCount = async (): Promise<{ count: number }> => {
+    return api.call<{ count: number }>(
+      "/intelligence/suggestions/dismissed/count",
+      { method: "GET" },
+    );
+  };
+
+  const clearDismissed = async (): Promise<{ cleared: number }> => {
+    return api.call<{ cleared: number }>(
+      "/intelligence/suggestions/dismissed",
+      {
+        method: "DELETE",
+      },
+    );
+  };
+
   return {
     capture,
     search,
@@ -270,5 +342,11 @@ export const createItemsService = (
     getReflectionQuestions,
     synthesizeReflection,
     getWhatTonight,
+    getSuggestions,
+    generateSuggestions,
+    dismissSuggestion,
+    saveSuggestion,
+    getDismissedCount,
+    clearDismissed,
   };
 };

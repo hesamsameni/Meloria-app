@@ -5,6 +5,35 @@
       <CaptureBar @captured="handleCaptured" />
     </div>
 
+    <!-- suggestions -->
+    <div v-if="visibleSuggestions.length > 0" class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-medium text-neutral-900 dark:text-white">
+          Suggested for you
+        </h2>
+        <NuxtLink
+          to="/suggestions"
+          class="text-xs text-neutral-400 hover:text-primary-500 transition-colors"
+        >
+          See all →
+        </NuxtLink>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <SuggestionCard
+          v-for="suggestion in visibleSuggestions"
+          :key="suggestion.id"
+          :suggestion="suggestion"
+          :saving="savingIds.has(suggestion.id)"
+          :dismissing="dismissingIds.has(suggestion.id)"
+          :saved="!!savedItems[suggestion.id]"
+          @save="saveSuggestion"
+          @dismiss="dismissSuggestion"
+          @view="viewSaved"
+        />
+      </div>
+    </div>
+
     <!-- what tonight button -->
     <WhatTonightButton />
 
@@ -48,7 +77,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Item } from "~/services/items.service";
+import type { Item, Suggestion } from "~/services/items.service";
+import { createItemsService } from "~/services/items.service";
 
 const { user } = useAuth();
 const { displayLabel } = useProfile();
@@ -60,7 +90,75 @@ const posthog = usePostHog();
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Dashboard" });
 
+const api = useApiService();
+const itemsService = createItemsService(api);
+
 const recentItems = computed(() => items.items.value);
+
+// --- Suggestions ---
+const suggestions = ref<Suggestion[]>([]);
+const savingIds = ref(new Set<string>());
+const dismissingIds = ref(new Set<string>());
+const savedItems = ref<Record<string, Item>>({});
+
+const visibleSuggestions = computed(() => {
+  const active = suggestions.value.filter(
+    (s) => !dismissingIds.value.has(s.id),
+  );
+  const SCREEN_CATS = new Set(["movie", "show", "anime"]);
+  const screen = active.filter((s) => SCREEN_CATS.has(s.category));
+  return (screen.length > 0 ? screen : active).slice(0, 3);
+});
+
+const saveSuggestion = async (suggestion: Suggestion) => {
+  savingIds.value = new Set([...savingIds.value, suggestion.id]);
+  try {
+    const { item } = await itemsService.saveSuggestion(suggestion.id);
+    savedItems.value = { ...savedItems.value, [suggestion.id]: item };
+    posthog?.capture("suggestion_saved", {
+      category: suggestion.category,
+      title: suggestion.title,
+      source: "dashboard",
+    });
+    toast.success(
+      "Saved to library",
+      `${suggestion.title} added to your library`,
+    );
+  } catch (e: any) {
+    toast.error(
+      "Failed to save",
+      e?.data?.error || e?.message || "Something went wrong",
+    );
+  } finally {
+    const next = new Set(savingIds.value);
+    next.delete(suggestion.id);
+    savingIds.value = next;
+  }
+};
+
+const dismissSuggestion = async (suggestion: Suggestion) => {
+  dismissingIds.value = new Set([...dismissingIds.value, suggestion.id]);
+  try {
+    await itemsService.dismissSuggestion(suggestion.id);
+    posthog?.capture("suggestion_dismissed", { source: "dashboard" });
+    suggestions.value = suggestions.value.filter((s) => s.id !== suggestion.id);
+  } catch (e: any) {
+    toast.error(
+      "Failed to dismiss",
+      e?.data?.error || e?.message || "Something went wrong",
+    );
+  } finally {
+    const next = new Set(dismissingIds.value);
+    next.delete(suggestion.id);
+    dismissingIds.value = next;
+  }
+};
+
+const viewSaved = (suggestion: Suggestion) => {
+  const item = savedItems.value[suggestion.id];
+  if (item) router.push(`/items/${item.id}`);
+};
+// --- End suggestions ---
 
 const handleCaptured = (newItem: Item) => {
   items.items.value.unshift(newItem);
@@ -93,7 +191,15 @@ watchEffect(() => {
 
 onMounted(() => {
   items.fetch();
-  items.fetchTotals(); // uses localStorage cache, no-op if already loaded
+  items.fetchTotals();
+
+  // Fetch pending suggestions silently — no generation on dashboard
+  itemsService
+    .getSuggestions()
+    .then(({ suggestions: data }) => {
+      suggestions.value = data;
+    })
+    .catch(() => {});
 
   if (user.value?.email) {
     posthog?.identify(user.value.email);
