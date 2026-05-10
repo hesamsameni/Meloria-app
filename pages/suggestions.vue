@@ -7,15 +7,26 @@
           class="h-4 w-36 rounded bg-neutral-100 dark:bg-neutral-800 animate-pulse"
         />
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="flex flex-col gap-3">
         <div
           v-for="i in 4"
           :key="i"
-          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 overflow-hidden animate-pulse"
+          class="flex overflow-hidden rounded-xl border border-neutral-200/60 dark:border-neutral-800/60 bg-card/80 dark:bg-card-dark/80 animate-pulse"
         >
-          <div class="h-44 bg-neutral-100 dark:bg-neutral-800" />
-          <div class="p-4 space-y-3">
-            <div class="h-4 w-2/3 rounded bg-neutral-100 dark:bg-neutral-800" />
+          <!-- Thumbnail placeholder -->
+          <div
+            class="w-28 sm:w-36 shrink-0 h-28 bg-neutral-100 dark:bg-neutral-800"
+          />
+          <!-- Text lines -->
+          <div class="flex-1 p-4 space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div
+                class="h-4 w-1/2 rounded bg-neutral-100 dark:bg-neutral-800"
+              />
+              <div
+                class="h-4 w-16 rounded-full bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              />
+            </div>
             <div class="h-3 w-1/3 rounded bg-neutral-100 dark:bg-neutral-800" />
             <div class="space-y-1.5">
               <div
@@ -26,7 +37,7 @@
               />
             </div>
             <div
-              class="h-8 w-full rounded-lg bg-neutral-100 dark:bg-neutral-800"
+              class="h-7 w-32 rounded-lg bg-neutral-100 dark:bg-neutral-800"
             />
           </div>
         </div>
@@ -125,11 +136,12 @@
           v-if="section.newItems.length > 0"
           name="card-list"
           tag="div"
-          class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          class="flex flex-col gap-3"
         >
           <SuggestionCard
             v-for="suggestion in section.newItems"
             :key="suggestion.id"
+            variant="row"
             :suggestion="suggestion"
             :saving="savingIds.has(suggestion.id)"
             :dismissing="dismissingIds.has(suggestion.id)"
@@ -160,11 +172,12 @@
           <TransitionGroup
             name="card-list"
             tag="div"
-            class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            class="flex flex-col gap-3"
           >
             <SuggestionCard
               v-for="suggestion in section.wantToItems"
               :key="suggestion.id"
+              variant="row"
               :suggestion="suggestion"
               :saving="savingIds.has(suggestion.id)"
               :dismissing="dismissingIds.has(suggestion.id)"
@@ -505,26 +518,64 @@ const save = async (suggestion: Suggestion) => {
   }
 };
 
-const dismiss = async (id: string) => {
-  dismissingIds.value = new Set([...dismissingIds.value, id]);
-  try {
-    await itemsService.dismissSuggestion(id);
-    posthog?.capture("suggestion_dismissed");
-    suggestions.value = suggestions.value.filter((s) => s.id !== id);
-    // If the user dismissed the last card, immediately allow a refresh
-    if (suggestions.value.length === 0) {
-      refreshEligible.value = true;
+const pendingDismissals = new Map<string, ReturnType<typeof setTimeout>>();
+
+const dismiss = (id: string) => {
+  const suggestion = suggestions.value.find((s) => s.id === id);
+  if (!suggestion) return;
+
+  const index = suggestions.value.indexOf(suggestion);
+
+  // Optimistically remove from the list
+  suggestions.value = suggestions.value.filter((s) => s.id !== id);
+  if (suggestions.value.length === 0) refreshEligible.value = true;
+
+  // Show undo toast for 4 seconds
+  const toastId = `dismiss-${id}`;
+  let undone = false;
+  toast.add({
+    id: toastId,
+    title: "Dismissed",
+    duration: 4000,
+    actions: [
+      {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          clearTimeout(pendingDismissals.get(id));
+          pendingDismissals.delete(id);
+          // Restore suggestion at its original position
+          const restored = [...suggestions.value];
+          restored.splice(index, 0, suggestion);
+          suggestions.value = restored;
+          if (suggestions.value.length > 0) refreshEligible.value = false;
+          toast.remove(toastId);
+        },
+      },
+    ],
+  });
+
+  // Commit the dismissal after the undo window
+  const timer = setTimeout(async () => {
+    pendingDismissals.delete(id);
+    if (undone) return;
+    try {
+      await itemsService.dismissSuggestion(id);
+      posthog?.capture("suggestion_dismissed");
+    } catch (e: any) {
+      // Restore the suggestion if the API call fails
+      const restored = [...suggestions.value];
+      restored.splice(index, 0, suggestion);
+      suggestions.value = restored;
+      if (suggestions.value.length > 0) refreshEligible.value = false;
+      toast.error(
+        "Failed to dismiss",
+        e?.data?.error || e?.message || "Something went wrong",
+      );
     }
-  } catch (e: any) {
-    toast.error(
-      "Failed to dismiss",
-      e?.data?.error || e?.message || "Something went wrong",
-    );
-  } finally {
-    const next = new Set(dismissingIds.value);
-    next.delete(id);
-    dismissingIds.value = next;
-  }
+  }, 4200);
+
+  pendingDismissals.set(id, timer);
 };
 
 const viewSaved = (id: string) => {
@@ -541,6 +592,8 @@ onMounted(loadSuggestions);
 
 onUnmounted(() => {
   if (pollTimer) clearTimeout(pollTimer);
+  for (const timer of pendingDismissals.values()) clearTimeout(timer);
+  pendingDismissals.clear();
 });
 </script>
 
