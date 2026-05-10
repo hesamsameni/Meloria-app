@@ -15,5 +15,7 @@ export const useAuth = () => {
     signInWithGoogle: store.signInWithGoogle,
     signOut: store.signOut,
     getToken: store.getToken,
+    sendPasswordReset: store.sendPasswordReset,
+    updatePassword: store.updatePassword,
   };
 };

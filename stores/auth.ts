@@ -54,6 +54,14 @@ export const useAuthStore = defineStore("auth", () => {
     return getService().getToken();
   };
 
+  const sendPasswordReset = async (email: string) => {
+    return getService().sendPasswordReset(email);
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    return getService().updatePassword(newPassword);
+  };
+
   const isAuthenticated = computed(() => !!user.value);
 
   return {
@@ -67,5 +75,7 @@ export const useAuthStore = defineStore("auth", () => {
     signInWithGoogle,
     signOut,
     getToken,
+    sendPasswordReset,
+    updatePassword,
   };
 });

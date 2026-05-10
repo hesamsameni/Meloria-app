@@ -32,6 +32,18 @@ export const createAuthService = (supabase: SupabaseClient) => {
     if (error) throw error;
   };
 
+  const sendPasswordReset = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+  };
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -62,5 +74,7 @@ export const createAuthService = (supabase: SupabaseClient) => {
     getSession,
     getToken,
     onAuthChange,
+    sendPasswordReset,
+    updatePassword,
   };
 };
