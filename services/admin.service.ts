@@ -107,6 +107,20 @@ export const createAdminService = (
     return api.call("/admin/run-job", { method: "POST" });
   };
 
+  const testWeeklyDigest = async (payload: {
+    user_id?: string;
+  }): Promise<{
+    ok: boolean;
+    user_id: string;
+    skipped: boolean;
+    channels_sent: string[];
+  }> => {
+    return api.call("/admin/test-weekly-digest", {
+      method: "POST",
+      body: payload,
+    });
+  };
+
   return {
     getUsers,
     getStats,
@@ -115,5 +129,6 @@ export const createAdminService = (
     updateModel,
     testNotify,
     runJob,
+    testWeeklyDigest,
   };
 };

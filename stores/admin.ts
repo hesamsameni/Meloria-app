@@ -107,6 +107,10 @@ export const useAdminStore = defineStore("admin", () => {
     return adminService.runJob();
   };
 
+  const testWeeklyDigest = async (payload: { user_id?: string }) => {
+    return adminService.testWeeklyDigest(payload);
+  };
+
   const totalPages = computed(() => Math.ceil(total.value / limit.value) || 1);
 
   return {
@@ -129,5 +133,6 @@ export const useAdminStore = defineStore("admin", () => {
     updateModel,
     testNotify,
     runJob,
+    testWeeklyDigest,
   };
 });
