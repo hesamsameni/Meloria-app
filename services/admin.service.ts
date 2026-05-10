@@ -96,11 +96,24 @@ export const createAdminService = (
     );
   };
 
+  const testNotify = async (payload: {
+    event_type: "taste_profile_updated" | "suggestions_ready";
+    user_id?: string;
+  }): Promise<{ ok: boolean; user_id: string; event_type: string }> => {
+    return api.call("/admin/test-notify", { method: "POST", body: payload });
+  };
+
+  const runJob = async (): Promise<{ ok: boolean; message: string }> => {
+    return api.call("/admin/run-job", { method: "POST" });
+  };
+
   return {
     getUsers,
     getStats,
     getModels,
     createModel,
     updateModel,
+    testNotify,
+    runJob,
   };
 };

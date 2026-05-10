@@ -96,6 +96,17 @@ export const useAdminStore = defineStore("admin", () => {
     }
   };
 
+  const testNotify = async (payload: {
+    event_type: "taste_profile_updated" | "suggestions_ready";
+    user_id?: string;
+  }) => {
+    return adminService.testNotify(payload);
+  };
+
+  const runJob = async () => {
+    return adminService.runJob();
+  };
+
   const totalPages = computed(() => Math.ceil(total.value / limit.value) || 1);
 
   return {
@@ -116,5 +127,7 @@ export const useAdminStore = defineStore("admin", () => {
     fetchModels,
     addModel,
     updateModel,
+    testNotify,
+    runJob,
   };
 });

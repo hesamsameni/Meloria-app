@@ -158,7 +158,34 @@
             }}
           </span>
         </div>
+
+        <!-- Bell icon -->
+        <UPopover
+          v-model:open="notifPanelOpen"
+          :popper="{ placement: 'top-end' }"
+        >
+          <UButton
+            variant="ghost"
+            size="xs"
+            color="neutral"
+            class="relative shrink-0 text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200"
+            aria-label="Notifications"
+          >
+            <UIcon name="i-lucide-bell" class="w-4 h-4" />
+            <span
+              v-if="unreadCount > 0"
+              class="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white leading-none"
+            >
+              {{ unreadCount > 9 ? "9+" : unreadCount }}
+            </span>
+          </UButton>
+
+          <template #content>
+            <NotificationsPanel />
+          </template>
+        </UPopover>
       </div>
+
       <UButton
         variant="ghost"
         size="xs"
@@ -198,9 +225,28 @@ const route = useRoute();
 const itemsStore = useItemsStore();
 
 const { hasPending, refresh: refreshReflect } = useReflectPending();
+const {
+  unreadCount,
+  fetch: fetchNotifications,
+  startPolling,
+  stopPolling,
+} = useNotifications();
+
+const notifPanelOpen = ref(false);
+
+watch(notifPanelOpen, (open) => {
+  if (open) fetchNotifications();
+});
+
 onMounted(() => {
   refreshReflect();
   itemsStore.fetchTotals();
+  fetchNotifications();
+  startPolling();
+});
+
+onUnmounted(() => {
+  stopPolling();
 });
 
 const CATEGORY_TOTALS_MAP: Record<string, keyof typeof itemsStore.totals> = {

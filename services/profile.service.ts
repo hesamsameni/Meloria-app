@@ -14,6 +14,8 @@ export type UserProfile = {
   display_name: string | null;
   current_period_end: string | null;
   role: UserRole;
+  notify_telegram: boolean;
+  notify_email: boolean;
   created_at: string | null;
   updated_at: string | null;
 };
@@ -29,6 +31,8 @@ export const createProfileService = (
     display_name?: string | null;
     username?: string | null;
     preferred_model?: string;
+    notify_telegram?: boolean;
+    notify_email?: boolean;
   }): Promise<UserProfile> => {
     return api.call<UserProfile>("/profile", {
       method: "PATCH",

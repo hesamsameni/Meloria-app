@@ -35,6 +35,8 @@ export const useProfileStore = defineStore("profile", () => {
     display_name?: string | null;
     username?: string | null;
     preferred_model?: string;
+    notify_telegram?: boolean;
+    notify_email?: boolean;
   }) => {
     loading.value = true;
     error.value = null;
