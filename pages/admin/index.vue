@@ -465,6 +465,54 @@
             :title="runJobResult.ok ? runJobResult.message : runJobResult.error"
           />
         </div>
+
+        <!-- Weekly Digest -->
+        <div
+          class="border-t border-neutral-100 dark:border-neutral-800/60 pt-6"
+        >
+          <p
+            class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-widest mb-3"
+          >
+            Weekly Digest
+          </p>
+          <div class="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+            <UFormField
+              label="User ID (optional — defaults to you)"
+              class="flex-1"
+            >
+              <UInput
+                v-model="digestUserId"
+                placeholder="Leave blank to send to yourself"
+                size="sm"
+                class="w-full font-mono text-xs"
+              />
+            </UFormField>
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-mail"
+              :loading="digestLoading"
+              class="shrink-0 self-end"
+              @click="fireTestDigest"
+            >
+              Send digest
+            </UButton>
+          </div>
+          <UAlert
+            v-if="digestResult"
+            :color="digestResult.ok ? 'success' : 'error'"
+            variant="soft"
+            class="mt-3"
+            :title="
+              digestResult.ok
+                ? digestResult.skipped
+                  ? 'Skipped — no activity this week (force flag bypassed this)'
+                  : `Sent to ${digestResult.user_id?.slice(0, 8)}… via [${digestResult.channels_sent?.join(', ') || 'none'}]`
+                : digestResult.error || 'Failed'
+            "
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -722,6 +770,30 @@ const fireRunJob = async () => {
     };
   } finally {
     runJobLoading.value = false;
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Developer Tools — Weekly Digest
+// ---------------------------------------------------------------------------
+const digestUserId = ref("");
+const digestLoading = ref(false);
+const digestResult = ref<any>(null);
+
+const fireTestDigest = async () => {
+  digestLoading.value = true;
+  digestResult.value = null;
+  try {
+    const payload: { user_id?: string } = {};
+    if (digestUserId.value.trim()) payload.user_id = digestUserId.value.trim();
+    digestResult.value = await admin.testWeeklyDigest(payload);
+  } catch (e: any) {
+    digestResult.value = {
+      ok: false,
+      error: e?.data?.error || e?.message || "Failed",
+    };
+  } finally {
+    digestLoading.value = false;
   }
 };
 
