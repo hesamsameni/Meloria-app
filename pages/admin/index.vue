@@ -358,6 +358,115 @@
         </p>
       </div>
     </div>
+    <!-- Developer Tools section -->
+    <div
+      class="rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950"
+    >
+      <div class="p-5 border-b border-neutral-200 dark:border-neutral-800">
+        <h2 class="text-sm font-medium text-neutral-900 dark:text-white">
+          Developer Tools
+        </h2>
+        <p class="text-xs text-neutral-400 mt-0.5">
+          Test notifications and trigger background jobs manually
+        </p>
+      </div>
+
+      <div class="p-5 flex flex-col gap-6">
+        <!-- Test Notification -->
+        <div>
+          <p
+            class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-widest mb-3"
+          >
+            Test Notification
+          </p>
+          <div class="flex flex-col sm:flex-row items-start sm:items-end gap-3">
+            <UFormField label="Event type" class="flex-1">
+              <USelect
+                v-model="testNotifyForm.event_type"
+                :items="notifyEventOptions"
+                size="sm"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField
+              label="User ID (optional — defaults to you)"
+              class="flex-1"
+            >
+              <UInput
+                v-model="testNotifyForm.user_id"
+                placeholder="Leave blank to notify yourself"
+                size="sm"
+                class="w-full font-mono text-xs"
+              />
+            </UFormField>
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-send"
+              :loading="testNotifyLoading"
+              class="shrink-0 self-end"
+              @click="fireTestNotify"
+            >
+              Send
+            </UButton>
+          </div>
+          <UAlert
+            v-if="testNotifyResult"
+            :color="testNotifyResult.ok ? 'success' : 'error'"
+            variant="soft"
+            class="mt-3"
+            :title="
+              testNotifyResult.ok
+                ? `Sent ${testNotifyResult.event_type} to ${testNotifyResult.user_id?.slice(0, 8)}…`
+                : testNotifyResult.error
+            "
+          />
+        </div>
+
+        <!-- Run Background Job -->
+        <div
+          class="border-t border-neutral-100 dark:border-neutral-800/60 pt-6"
+        >
+          <p
+            class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-widest mb-3"
+          >
+            Background Job
+          </p>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p
+                class="text-sm font-medium text-neutral-900 dark:text-neutral-100"
+              >
+                Run taste profile + suggestions pipeline
+              </p>
+              <p class="text-xs text-neutral-400 mt-0.5">
+                Runs for all eligible users — same as the scheduled Tue/Fri
+                cron. Responds immediately, runs in background.
+              </p>
+            </div>
+            <UButton
+              size="sm"
+              color="neutral"
+              variant="outline"
+              icon="i-lucide-play"
+              :loading="runJobLoading"
+              class="shrink-0"
+              @click="fireRunJob"
+            >
+              Run job
+            </UButton>
+          </div>
+          <UAlert
+            v-if="runJobResult"
+            :color="runJobResult.ok ? 'success' : 'error'"
+            variant="soft"
+            class="mt-3"
+            :title="runJobResult.ok ? runJobResult.message : runJobResult.error"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Add Model Modal -->
@@ -550,6 +659,69 @@ const updatePlans = async (model: string, plans: string[]) => {
     await admin.updateModel(model, { plans: plans.length > 0 ? plans : null });
   } catch {
     await admin.fetchModels();
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Developer Tools — Test Notify
+// ---------------------------------------------------------------------------
+const notifyEventOptions = [
+  { label: "Taste Profile Updated", value: "taste_profile_updated" },
+  { label: "Suggestions Ready", value: "suggestions_ready" },
+];
+
+const testNotifyForm = ref<{
+  event_type: "taste_profile_updated" | "suggestions_ready";
+  user_id: string;
+}>({
+  event_type: "suggestions_ready",
+  user_id: "",
+});
+const testNotifyLoading = ref(false);
+const testNotifyResult = ref<any>(null);
+
+const fireTestNotify = async () => {
+  testNotifyLoading.value = true;
+  testNotifyResult.value = null;
+  try {
+    const payload: {
+      event_type: typeof testNotifyForm.value.event_type;
+      user_id?: string;
+    } = {
+      event_type: testNotifyForm.value.event_type,
+    };
+    if (testNotifyForm.value.user_id.trim()) {
+      payload.user_id = testNotifyForm.value.user_id.trim();
+    }
+    testNotifyResult.value = await admin.testNotify(payload);
+  } catch (e: any) {
+    testNotifyResult.value = {
+      ok: false,
+      error: e?.data?.error || e?.message || "Failed",
+    };
+  } finally {
+    testNotifyLoading.value = false;
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Developer Tools — Run Job
+// ---------------------------------------------------------------------------
+const runJobLoading = ref(false);
+const runJobResult = ref<any>(null);
+
+const fireRunJob = async () => {
+  runJobLoading.value = true;
+  runJobResult.value = null;
+  try {
+    runJobResult.value = await admin.runJob();
+  } catch (e: any) {
+    runJobResult.value = {
+      ok: false,
+      error: e?.data?.error || e?.message || "Failed",
+    };
+  } finally {
+    runJobLoading.value = false;
   }
 };
 
