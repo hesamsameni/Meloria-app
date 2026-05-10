@@ -15,8 +15,14 @@
 
       <UCard>
         <!-- Loading / waiting for Supabase to process the recovery token -->
-        <div v-if="state === 'loading'" class="flex flex-col items-center gap-3 py-4">
-          <UIcon name="i-lucide-loader-circle" class="w-6 h-6 animate-spin text-neutral-400" />
+        <div
+          v-if="state === 'loading'"
+          class="flex flex-col items-center gap-3 py-4"
+        >
+          <UIcon
+            name="i-lucide-loader-circle"
+            class="w-6 h-6 animate-spin text-neutral-400"
+          />
           <p class="text-sm text-neutral-500">Verifying reset link…</p>
         </div>
 
@@ -28,7 +34,12 @@
             title="Link invalid or expired"
             description="This password reset link has expired or already been used. Please request a new one."
           />
-          <UButton variant="outline" color="neutral" class="w-full" @click="navigateTo('/login')">
+          <UButton
+            variant="outline"
+            color="neutral"
+            class="w-full"
+            @click="navigateTo('/login')"
+          >
             Back to sign in
           </UButton>
         </div>
@@ -36,7 +47,9 @@
         <!-- Set new password form -->
         <div v-else-if="state === 'form'" class="flex flex-col gap-4">
           <div>
-            <p class="text-sm font-medium text-neutral-900 dark:text-white mb-0.5">
+            <p
+              class="text-sm font-medium text-neutral-900 dark:text-white mb-0.5"
+            >
               Set a new password
             </p>
             <p class="text-xs text-neutral-500 dark:text-neutral-400">
@@ -44,7 +57,12 @@
             </p>
           </div>
 
-          <UAlert v-if="formError" color="error" variant="soft" :description="formError" />
+          <UAlert
+            v-if="formError"
+            color="error"
+            variant="soft"
+            :description="formError"
+          />
 
           <UFormField label="New password">
             <UInput
@@ -97,26 +115,34 @@ const confirmPassword = ref("");
 const formError = ref("");
 const loading = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
   if (import.meta.server) return;
 
-  // Supabase processes the recovery token from the URL hash and fires
-  // PASSWORD_RECOVERY via onAuthStateChange. We listen for it here.
-  const { data: { subscription } } = ($supabase as any).auth.onAuthStateChange(
-    (event: string) => {
-      if (event === "PASSWORD_RECOVERY") {
-        state.value = "form";
-      } else if (event === "SIGNED_IN" && state.value === "loading") {
-        // Some flows fire SIGNED_IN instead of PASSWORD_RECOVERY
-        state.value = "form";
-      }
-    },
-  );
+  // Supabase may have already processed the recovery token by the time this
+  // mounts (especially if the middleware called getSession first).
+  // Check the current session first; if the user is signed in we can show
+  // the form immediately without waiting for an event.
+  const {
+    data: { session },
+  } = await ($supabase as any).auth.getSession();
+  if (session?.user) {
+    state.value = "form";
+    return;
+  }
 
-  // Timeout fallback: if no auth event after 4s, treat link as invalid
+  // No session yet — listen for Supabase to process the recovery token.
+  const {
+    data: { subscription },
+  } = ($supabase as any).auth.onAuthStateChange((event: string) => {
+    if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+      state.value = "form";
+    }
+  });
+
+  // Timeout fallback: if no auth event after 5s, treat link as invalid.
   setTimeout(() => {
     if (state.value === "loading") state.value = "invalid";
-  }, 4000);
+  }, 5000);
 
   onUnmounted(() => subscription.unsubscribe());
 });
