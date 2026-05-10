@@ -1,6 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <SettingsAccountSection />
+    <SettingsPasswordSection />
     <SettingsIntegrationsSection />
     <SettingsNotificationsSection />
     <div v-if="useHasPaidPlan().value">
