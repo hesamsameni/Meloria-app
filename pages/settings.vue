@@ -5,8 +5,9 @@
     <div v-if="useHasPaidPlan().value">
       <SettingsAiModelSection />
     </div>
-    <SettingsApiTokensSection />
     <SettingsSuggestionsSection />
+
+    <SettingsApiTokensSection />
   </div>
 </template>
 
