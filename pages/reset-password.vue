@@ -118,10 +118,8 @@ const loading = ref(false);
 onMounted(async () => {
   if (import.meta.server) return;
 
-  // Supabase may have already processed the recovery token by the time this
-  // mounts (especially if the middleware called getSession first).
-  // Check the current session first; if the user is signed in we can show
-  // the form immediately without waiting for an event.
+  // The global auth store redirects here on PASSWORD_RECOVERY, so by the
+  // time this page mounts there is usually already a recovery session.
   const {
     data: { session },
   } = await ($supabase as any).auth.getSession();
@@ -130,7 +128,7 @@ onMounted(async () => {
     return;
   }
 
-  // No session yet — listen for Supabase to process the recovery token.
+  // Fallback: if for some reason the session isn't ready yet, wait for it.
   const {
     data: { subscription },
   } = ($supabase as any).auth.onAuthStateChange((event: string) => {
@@ -139,10 +137,10 @@ onMounted(async () => {
     }
   });
 
-  // Timeout fallback: if no auth event after 5s, treat link as invalid.
+  // After 6s with no session, the link is invalid/expired.
   setTimeout(() => {
     if (state.value === "loading") state.value = "invalid";
-  }, 5000);
+  }, 6000);
 
   onUnmounted(() => subscription.unsubscribe());
 });

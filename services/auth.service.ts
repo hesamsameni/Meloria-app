@@ -59,9 +59,9 @@ export const createAuthService = (supabase: SupabaseClient) => {
     return session?.access_token ?? null;
   };
 
-  const onAuthChange = (callback: (user: any) => void) => {
-    return supabase.auth.onAuthStateChange((_event, session) => {
-      callback(session?.user ?? null);
+  const onAuthChange = (callback: (user: any, event: string) => void) => {
+    return supabase.auth.onAuthStateChange((event, session) => {
+      callback(session?.user ?? null, event);
     });
   };
 

@@ -21,8 +21,11 @@ export const useAuthStore = defineStore("auth", () => {
     const session = await svc.getSession();
     user.value = session?.user ?? null;
     loading.value = false;
-    svc.onAuthChange((u: any) => {
+    svc.onAuthChange((u: any, event: string) => {
       user.value = u;
+      if (event === "PASSWORD_RECOVERY") {
+        navigateTo("/reset-password");
+      }
     });
   };
 
