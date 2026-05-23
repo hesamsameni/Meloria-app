@@ -59,10 +59,11 @@
                   <div v-if="step.pills" class="mt-5 flex flex-wrap gap-2">
                     <span
                       v-for="pill in step.pills"
-                      :key="pill"
+                      :key="pill.label"
                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300"
                     >
-                      {{ pill }}
+                      <UIcon :name="pill.icon" class="w-3.5 h-3.5 shrink-0" />
+                      {{ pill.label }}
                     </span>
                   </div>
                 </div>
@@ -121,11 +122,11 @@ const steps = [
     title: "Welcome to Meloria 👋",
     body: "Meloria is your personal second brain for everything you watch, read, and listen to. Here's a quick tour of what you can do.",
     pills: [
-      "🎬 Movies & Shows",
-      "📚 Books",
-      "🎵 Music",
-      "🎮 Games",
-      "🎙 Podcasts",
+      { label: "Movies & Shows", icon: "i-lucide-film" },
+      { label: "Books", icon: "i-lucide-book-open" },
+      { label: "Music", icon: "i-lucide-music-2" },
+      { label: "Games", icon: "i-lucide-gamepad-2" },
+      { label: "Podcasts", icon: "i-lucide-mic" },
     ],
   },
   {
@@ -133,14 +134,14 @@ const steps = [
     iconBg: "bg-amber-50 dark:bg-amber-900/30",
     iconColor: "text-amber-500",
     title: "Capture anything, instantly",
-    body: "Use the search bar at the top of your dashboard to add anything — just type a title and we'll find it. You can also import from Telegram, Apple Shortcuts, or use Bulk Import to add a whole list at once.",
+    body: "Use the search bar at the top of your dashboard to add anything. Just type a title and we'll find it. You can also import from Telegram, Apple Shortcuts, or use Bulk Import to add a whole list at once.",
   },
   {
     icon: "i-lucide-library",
     iconBg: "bg-blue-50 dark:bg-blue-900/30",
     iconColor: "text-blue-500",
     title: "Your library, your way",
-    body: "Everything you add lands in your Library, sorted by category. Track your status — Want to, In progress, or Finished — and rate things as you go. Finished items help us learn your taste.",
+    body: "Everything you add lands in your Library, sorted by category. Track your status (Want to, In progress, or Finished) and rate things as you go. Finished items help us learn your taste.",
   },
   {
     icon: "i-lucide-brain",

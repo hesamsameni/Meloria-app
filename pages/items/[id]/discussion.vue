@@ -1,46 +1,49 @@
 <template>
   <div
-    class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col"
-    style="height: calc(100dvh - 4rem)"
+    class="max-w-3xl mx-auto px-4 sm:px-6 flex flex-col overflow-hidden"
+    :style="containerStyle"
   >
-    <!-- Back link -->
-    <NuxtLink
-      :to="`/items/${route.params.id}`"
-      class="inline-flex items-center gap-2 rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-white/75 dark:bg-neutral-950/70 backdrop-blur px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-5 self-start shrink-0"
-    >
-      <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
-      Back to item
-    </NuxtLink>
-
-    <!-- Header -->
-    <div class="flex items-center gap-3 mb-5 shrink-0">
-      <div
-        class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center shrink-0"
+    <!-- Top area (back + header) -->
+    <div class="shrink-0 pt-5 sm:pt-8 pb-4">
+      <!-- Back link -->
+      <NuxtLink
+        :to="`/items/${route.params.id}`"
+        class="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-4 self-start"
       >
-        <UIcon
-          name="i-lucide-message-circle"
-          class="w-5 h-5 text-primary-500"
-        />
-      </div>
-      <div class="min-w-0">
-        <h1
-          class="text-base font-semibold text-neutral-900 dark:text-white leading-tight truncate"
+        <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
+        Back to item
+      </NuxtLink>
+
+      <!-- Header -->
+      <div class="flex items-center gap-3">
+        <div
+          class="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-950/40 ring-1 ring-primary-100 dark:ring-primary-900/40 flex items-center justify-center shrink-0"
         >
-          Discuss with AI
-        </h1>
-        <p
-          v-if="itemTitle"
-          class="text-xs text-neutral-500 dark:text-neutral-400 truncate"
-        >
-          {{ itemTitle }}
-        </p>
+          <UIcon
+            name="i-lucide-message-circle"
+            class="w-4.5 h-4.5 text-primary-500"
+          />
+        </div>
+        <div class="min-w-0">
+          <h1
+            class="text-base font-semibold text-neutral-900 dark:text-white leading-tight"
+          >
+            Discuss with AI
+          </h1>
+          <p
+            v-if="itemTitle"
+            class="text-xs text-neutral-400 dark:text-neutral-500 truncate mt-0.5"
+          >
+            {{ itemTitle }}
+          </p>
+        </div>
       </div>
     </div>
 
     <!-- Limit error banner -->
     <div
       v-if="limitError"
-      class="mb-4 shrink-0 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 flex items-start gap-3"
+      class="mb-3 shrink-0 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 flex items-start gap-3"
     >
       <UIcon
         name="i-lucide-triangle-alert"
@@ -62,88 +65,116 @@
     <!-- Messages area -->
     <div
       ref="messagesEl"
-      class="flex-1 overflow-y-auto space-y-4 py-2 pr-1 min-h-0"
+      class="flex-1 overflow-y-auto min-h-0"
+      style="overscroll-behavior: contain"
     >
-      <!-- Initial loading -->
-      <div v-if="loading" class="flex items-center justify-center py-16">
-        <UIcon
-          name="i-lucide-loader-circle"
-          class="w-6 h-6 text-neutral-400 animate-spin"
-        />
-      </div>
-
-      <!-- Empty state -->
-      <div
-        v-else-if="messages.length === 0"
-        class="flex flex-col items-center justify-center py-16 gap-3 text-center"
-      >
-        <p
-          class="text-sm text-neutral-500 dark:text-neutral-400 max-w-xs leading-relaxed"
-        >
-          Ask anything about
-          <span
-            v-if="itemTitle"
-            class="font-medium text-neutral-700 dark:text-neutral-300"
-            >{{ itemTitle }}</span
-          >
-          <span v-else>this item</span>
-          — themes, comparisons, what to watch next, or just how it made you
-          feel.
-        </p>
-        <!-- Starter prompts -->
-        <div class="flex flex-col gap-2 mt-2 w-full max-w-sm">
-          <button
-            v-for="prompt in starterPrompts"
-            :key="prompt"
-            class="text-left text-xs px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-700 dark:hover:text-primary-400 transition-colors"
-            @click="sendStarter(prompt)"
-          >
-            {{ prompt }}
-          </button>
+      <div class="space-y-3 py-2">
+        <!-- Initial loading -->
+        <div v-if="loading" class="flex items-center justify-center py-20">
+          <UIcon
+            name="i-lucide-loader-circle"
+            class="w-5 h-5 text-neutral-400 animate-spin"
+          />
         </div>
-      </div>
 
-      <!-- Message bubbles -->
-      <template v-else>
+        <!-- Empty state -->
         <div
-          v-for="(msg, i) in messages"
-          :key="i"
-          class="flex"
-          :class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
+          v-else-if="messages.length === 0"
+          class="flex flex-col items-center justify-center py-16 gap-4 text-center px-4"
         >
-          <!-- AI avatar -->
-          <div
-            v-if="msg.role === 'assistant'"
-            class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center shrink-0 mr-2 mt-1 overflow-hidden"
-          >
-            <img src="/logo.svg" alt="Meloria" class="w-4 h-4" />
+          <div class="space-y-1.5">
+            <p
+              class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            >
+              What would you like to know?
+            </p>
+            <p
+              class="text-xs text-neutral-400 dark:text-neutral-500 max-w-[260px] leading-relaxed"
+            >
+              Ask about themes, comparisons, recommendations, or anything
+              <span v-if="itemTitle"
+                >about
+                <span
+                  class="text-neutral-600 dark:text-neutral-400 font-medium"
+                  >{{ itemTitle }}</span
+                >
+              </span>
+              <span v-else>about this</span>.
+            </p>
           </div>
-
-          <div
-            class="max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed"
-            :class="
-              msg.role === 'user'
-                ? 'bg-primary-500 text-white rounded-br-sm whitespace-pre-wrap'
-                : 'bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 rounded-bl-sm prose prose-sm dark:prose-invert max-w-none'
-            "
-          >
-            <template v-if="msg.role === 'assistant'">
-              <!-- eslint-disable-next-line vue/no-v-html -->
-              <span v-html="renderMarkdown(msg.content)" />
-              <span
-                v-if="i === messages.length - 1 && streaming"
-                class="inline-block w-1 h-3.5 bg-neutral-400 dark:bg-neutral-500 rounded animate-pulse ml-0.5 align-text-bottom"
-              />
-            </template>
-            <span v-else>{{ msg.content }}</span>
+          <!-- Starter prompts -->
+          <div class="flex flex-col gap-2 w-full max-w-xs">
+            <button
+              v-for="prompt in starterPrompts"
+              :key="prompt"
+              class="text-left text-xs px-3.5 py-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 text-neutral-600 dark:text-neutral-400 hover:border-primary-300 dark:hover:border-primary-700/70 hover:bg-primary-50/50 dark:hover:bg-primary-950/20 hover:text-primary-700 dark:hover:text-primary-400 transition-all"
+              @click="sendStarter(prompt)"
+            >
+              {{ prompt }}
+            </button>
           </div>
         </div>
-      </template>
+
+        <!-- Message bubbles -->
+        <template v-else>
+          <div
+            v-for="(msg, i) in messages"
+            :key="i"
+            class="flex"
+            :class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
+          >
+            <!-- AI avatar -->
+            <div
+              v-if="msg.role === 'assistant'"
+              class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center shrink-0 mr-2 mt-1 overflow-hidden"
+            >
+              <img src="/logo.svg" alt="Meloria" class="w-3.5 h-3.5" />
+            </div>
+
+            <div
+              class="text-sm leading-relaxed"
+              :class="
+                msg.role === 'user'
+                  ? 'max-w-[78%] bg-primary-500 text-white rounded-2xl rounded-br-md px-4 py-2.5 whitespace-pre-wrap shadow-sm'
+                  : 'max-w-[82%] bg-neutral-50 dark:bg-neutral-900/80 border border-neutral-200/80 dark:border-neutral-800/80 text-neutral-900 dark:text-neutral-100 rounded-2xl rounded-bl-md px-4 py-2.5 prose prose-sm dark:prose-invert max-w-none'
+              "
+            >
+              <template v-if="msg.role === 'assistant'">
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <span v-html="renderMarkdown(msg.content)" />
+                <span
+                  v-if="i === messages.length - 1 && streaming && !msg.content"
+                  class="inline-flex items-center gap-1 py-0.5"
+                >
+                  <span
+                    class="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full animate-bounce"
+                    style="animation-delay: 0ms"
+                  />
+                  <span
+                    class="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full animate-bounce"
+                    style="animation-delay: 150ms"
+                  />
+                  <span
+                    class="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full animate-bounce"
+                    style="animation-delay: 300ms"
+                  />
+                </span>
+                <span
+                  v-else-if="i === messages.length - 1 && streaming"
+                  class="inline-block w-0.5 h-3.5 bg-neutral-400 dark:bg-neutral-500 rounded-sm animate-pulse ml-0.5 align-text-bottom"
+                />
+              </template>
+              <span v-else>{{ msg.content }}</span>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
 
     <!-- Input bar -->
     <div
-      class="shrink-0 pt-3 mt-2 border-t border-neutral-200 dark:border-neutral-800"
+      class="shrink-0 pt-2.5 pb-3 sm:pb-5 mt-1 border-t border-neutral-200 dark:border-neutral-800"
+      :style="inputBarStyle"
     >
       <div class="flex gap-2 items-end">
         <textarea
@@ -152,7 +183,10 @@
           rows="1"
           placeholder="Ask something…"
           :disabled="streaming || !!limitError"
-          class="flex-1 resize-none rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400 dark:focus:border-primary-600 transition disabled:opacity-50 disabled:cursor-not-allowed max-h-36 overflow-y-auto"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="sentences"
+          class="flex-1 resize-none rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-sm text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-600 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-400 dark:focus:border-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed max-h-32 overflow-y-auto"
           style="field-sizing: content"
           @keydown.enter.exact.prevent="send"
           @keydown.enter.shift.exact="undefined"
@@ -165,11 +199,11 @@
           color="primary"
           variant="solid"
           size="md"
-          class="rounded-xl shrink-0"
+          class="rounded-xl shrink-0 mb-px"
           @click="send"
         />
       </div>
-      <p class="text-xs text-neutral-400 mt-1.5 text-center">
+      <p class="hidden sm:block text-xs text-neutral-400 mt-1.5 text-center">
         Enter to send · Shift+Enter for new line
       </p>
     </div>
@@ -199,6 +233,22 @@ const itemTitle = ref<string | null>(null);
 const limitError = ref<DiscussionLimitError | null>(null);
 const messagesEl = ref<HTMLElement | null>(null);
 const inputEl = ref<HTMLTextAreaElement | null>(null);
+
+// Track visual viewport height to handle mobile keyboard gap
+const vvHeight = ref<number | null>(null);
+
+const containerStyle = computed(() => {
+  const h = vvHeight.value;
+  return {
+    height: h !== null ? `calc(${h}px - 4rem)` : "calc(100dvh - 4rem)",
+  };
+});
+
+// On mobile, add bottom padding equal to safe-area-inset-bottom when keyboard is open
+const inputBarStyle = computed(() => {
+  // No extra padding needed — container height already accounts for keyboard
+  return {};
+});
 
 function renderMarkdown(text: string): string {
   if (!text) return "";
@@ -246,7 +296,10 @@ const starterPrompts = computed(() => {
     title
       ? `What themes does ${title} explore?`
       : "What themes does this explore?",
-    "How does it compare to similar works?",
+
+    title
+      ? `Let's discuss ${title}. What are your thoughts?`
+      : "Let's discuss this item. What are your thoughts?",
     title
       ? `What should I watch/read next after ${title}?`
       : "What should I watch or read next?",
@@ -367,5 +420,29 @@ function autoResize() {
   }
 }
 
-onMounted(loadDiscussion);
+onMounted(() => {
+  loadDiscussion();
+
+  if (typeof window !== "undefined" && window.visualViewport) {
+    vvHeight.value = window.visualViewport.height;
+
+    const handleViewport = () => {
+      const newH = window.visualViewport!.height;
+      const prev = vvHeight.value;
+      vvHeight.value = newH;
+      // Scroll to bottom when keyboard opens (viewport shrinks)
+      if (prev !== null && newH < prev) {
+        nextTick(scrollToBottom);
+      }
+    };
+
+    window.visualViewport.addEventListener("resize", handleViewport);
+    window.visualViewport.addEventListener("scroll", handleViewport);
+
+    onUnmounted(() => {
+      window.visualViewport?.removeEventListener("resize", handleViewport);
+      window.visualViewport?.removeEventListener("scroll", handleViewport);
+    });
+  }
+});
 </script>
