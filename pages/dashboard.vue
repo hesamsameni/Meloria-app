@@ -1,17 +1,23 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <!-- onboarding -->
+    <OnboardingModal v-if="user?.id" :user-id="user.id" />
     <!-- capture -->
     <div class="mb-8">
       <CaptureBar @captured="handleCaptured" />
     </div>
 
     <!-- suggestions -->
-    <div v-if="visibleSuggestions.length > 0" class="mb-8">
+    <div
+      v-if="loadingSuggestions || visibleSuggestions.length > 0"
+      class="mb-8"
+    >
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-sm font-medium text-neutral-900 dark:text-white">
           Suggested for you
         </h2>
         <NuxtLink
+          v-if="!loadingSuggestions"
           to="/suggestions"
           class="text-xs text-neutral-400 hover:text-primary-500 transition-colors"
         >
@@ -19,7 +25,28 @@
         </NuxtLink>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- skeleton while loading -->
+      <div
+        v-if="loadingSuggestions"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <div
+          v-for="n in 3"
+          :key="n"
+          class="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-3"
+        >
+          <USkeleton class="h-4 w-2/3" />
+          <USkeleton class="h-3 w-full" />
+          <USkeleton class="h-3 w-4/5" />
+          <div class="flex gap-2 pt-1">
+            <USkeleton class="h-7 w-16 rounded-lg" />
+            <USkeleton class="h-7 w-16 rounded-lg" />
+          </div>
+        </div>
+      </div>
+
+      <!-- actual suggestions -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <SuggestionCard
           v-for="suggestion in visibleSuggestions"
           :key="suggestion.id"
@@ -36,6 +63,12 @@
 
     <!-- what tonight button -->
     <WhatTonightButton />
+
+    <!-- starter picks for new joiners -->
+    <StarterPicks
+      v-if="!items.loading.value && recentItems.length < 3"
+      @added="handleStarterAdded"
+    />
 
     <!-- recent -->
     <div>
@@ -97,6 +130,7 @@ const recentItems = computed(() => items.items.value);
 
 // --- Suggestions ---
 const suggestions = ref<Suggestion[]>([]);
+const loadingSuggestions = ref(true);
 const savingIds = ref(new Set<string>());
 const dismissingIds = ref(new Set<string>());
 const savedItems = ref<Record<string, Item>>({});
@@ -164,6 +198,10 @@ const handleCaptured = (newItem: Item) => {
   items.items.value.unshift(newItem);
 };
 
+const handleStarterAdded = (newItem: Item) => {
+  items.items.value.unshift(newItem);
+};
+
 const greeting = computed(() => {
   const h = new Date().getHours();
   const rawName = (displayLabel.value || user.value?.email || "").trim();
@@ -199,7 +237,10 @@ onMounted(() => {
     .then(({ suggestions: data }) => {
       suggestions.value = data;
     })
-    .catch(() => {});
+    .catch(() => {})
+    .finally(() => {
+      loadingSuggestions.value = false;
+    });
 
   if (user.value?.email) {
     posthog?.identify(user.value.email);

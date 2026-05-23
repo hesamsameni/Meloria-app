@@ -141,6 +141,35 @@ export type Suggestion = {
   library_item_id: string | null;
 };
 
+export type DiscoverItem = {
+  id: string;
+  title: string;
+  category: string;
+  creator: string | null;
+  description: string | null;
+  image_url: string | null;
+  artwork_url: string | null;
+  backdrop_url: string | null;
+  release_year: string | null;
+  external_rating: number | null;
+  genres: string[] | null;
+  runtime: number | null;
+  tmdb_id: string | null;
+  open_library_id: string | null;
+  spotify_id: string | null;
+  tags: string[] | null;
+  artist_image_url: string | null;
+  album_name: string | null;
+  author_name: string | null;
+  popularity: number;
+};
+
+export type DiscoverResponse = {
+  items: DiscoverItem[];
+  total: number;
+  hasMore: boolean;
+};
+
 export type SuggestionsResponse = {
   suggestions: Suggestion[];
   refresh_eligible: boolean;
@@ -327,6 +356,27 @@ export const createItemsService = (
     );
   };
 
+  const getDiscoverItems = async (
+    params: { category?: string; limit?: number; offset?: number } = {},
+  ): Promise<DiscoverResponse> => {
+    const q = new URLSearchParams();
+    if (params.category) q.set("category", params.category);
+    if (params.limit != null) q.set("limit", String(params.limit));
+    if (params.offset != null) q.set("offset", String(params.offset));
+    const url = `/items/discover${q.toString() ? `?${q.toString()}` : ""}`;
+    return api.call<DiscoverResponse>(url, { method: "GET" });
+  };
+
+  const addDiscoverItem = async (
+    sourceId: string,
+    status: "want_to" | "finished",
+  ): Promise<{ item: Item }> => {
+    return api.call<{ item: Item }>("/items/discover/add", {
+      method: "POST",
+      body: { sourceId, status },
+    });
+  };
+
   return {
     capture,
     search,
@@ -348,5 +398,7 @@ export const createItemsService = (
     saveSuggestion,
     getDismissedCount,
     clearDismissed,
+    getDiscoverItems,
+    addDiscoverItem,
   };
 };
