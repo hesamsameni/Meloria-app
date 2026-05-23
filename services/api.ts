@@ -47,5 +47,22 @@ export const createApiService = (
     });
   };
 
-  return { call };
+  // For SSE / streaming responses — returns the raw Response so the caller can
+  // read the body as a ReadableStream. Uses native fetch (not $fetch).
+  const fetchStream = async (
+    path: string,
+    options: RequestInit = {},
+  ): Promise<Response> => {
+    const token = await getValidToken();
+    return fetch(`${apiUrl}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers as Record<string, string> | undefined),
+      },
+    });
+  };
+
+  return { call, fetchStream };
 };

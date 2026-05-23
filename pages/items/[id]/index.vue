@@ -124,6 +124,41 @@
             @blur="saveNotes"
           />
         </UCard>
+
+        <UCard
+          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        >
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-message-circle"
+                  class="w-4 h-4 text-primary-500"
+                />
+              </div>
+              <div>
+                <p
+                  class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                >
+                  Discuss with AI
+                </p>
+                <p class="text-xs text-neutral-400 mt-0.5">
+                  Explore themes, comparisons, and more
+                </p>
+              </div>
+            </div>
+            <UButton
+              size="sm"
+              variant="outline"
+              color="primary"
+              :label="hasDiscussion ? 'Continue discussion' : 'Start chat'"
+              trailing-icon="i-lucide-arrow-right"
+              @click="goToDiscussion"
+            />
+          </div>
+        </UCard>
       </div>
 
       <aside class="space-y-5 sm:space-y-6">
@@ -596,6 +631,7 @@ const item = ref<Item | null>(null);
 const loading = ref(true);
 const userNotes = ref("");
 const includeInTaste = ref(true);
+const hasDiscussion = ref(false);
 
 // Edit modal state
 const editModalOpen = ref(false);
@@ -809,11 +845,16 @@ const deleteItem = async () => {
 
 onMounted(async () => {
   try {
-    const data = await itemsService.getById(route.params.id as string);
+    const id = route.params.id as string;
+    const [data, discussion] = await Promise.all([
+      itemsService.getById(id),
+      itemsService.getDiscussion(id).catch(() => ({ messages: [] })),
+    ]);
     item.value = data;
     useHead({ title: data.title || "Item" });
     userNotes.value = data.your_notes || "";
     includeInTaste.value = data.include_in_taste ?? true;
+    hasDiscussion.value = discussion.messages.length > 0;
   } finally {
     loading.value = false;
   }
