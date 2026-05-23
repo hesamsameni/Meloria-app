@@ -176,6 +176,19 @@ export type SuggestionsResponse = {
   batch_created_at: string | null;
 };
 
+export type DiscussionMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type DiscussionLimitError = {
+  error: string;
+  limit_type: "daily" | "conversation";
+  tier: string;
+  limit: number;
+  upgrade_required: true;
+};
+
 export const createItemsService = (
   api: ReturnType<typeof createApiService>,
 ) => {
@@ -377,6 +390,25 @@ export const createItemsService = (
     });
   };
 
+  const getDiscussion = async (
+    itemId: string,
+  ): Promise<{ messages: DiscussionMessage[] }> => {
+    return api.call<{ messages: DiscussionMessage[] }>(
+      `/items/${itemId}/discussion`,
+      { method: "GET" },
+    );
+  };
+
+  const sendDiscussionMessage = async (
+    itemId: string,
+    messages: DiscussionMessage[],
+  ): Promise<Response> => {
+    return api.fetchStream(`/items/${itemId}/discussion`, {
+      method: "POST",
+      body: JSON.stringify({ messages }),
+    });
+  };
+
   return {
     capture,
     search,
@@ -400,5 +432,7 @@ export const createItemsService = (
     clearDismissed,
     getDiscoverItems,
     addDiscoverItem,
+    getDiscussion,
+    sendDiscussionMessage,
   };
 };

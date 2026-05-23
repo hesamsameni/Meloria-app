@@ -57,19 +57,6 @@
         />
       </div>
     </div>
-
-    <!-- Show more -->
-    <div v-if="!loading && hasMore" class="mt-4 text-center">
-      <UButton
-        variant="outline"
-        color="neutral"
-        size="sm"
-        :loading="loadingMore"
-        @click="loadMore"
-      >
-        Show more
-      </UButton>
-    </div>
   </div>
 </template>
 
