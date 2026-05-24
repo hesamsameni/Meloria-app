@@ -83,49 +83,6 @@
         </UCard>
 
         <UCard
-          v-if="item.ai_notes"
-          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
-        >
-          <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              AI Notes
-            </p>
-          </template>
-          <div class="flex items-start gap-2.5">
-            <UIcon
-              name="i-lucide-sparkles"
-              class="w-4 h-4 text-primary-500 shrink-0 mt-0.5"
-            />
-            <p
-              class="text-sm text-neutral-600 dark:text-neutral-300 italic leading-relaxed"
-            >
-              {{ item.ai_notes }}
-            </p>
-          </div>
-        </UCard>
-
-        <UCard
-          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
-        >
-          <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Your Notes
-            </p>
-          </template>
-          <UTextarea
-            v-model="userNotes"
-            placeholder="Add your thoughts..."
-            :rows="4"
-            class="w-full"
-            @blur="saveNotes"
-          />
-        </UCard>
-
-        <UCard
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <div class="flex items-center justify-between gap-4">
@@ -158,6 +115,25 @@
               @click="goToDiscussion"
             />
           </div>
+        </UCard>
+
+        <UCard
+          class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+        >
+          <template #header>
+            <p
+              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
+            >
+              Your Notes
+            </p>
+          </template>
+          <UTextarea
+            v-model="userNotes"
+            placeholder="Add your thoughts..."
+            :rows="4"
+            class="w-full"
+            @blur="saveNotes"
+          />
         </UCard>
       </div>
 
