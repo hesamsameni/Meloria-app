@@ -234,14 +234,21 @@ const limitError = ref<DiscussionLimitError | null>(null);
 const messagesEl = ref<HTMLElement | null>(null);
 const inputEl = ref<HTMLTextAreaElement | null>(null);
 
-// Track visual viewport height to handle mobile keyboard gap
+// Track visual viewport metrics to handle mobile keyboard gap
 const vvHeight = ref<number | null>(null);
+const vvPageTop = ref<number>(0); // window.scrollY + visualViewport.offsetTop
 
 const containerStyle = computed(() => {
   const h = vvHeight.value;
-  return {
-    height: h !== null ? `calc(${h}px - 4rem)` : "calc(100dvh - 4rem)",
-  };
+  const pageTop = vvPageTop.value;
+  if (h === null) {
+    return { height: "calc(100dvh - 4rem)" };
+  }
+  // The container starts at headerHeight (~64 px) in the document.
+  // Its bottom must reach the visual-viewport bottom (pageTop + h) so the
+  // input sits flush above the keyboard with no gap.
+  const height = Math.max(pageTop + h - 64, 200);
+  return { height: `${height}px` };
 });
 
 // On mobile, add bottom padding equal to safe-area-inset-bottom when keyboard is open
@@ -424,24 +431,28 @@ onMounted(() => {
   loadDiscussion();
 
   if (typeof window !== "undefined" && window.visualViewport) {
-    vvHeight.value = window.visualViewport.height;
+    const vp = window.visualViewport;
+    vvHeight.value = vp.height;
+    vvPageTop.value = window.scrollY + vp.offsetTop;
 
     const handleViewport = () => {
-      const newH = window.visualViewport!.height;
+      const newH = vp.height;
       const prev = vvHeight.value;
       vvHeight.value = newH;
+      vvPageTop.value = window.scrollY + vp.offsetTop;
       // Scroll to bottom when keyboard opens (viewport shrinks)
       if (prev !== null && newH < prev) {
         nextTick(scrollToBottom);
       }
     };
 
-    window.visualViewport.addEventListener("resize", handleViewport);
-    window.visualViewport.addEventListener("scroll", handleViewport);
+    // Also listen to visualViewport scroll so containerStyle recomputes when offsetTop changes
+    vp.addEventListener("resize", handleViewport);
+    vp.addEventListener("scroll", handleViewport);
 
     onUnmounted(() => {
-      window.visualViewport?.removeEventListener("resize", handleViewport);
-      window.visualViewport?.removeEventListener("scroll", handleViewport);
+      vp.removeEventListener("resize", handleViewport);
+      vp.removeEventListener("scroll", handleViewport);
     });
   }
 });
