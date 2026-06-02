@@ -8,13 +8,8 @@
 </template>
 
 <script setup lang="ts">
-const { init } = useAuth();
 useHead({
   title: "Meloria",
-  meta: [
-    { charset: "utf-8" },
-    { name: "description", content: "Share your music journey with friends" },
-  ],
   link: [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     {
@@ -24,9 +19,6 @@ useHead({
     },
   ],
 });
-// use onMounted instead of top-level await
-// plugins are guaranteed to be ready by then
-onMounted(() => init());
 </script>
 
 <style>
