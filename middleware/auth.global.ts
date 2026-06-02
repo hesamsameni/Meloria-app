@@ -6,12 +6,20 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (loading.value) await init();
 
-  const publicRoutes = ["/login", "/welcome", "/reset-password"];
-  const isPublic = publicRoutes.includes(to.path);
-  const isLoginRoute = to.path === "/login";
+  // Routes anyone can access (no redirect either way)
+  const publicRoutes = ["/terms", "/privacy", "/reset-password"];
 
-  if (!user.value && !isPublic) return navigateTo("/login");
-  if (user.value && isLoginRoute) return navigateTo("/dashboard");
+  // Routes only unauthenticated users should see (authenticated → /dashboard)
+  const guestOnlyRoutes = ["/login", "/welcome"];
+
+  const isPublic = publicRoutes.includes(to.path);
+  const isGuestOnly = guestOnlyRoutes.includes(to.path);
+
+  // Unauthenticated user trying to access a private route → send to /login
+  if (!user.value && !isPublic && !isGuestOnly) return navigateTo("/login");
+
+  // Authenticated user trying to access guest-only pages → send to /dashboard
+  if (user.value && isGuestOnly) return navigateTo("/dashboard");
 
   // Admin-only routes
   if (to.path.startsWith("/admin")) {

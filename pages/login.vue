@@ -5,6 +5,12 @@
     <div class="w-full max-w-sm">
       <!-- Logo -->
       <div class="text-center mb-8">
+        <NuxtLink
+          to="/welcome"
+          class="inline-block mb-3 text-sm text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
+        >
+          ← Back to Meloria
+        </NuxtLink>
         <h1
           class="text-3xl font-semibold tracking-tight text-neutral-900 dark:text-white mb-1"
         >
@@ -27,7 +33,8 @@
 definePageMeta({ layout: false });
 useHead({ title: "Sign In" });
 
-const tab = ref("0");
+const route = useRoute();
+const tab = ref(route.query.tab === "1" ? "1" : "0");
 const tabs = [
   { label: "Sign in", value: "0" },
   { label: "Sign up", value: "1" },
