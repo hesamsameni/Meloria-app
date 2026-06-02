@@ -15,26 +15,14 @@ export const useAuthStore = defineStore("auth", () => {
     return _authService;
   };
 
-  let _initialized = false;
-
   const init = async () => {
     if (import.meta.server) return;
-    if (_initialized) return;
-    _initialized = true;
     const svc = getService();
     const session = await svc.getSession();
     user.value = session?.user ?? null;
     loading.value = false;
     svc.onAuthChange((u: any, event: string) => {
       user.value = u;
-      if (event === "SIGNED_IN" && u) {
-        const router = useRouter();
-        const currentPath = router.currentRoute.value.path;
-        const guestOnlyRoutes = ["/login", "/welcome"];
-        if (guestOnlyRoutes.includes(currentPath)) {
-          navigateTo("/dashboard");
-        }
-      }
       if (event === "PASSWORD_RECOVERY") {
         navigateTo("/reset-password");
       }

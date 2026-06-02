@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+const { init } = useAuth();
 useHead({
   title: "Meloria",
   link: [
@@ -19,6 +20,8 @@ useHead({
     },
   ],
 });
+// plugins are guaranteed to be ready by then
+onMounted(() => init());
 </script>
 
 <style>
