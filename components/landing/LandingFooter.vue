@@ -14,11 +14,11 @@
           <div class="footer-col-title">Product</div>
           <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
-          <a href="/dashboard">Dashboard</a>
+          <a href="/login">Dashboard</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Capture</div>
-          <a href="/dashboard">Web app</a>
+          <a href="/login">Web app</a>
           <a href="https://t.me/meloria_app_bot" target="_blank"
             >Telegram bot</a
           >
@@ -38,11 +38,18 @@
       </p>
       <p class="footer-copy">© 2026 Meloria. All rights reserved.</p>
     </div>
-    <div class="footer-copy">
-      Developed with ❤️ by
-      <a href="https://www.linkedin.com/in/hesamsameni/" target="_blank"
-        >Hesam Sameni</a
-      >
+    <div class="footer-bottom">
+      <div class="footer-legal">
+        <a href="/terms">Terms of Service</a>
+        <span class="footer-sep">·</span>
+        <a href="/privacy">Privacy Policy</a>
+      </div>
+      <div class="footer-copy">
+        Developed with ❤️ by
+        <a href="https://www.linkedin.com/in/hesamsameni/" target="_blank"
+          >Hesam Sameni</a
+        >
+      </div>
     </div>
   </footer>
 </template>

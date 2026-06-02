@@ -62,6 +62,23 @@
   gap: 32px;
   flex: 1;
 }
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-signin {
+  text-decoration: none;
+  color: #a89880;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.nav-signin:hover {
+  color: #f3f0ea;
+}
+
 .nav-links a {
   text-decoration: none;
   color: #a89880;
@@ -872,7 +889,7 @@
 }
 .roadmap-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 .roadmap-item {
@@ -1142,6 +1159,37 @@
 .footer-copy {
   font-size: 12px;
   color: var(--text-faint);
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.footer-legal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+.footer-legal a {
+  color: var(--text-faint);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footer-legal a:hover {
+  color: var(--text-secondary);
+}
+
+.footer-sep {
+  opacity: 0.4;
 }
 
 /* ─── RESPONSIVE ─── */

@@ -105,9 +105,9 @@
         <div class="feature-visual fv-profile">
           <div class="profile-summary">
             "You gravitate toward slow, contemplative cinema that asks more than
-            it answers — Kiarostami, Kieślowski, Hamaguchi — while your book
-            shelf is almost entirely Yalom, tracing a search for meaning that
-            runs underneath everything else you save."
+            it answers: Kiarostami, Kieślowski, Hamaguchi, while your book shelf
+            is almost entirely Yalom, tracing a search for meaning that runs
+            underneath everything else you save."
           </div>
           <div class="profile-tags">
             <span class="ptag">Existential themes</span>
@@ -162,7 +162,7 @@
             <div class="tonight-info">
               <div class="tonight-title">Perfect Days</div>
               <div class="tonight-reason">
-                You saved it 3 months ago. Tuesday evening, quiet mood — this is
+                You saved it 3 months ago. Tuesday evening, quiet mood. This is
                 exactly the right film for tonight.
               </div>
             </div>

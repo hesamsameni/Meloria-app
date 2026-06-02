@@ -30,7 +30,7 @@
         <h3>Telegram Bot</h3>
         <p>
           Forward any post, send a voice note, drop a link, or just type a title
-          — Meloria Bot handles it instantly. Link your account with a one-time
+          Meloria Bot handles it instantly. Link your account with a one-time
           code from settings and start capturing immediately.
         </p>
         <div class="tg-demo">

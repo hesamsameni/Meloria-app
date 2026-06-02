@@ -49,7 +49,7 @@ export const useAuthStore = defineStore("auth", () => {
   const signOut = async () => {
     await getService().signOut();
     user.value = null;
-    await navigateTo("/login");
+    await navigateTo("/welcome");
   };
 
   const getToken = (): Promise<string | null> => {

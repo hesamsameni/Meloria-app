@@ -68,6 +68,13 @@
       </div>
 
       <slot />
+      <footer class="app-footer">
+        <span>© 2026 Meloria</span>
+        <span class="app-footer-sep">·</span>
+        <NuxtLink to="/terms">Terms</NuxtLink>
+        <span class="app-footer-sep">·</span>
+        <NuxtLink to="/privacy">Privacy</NuxtLink>
+      </footer>
     </main>
   </div>
 </template>
@@ -86,3 +93,39 @@ watch(
   },
 );
 </script>
+
+<style scoped>
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 24px;
+  font-size: 12px;
+  color: rgb(var(--color-neutral-400));
+  border-top: 1px solid rgb(var(--color-neutral-200));
+}
+
+.dark .app-footer {
+  color: rgb(var(--color-neutral-500));
+  border-top-color: rgb(var(--color-neutral-800));
+}
+
+.app-footer a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.app-footer a:hover {
+  color: rgb(var(--color-neutral-600));
+}
+
+.dark .app-footer a:hover {
+  color: rgb(var(--color-neutral-300));
+}
+
+.app-footer-sep {
+  opacity: 0.4;
+}
+</style>

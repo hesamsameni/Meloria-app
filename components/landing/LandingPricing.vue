@@ -23,7 +23,7 @@
           <li>✓ Bulk import</li>
           <li>✓ Basic taste profile</li>
         </ul>
-        <a href="/dashboard" class="pricing-btn pricing-btn-ghost"
+        <a href="/login" class="pricing-btn pricing-btn-ghost"
           >Get started free</a
         >
       </div>
@@ -32,7 +32,7 @@
         <div class="pricing-popular">Most popular</div>
         <div class="pricing-tier">Pro</div>
         <div class="pricing-price">
-          <span class="price-amount">€4.99</span>
+          <span class="price-amount">{{ proPriceLabel }}</span>
           <span class="price-period">/ month</span>
         </div>
         <div class="pricing-limit">120 captures per month</div>
@@ -42,15 +42,13 @@
           <li>✓ Reflection notes & post-finish discussion</li>
           <li>✓ Priority enrichment</li>
         </ul>
-        <a href="/dashboard" class="pricing-btn pricing-btn-primary"
-          >Start Pro</a
-        >
+        <a href="/login" class="pricing-btn pricing-btn-primary">Start Pro</a>
       </div>
 
       <div class="pricing-card">
         <div class="pricing-tier">Ultimate</div>
         <div class="pricing-price">
-          <span class="price-amount">€9.99</span>
+          <span class="price-amount">{{ ultimatePriceLabel }}</span>
           <span class="price-period">/ month</span>
         </div>
         <div class="pricing-limit">Unlimited captures</div>
@@ -61,10 +59,14 @@
           <li>✓ Early access to all new features</li>
           <li>✓ Priority support</li>
         </ul>
-        <a href="/dashboard" class="pricing-btn pricing-btn-ghost"
-          >Go Ultimate</a
-        >
+        <a href="/login" class="pricing-btn pricing-btn-ghost">Go Ultimate</a>
       </div>
     </div>
   </section>
 </template>
+
+<script setup lang="ts">
+const config = useRuntimeConfig();
+const proPriceLabel = config.public.proPriceLabel;
+const ultimatePriceLabel = config.public.ultimatePriceLabel;
+</script>

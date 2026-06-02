@@ -14,7 +14,7 @@
         </div>
         <h3>Capture from anywhere</h3>
         <p>
-          Send anything to Meloria — a Telegram message, an Apple Shortcut
+          Send anything to Meloria: a Telegram message, an Apple Shortcut
           trigger from any app, a URL, a voice note, or a paste in the
           dashboard. If it's a movie, show, book, or song, Meloria figures it
           out.

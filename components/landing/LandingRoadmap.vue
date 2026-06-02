@@ -7,30 +7,6 @@
     <div class="roadmap-grid">
       <div class="roadmap-item">
         <span class="road-icon"
-          ><UIcon name="i-lucide-bot" class="w-7 h-7"
-        /></span>
-        <div>
-          <h4>Chat with your brain</h4>
-          <p>
-            Ask anything about your library. "What films did I save with Jessica
-            Alba?" Just ask.
-          </p>
-        </div>
-      </div>
-      <div class="roadmap-item">
-        <span class="road-icon"
-          ><UIcon name="i-lucide-mail" class="w-7 h-7"
-        /></span>
-        <div>
-          <h4>Weekly digest email</h4>
-          <p>
-            Every Monday, what you saved, what patterns emerged, and three
-            suggestions for the week.
-          </p>
-        </div>
-      </div>
-      <div class="roadmap-item">
-        <span class="road-icon"
           ><UIcon name="i-lucide-gamepad-2" class="w-7 h-7"
         /></span>
         <div>

@@ -16,17 +16,17 @@
       <h1 class="hero-title">
         Everything you want<br />
         to <em>watch, read, hear</em><br />
-        — finally organised
+        finally organised
       </h1>
 
       <p class="hero-sub">
-        Meloria captures movies, shows, books, and music from anywhere —
+        Meloria captures movies, shows, books, and music from anywhere:
         Telegram, Apple Shortcuts, or the web. It enriches, learns your taste,
         and tells you what to watch tonight.
       </p>
 
       <div class="hero-actions">
-        <a href="/dashboard" class="btn-primary">
+        <a href="/login" class="btn-primary">
           Start for free
           <svg
             width="16"

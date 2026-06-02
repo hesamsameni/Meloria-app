@@ -18,7 +18,7 @@
           Stop losing recommendations to forgotten notes. Start building a
           library that knows you.
         </p>
-        <a href="/dashboard" class="btn-primary btn-large">
+        <a href="/login" class="btn-primary btn-large">
           Open Meloria free
           <svg
             width="18"
