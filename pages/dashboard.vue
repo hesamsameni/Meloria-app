@@ -7,6 +7,9 @@
       <CaptureBar @captured="handleCaptured" />
     </div>
 
+    <!-- what tonight button -->
+    <WhatTonightButton />
+
     <!-- suggestions -->
     <div
       v-if="loadingSuggestions || visibleSuggestions.length > 0"
@@ -60,9 +63,6 @@
         />
       </div>
     </div>
-
-    <!-- what tonight button -->
-    <WhatTonightButton />
 
     <!-- starter picks for new joiners -->
     <StarterPicks
