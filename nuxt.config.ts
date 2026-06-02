@@ -16,7 +16,8 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_ULTIMATE_PRICE_LABEL || "9.99 Euros",
       posthog: {
         publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
-        host: process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+        host:
+          process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
       },
     },
   },
@@ -38,6 +39,46 @@ export default defineNuxtConfig({
             "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
         },
         { name: "theme-color", content: "#e8673a" },
+
+        // Primary description
+        {
+          name: "description",
+          content:
+            "Meloria helps you capture, organise, and rediscover the books, films, music, and shows you love — with AI-powered recommendations tailored to your taste.",
+        },
+
+        // Open Graph
+        { property: "og:type", content: "website" },
+        { property: "og:site_name", content: "Meloria" },
+        {
+          property: "og:title",
+          content: "Meloria — Your personal taste library",
+        },
+        {
+          property: "og:description",
+          content:
+            "Capture books, films, music, and shows. Get AI recommendations tailored to your taste. Build your personal library and discover what to enjoy tonight.",
+        },
+        { property: "og:image", content: "/og-image.png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        {
+          property: "og:image:alt",
+          content: "Meloria — Your personal taste library",
+        },
+
+        // Twitter / X Card
+        { name: "twitter:card", content: "summary_large_image" },
+        {
+          name: "twitter:title",
+          content: "Meloria — Your personal taste library",
+        },
+        {
+          name: "twitter:description",
+          content:
+            "Capture books, films, music, and shows. Get AI recommendations tailored to your taste.",
+        },
+        { name: "twitter:image", content: "/og-image.png" },
       ],
       link: [
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
