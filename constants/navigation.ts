@@ -7,16 +7,9 @@ export interface NavItem {
 
 export const NAV_ITEMS: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: "i-lucide-layout-dashboard" },
-  { to: "/library", label: "Library", icon: "i-lucide-library" },
+  { to: "/profile", label: "Profile", icon: "i-lucide-user" },
   { to: "/discover", label: "Discover", icon: "i-lucide-compass" },
   { to: "/import", label: "Bulk Import", icon: "i-lucide-list-plus" },
-  { to: "/reflect", label: "Reflect", icon: "i-lucide-notebook-pen" },
-  { to: "/suggestions", label: "Suggestions", icon: "i-lucide-sparkles" },
-  {
-    to: "/taste-profile",
-    label: "Taste Profile",
-    icon: "i-lucide-fingerprint",
-  },
   {
     to: "/settings",
     label: "Settings",

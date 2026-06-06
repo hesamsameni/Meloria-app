@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+  <div>
     <!-- Input state -->
     <div v-if="!recommendation" class="space-y-4">
       <UCard
@@ -62,7 +62,8 @@
           <img
             :src="
               recommendation.item.backdrop_url ||
-              recommendation.item.artwork_url
+              recommendation.item.artwork_url ||
+              ''
             "
             :alt="recommendation.title"
             class="w-full h-full object-cover"
@@ -155,7 +156,6 @@
               </p>
             </div>
 
-            <!-- Before saving -->
             <UButton
               v-if="!savedItem"
               size="sm"
@@ -167,7 +167,6 @@
               Save to Library
             </UButton>
 
-            <!-- After saving -->
             <div v-else class="space-y-2">
               <div class="flex items-center gap-1.5">
                 <UIcon
@@ -254,10 +253,6 @@
 <script setup lang="ts">
 import type { TonightRecommendation, Item } from "~/services/items.service";
 import { createItemsService } from "~/services/items.service";
-
-useHead({ title: "What Tonight?" });
-const { setPageHeader } = usePageHeader();
-setPageHeader("What tonight?", "One pick from your library, with a reason");
 
 const api = useApiService();
 const itemsService = createItemsService(api);

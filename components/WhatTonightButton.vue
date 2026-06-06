@@ -1,7 +1,14 @@
+<script setup lang="ts">
+const { user } = useAuth();
+const tonightTo = computed(() =>
+  user.value?.id ? `/profile/${user.value.id}/tonight` : "/dashboard",
+);
+</script>
+
 <template>
   <div class="mb-6">
     <NuxtLink
-      to="/tonight"
+      :to="tonightTo"
       class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md hover:border-neutral-300 dark:hover:border-neutral-700 transition-all duration-150 group"
     >
       <div class="flex items-center gap-3 min-w-0">

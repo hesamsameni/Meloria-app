@@ -1,6 +1,5 @@
 <template>
-  <div class="relative max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-    <!-- Decorative blobs -->
+  <div class="relative">
     <div
       class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 overflow-hidden"
     >
@@ -23,12 +22,11 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: "Taste Profile — Profile" });
 const { setPageHeader } = usePageHeader();
-useHead({ title: "Taste Profile" });
+setPageHeader("Taste Profile", "AI-generated insights into your taste");
 const { tasteProfile, loading, generating, notFound, fetch, generate } =
   useTasteProfile();
-
-setPageHeader("Taste Profile", "AI-generated insights into your taste");
 
 onMounted(fetch);
 </script>

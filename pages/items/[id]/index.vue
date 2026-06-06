@@ -15,13 +15,13 @@
     </div>
 
     <div class="flex justify-between">
-      <NuxtLink
-        to="/library"
+      <button
         class="inline-flex items-center gap-2 rounded-full border border-neutral-200/80 dark:border-neutral-800/80 bg-white/75 dark:bg-neutral-950/70 backdrop-blur px-3 py-1.5 text-sm text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors mb-6"
+        @click="router.back()"
       >
         <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
-        Back to library
-      </NuxtLink>
+        Back
+      </button>
     </div>
 
     <ItemHero :item="item" @status-change="handleStatusChange" />
@@ -816,7 +816,7 @@ const deleteItem = async () => {
   if (!item.value) return;
   await itemsService.remove(item.value.id);
   useItemsStore().fetchTotals({ force: true });
-  router.push("/library");
+  router.back();
 };
 
 onMounted(async () => {

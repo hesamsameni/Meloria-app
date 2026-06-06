@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+  <div>
     <!-- Loading / generating skeleton -->
     <div v-if="loading" class="space-y-4">
       <div class="flex items-center justify-between">
@@ -13,11 +13,9 @@
           :key="i"
           class="flex overflow-hidden rounded-xl border border-neutral-200/60 dark:border-neutral-800/60 bg-card/80 dark:bg-card-dark/80 animate-pulse"
         >
-          <!-- Thumbnail placeholder -->
           <div
             class="w-28 sm:w-36 shrink-0 h-28 bg-neutral-100 dark:bg-neutral-800"
           />
-          <!-- Text lines -->
           <div class="flex-1 p-4 space-y-2.5">
             <div class="flex items-start justify-between gap-2">
               <div
@@ -94,7 +92,6 @@
 
     <!-- Suggestions grid -->
     <div v-else-if="suggestions.length > 0" class="space-y-10">
-      <!-- Header row -->
       <div class="flex items-center justify-between">
         <p class="text-xs text-neutral-500 dark:text-neutral-400">
           {{ totalNewCount }} personalised pick{{
@@ -115,9 +112,7 @@
         </UButton>
       </div>
 
-      <!-- Per-category sections -->
       <div v-for="section in sections" :key="section.key" class="space-y-4">
-        <!-- Section header -->
         <div class="flex items-center gap-2">
           <UIcon
             :name="section.icon"
@@ -131,7 +126,6 @@
           </span>
         </div>
 
-        <!-- New suggestions for this section -->
         <TransitionGroup
           v-if="section.newItems.length > 0"
           name="card-list"
@@ -152,7 +146,6 @@
           />
         </TransitionGroup>
 
-        <!-- Already in library (want_to) for this section -->
         <div v-if="section.wantToItems.length > 0" class="space-y-3">
           <div class="flex items-center gap-3">
             <div class="flex-1 h-px bg-neutral-200 dark:bg-neutral-800" />
@@ -238,7 +231,7 @@ import type { Suggestion, Item } from "~/services/items.service";
 import { createItemsService } from "~/services/items.service";
 
 const GENERATING_KEY = "meloria_suggestions_generating";
-const GENERATING_TTL_MS = 3 * 60 * 1000; // 3 minutes max
+const GENERATING_TTL_MS = 3 * 60 * 1000;
 
 function isGeneratingFlagSet(): boolean {
   const raw = sessionStorage.getItem(GENERATING_KEY);
@@ -258,10 +251,6 @@ function setGeneratingFlag() {
 function clearGeneratingFlag() {
   sessionStorage.removeItem(GENERATING_KEY);
 }
-
-useHead({ title: "Suggestions" });
-const { setPageHeader } = usePageHeader();
-setPageHeader("Suggestions", "Based on your taste profile");
 
 const api = useApiService();
 const itemsService = createItemsService(api);
@@ -374,12 +363,10 @@ const softErrorMap: Record<
   },
 };
 
-// Poll GET /intelligence/suggestions every 3s until suggestions appear or TTL expires.
 function startPolling() {
   const started = Date.now();
   const poll = async () => {
     if (!isGeneratingFlagSet()) {
-      // TTL expired or flag was cleared by another tab — stop
       loading.value = false;
       return;
     }
@@ -397,7 +384,7 @@ function startPolling() {
         return;
       }
     } catch {
-      // ignore poll errors, keep waiting
+      // ignore poll errors
     }
     if (Date.now() - started < GENERATING_TTL_MS) {
       pollTimer = setTimeout(poll, 3000);
@@ -414,8 +401,6 @@ const loadSuggestions = async () => {
   fetchError.value = null;
   softError.value = null;
 
-  // If a generation was already started (this tab or another, even after refresh),
-  // just poll for results instead of triggering another generation.
   if (isGeneratingFlagSet()) {
     startPolling();
     return;
@@ -443,7 +428,6 @@ const autoGenerate = async () => {
   setGeneratingFlag();
   try {
     await itemsService.generateSuggestions();
-    // Re-fetch via GET to get annotated results (library_item_id etc.)
     const { suggestions: data } = await itemsService.getSuggestions();
     suggestions.value = data;
     refreshEligible.value = false;
@@ -468,7 +452,6 @@ const refresh = async () => {
   generating.value = true;
   try {
     await itemsService.generateSuggestions();
-    // Re-fetch via GET to get annotated results (library_item_id etc.)
     const { suggestions: data } = await itemsService.getSuggestions();
     suggestions.value = data;
     savedItems.value = {};
@@ -525,12 +508,9 @@ const dismiss = (id: string) => {
   if (!suggestion) return;
 
   const index = suggestions.value.indexOf(suggestion);
-
-  // Optimistically remove from the list
   suggestions.value = suggestions.value.filter((s) => s.id !== id);
   if (suggestions.value.length === 0) refreshEligible.value = true;
 
-  // Show undo toast for 4 seconds
   const toastId = `dismiss-${id}`;
   let undone = false;
   toast.add({
@@ -544,7 +524,6 @@ const dismiss = (id: string) => {
           undone = true;
           clearTimeout(pendingDismissals.get(id));
           pendingDismissals.delete(id);
-          // Restore suggestion at its original position
           const restored = [...suggestions.value];
           restored.splice(index, 0, suggestion);
           suggestions.value = restored;
@@ -555,7 +534,6 @@ const dismiss = (id: string) => {
     ],
   });
 
-  // Commit the dismissal after the undo window
   const timer = setTimeout(async () => {
     pendingDismissals.delete(id);
     if (undone) return;
@@ -563,7 +541,6 @@ const dismiss = (id: string) => {
       await itemsService.dismissSuggestion(id);
       posthog?.capture("suggestion_dismissed");
     } catch (e: any) {
-      // Restore the suggestion if the API call fails
       const restored = [...suggestions.value];
       restored.splice(index, 0, suggestion);
       suggestions.value = restored;
@@ -582,7 +559,6 @@ const viewSaved = (id: string) => {
   const item = savedItems.value[id];
   if (item) router.push(`/items/${item.id}`);
   else {
-    // library_item_id from suggestion (want_to case)
     const s = suggestions.value.find((s) => s.id === id);
     if (s?.library_item_id) router.push(`/items/${s.library_item_id}`);
   }
