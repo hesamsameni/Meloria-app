@@ -152,6 +152,21 @@ export const useItemsStore = defineStore("items", () => {
     if (t[newStatus] !== undefined) t[newStatus]++;
   };
 
+  // Cache for profile library (per-category, persists across navigation)
+  const profileLibraryCache = ref<{
+    itemsByCategory: Record<string, Item[]>;
+    offsetByCategory: Record<string, number>;
+    hasMoreByCategory: Record<string, boolean>;
+  } | null>(null);
+
+  const setProfileLibraryCache = (data: typeof profileLibraryCache.value) => {
+    profileLibraryCache.value = data;
+  };
+
+  const clearProfileLibraryCache = () => {
+    profileLibraryCache.value = null;
+  };
+
   const updateStatus = async (id: string, status: string) => {
     await itemsService.updateStatus(id, status);
     const item = items.value.find((i) => i.id === id);
@@ -188,5 +203,8 @@ export const useItemsStore = defineStore("items", () => {
     updateStatus,
     updateLocalStatus,
     deleteItem,
+    profileLibraryCache,
+    setProfileLibraryCache,
+    clearProfileLibraryCache,
   };
 });

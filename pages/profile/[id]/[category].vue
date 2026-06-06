@@ -1,5 +1,13 @@
 <template>
   <div>
+    <NuxtLink
+      :to="`/profile/${route.params.id}`"
+      class="inline-flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors mb-4"
+    >
+      <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
+      Back to library
+    </NuxtLink>
+
     <div class="flex flex-col gap-3 mb-6">
       <UInput
         v-model="search"
