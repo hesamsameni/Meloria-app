@@ -94,6 +94,16 @@ export type CapturePayload = {
   source?: string;
 };
 
+export type SearchCandidate = {
+  id: string;
+  title: string;
+  year: string | null;
+  image_url: string | null;
+  subtitle?: string | null;
+  artist?: string | null;
+  author?: string | null;
+};
+
 export type ItemTotals = {
   total: number;
   movies: number;
@@ -201,6 +211,39 @@ export const createItemsService = (
         source: payload.source || "dashboard",
       },
     });
+    return result.item;
+  };
+
+  // Sure mode: live candidate search (no AI)
+  const searchCandidates = async (
+    category: string,
+    q: string,
+  ): Promise<SearchCandidate[]> => {
+    const params = new URLSearchParams({ category, q });
+    const result = await api.call<{ candidates: SearchCandidate[] }>(
+      `/ingest/search?${params.toString()}`,
+      { method: "GET" },
+    );
+    return result.candidates ?? [];
+  };
+
+  // Sure mode: add an exact selected item (no AI)
+  const captureDirect = async (payload: {
+    category: string;
+    id: string;
+    source?: string;
+  }): Promise<Item> => {
+    const result = await api.call<{ success: boolean; item: Item }>(
+      "/ingest/direct",
+      {
+        method: "POST",
+        body: {
+          category: payload.category,
+          id: payload.id,
+          source: payload.source || "dashboard",
+        },
+      },
+    );
     return result.item;
   };
 
@@ -411,6 +454,8 @@ export const createItemsService = (
 
   return {
     capture,
+    searchCandidates,
+    captureDirect,
     search,
     updateStatus,
     getById,

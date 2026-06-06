@@ -7,61 +7,35 @@
       <CaptureBar @captured="handleCaptured" />
     </div>
 
-    <!-- what tonight button -->
-    <WhatTonightButton />
-
-    <!-- suggestions -->
-    <div
-      v-if="loadingSuggestions || visibleSuggestions.length > 0"
-      class="mb-8"
-    >
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-sm font-medium text-neutral-900 dark:text-white">
-          Suggested for you
-        </h2>
-        <NuxtLink
-          v-if="!loadingSuggestions"
-          to="/suggestions"
-          class="text-xs text-neutral-400 hover:text-primary-500 transition-colors"
-        >
-          See all →
-        </NuxtLink>
-      </div>
-
-      <!-- skeleton while loading -->
-      <div
-        v-if="loadingSuggestions"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+    <!-- quick links grid -->
+    <div class="mb-8 grid grid-cols-2 gap-3">
+      <NuxtLink
+        :to="user?.id ? `/profile/${user.id}/tonight` : '/dashboard'"
+        class="flex flex-col items-center justify-center gap-2 px-4 py-5 rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md hover:border-primary-400 dark:hover:border-primary-500 hover:text-primary-500 dark:hover:text-primary-400 transition-all duration-150 group text-neutral-500 dark:text-neutral-400"
       >
-        <div
-          v-for="n in 3"
-          :key="n"
-          class="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-3"
+        <UIcon name="i-lucide-moon" class="w-5 h-5" />
+        <span
+          class="text-sm font-medium text-neutral-900 dark:text-white group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors"
+          >What tonight?</span
         >
-          <USkeleton class="h-4 w-2/3" />
-          <USkeleton class="h-3 w-full" />
-          <USkeleton class="h-3 w-4/5" />
-          <div class="flex gap-2 pt-1">
-            <USkeleton class="h-7 w-16 rounded-lg" />
-            <USkeleton class="h-7 w-16 rounded-lg" />
-          </div>
-        </div>
-      </div>
+        <span class="text-xs text-center hidden sm:block"
+          >Get a personal pick from your library</span
+        >
+      </NuxtLink>
 
-      <!-- actual suggestions -->
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SuggestionCard
-          v-for="suggestion in visibleSuggestions"
-          :key="suggestion.id"
-          :suggestion="suggestion"
-          :saving="savingIds.has(suggestion.id)"
-          :dismissing="dismissingIds.has(suggestion.id)"
-          :saved="!!savedItems[suggestion.id]"
-          @save="saveSuggestion"
-          @dismiss="dismissSuggestion"
-          @view="viewSaved"
-        />
-      </div>
+      <NuxtLink
+        :to="user?.id ? `/profile/${user.id}/suggestions` : '/dashboard'"
+        class="flex flex-col items-center justify-center gap-2 px-4 py-5 rounded-xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white dark:bg-neutral-900 shadow-sm hover:shadow-md hover:border-primary-400 dark:hover:border-primary-500 hover:text-primary-500 dark:hover:text-primary-400 transition-all duration-150 group text-neutral-500 dark:text-neutral-400"
+      >
+        <UIcon name="i-lucide-sparkles" class="w-5 h-5" />
+        <span
+          class="text-sm font-medium text-neutral-900 dark:text-white group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors"
+          >Suggestions</span
+        >
+        <span class="text-xs text-center hidden sm:block"
+          >Personalised picks based on your taste</span
+        >
+      </NuxtLink>
     </div>
 
     <!-- starter picks for new joiners -->
@@ -77,7 +51,7 @@
           Recently captured
         </h2>
         <NuxtLink
-          to="/library"
+          :to="user?.id ? `/profile/${user.id}` : '/dashboard'"
           class="text-xs text-neutral-400 hover:text-primary-500 transition-colors"
         >
           View all →
@@ -110,8 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Item, Suggestion } from "~/services/items.service";
-import { createItemsService } from "~/services/items.service";
+import type { Item } from "~/services/items.service";
 
 const { user } = useAuth();
 const { displayLabel } = useProfile();
@@ -123,76 +96,7 @@ const posthog = usePostHog();
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Dashboard" });
 
-const api = useApiService();
-const itemsService = createItemsService(api);
-
 const recentItems = computed(() => items.items.value);
-
-// --- Suggestions ---
-const suggestions = ref<Suggestion[]>([]);
-const loadingSuggestions = ref(true);
-const savingIds = ref(new Set<string>());
-const dismissingIds = ref(new Set<string>());
-const savedItems = ref<Record<string, Item>>({});
-
-const visibleSuggestions = computed(() => {
-  const active = suggestions.value.filter(
-    (s) => !dismissingIds.value.has(s.id),
-  );
-  const SCREEN_CATS = new Set(["movie", "show", "anime"]);
-  const screen = active.filter((s) => SCREEN_CATS.has(s.category));
-  return (screen.length > 0 ? screen : active).slice(0, 3);
-});
-
-const saveSuggestion = async (suggestion: Suggestion) => {
-  savingIds.value = new Set([...savingIds.value, suggestion.id]);
-  try {
-    const { item } = await itemsService.saveSuggestion(suggestion.id);
-    savedItems.value = { ...savedItems.value, [suggestion.id]: item };
-    posthog?.capture("suggestion_saved", {
-      category: suggestion.category,
-      title: suggestion.title,
-      source: "dashboard",
-    });
-    toast.success(
-      "Saved to library",
-      `${suggestion.title} added to your library`,
-    );
-  } catch (e: any) {
-    toast.error(
-      "Failed to save",
-      e?.data?.error || e?.message || "Something went wrong",
-    );
-  } finally {
-    const next = new Set(savingIds.value);
-    next.delete(suggestion.id);
-    savingIds.value = next;
-  }
-};
-
-const dismissSuggestion = async (suggestion: Suggestion) => {
-  dismissingIds.value = new Set([...dismissingIds.value, suggestion.id]);
-  try {
-    await itemsService.dismissSuggestion(suggestion.id);
-    posthog?.capture("suggestion_dismissed", { source: "dashboard" });
-    suggestions.value = suggestions.value.filter((s) => s.id !== suggestion.id);
-  } catch (e: any) {
-    toast.error(
-      "Failed to dismiss",
-      e?.data?.error || e?.message || "Something went wrong",
-    );
-  } finally {
-    const next = new Set(dismissingIds.value);
-    next.delete(suggestion.id);
-    dismissingIds.value = next;
-  }
-};
-
-const viewSaved = (suggestion: Suggestion) => {
-  const item = savedItems.value[suggestion.id];
-  if (item) router.push(`/items/${item.id}`);
-};
-// --- End suggestions ---
 
 const handleCaptured = (newItem: Item) => {
   items.items.value.unshift(newItem);
@@ -230,17 +134,6 @@ watchEffect(() => {
 onMounted(() => {
   items.fetch();
   items.fetchTotals();
-
-  // Fetch pending suggestions silently — no generation on dashboard
-  itemsService
-    .getSuggestions()
-    .then(({ suggestions: data }) => {
-      suggestions.value = data;
-    })
-    .catch(() => {})
-    .finally(() => {
-      loadingSuggestions.value = false;
-    });
 
   if (user.value?.email) {
     posthog?.identify(user.value.email);

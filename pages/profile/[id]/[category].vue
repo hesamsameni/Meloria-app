@@ -1,9 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-    <!-- capture -->
-    <div class="mb-8">
-      <CaptureBar @captured="handleCaptured" />
-    </div>
+  <div>
     <div class="flex flex-col gap-3 mb-6">
       <UInput
         v-model="search"
@@ -40,10 +36,7 @@
       @status-change="handleStatusChange"
     />
 
-    <EmptyState
-      v-else
-      description="Unknown category. Please choose a valid category from Library."
-    />
+    <EmptyState v-else description="Unknown category." />
 
     <div
       v-if="selectedCategory && items.hasMore.value && !items.loading.value"
@@ -79,16 +72,6 @@ const categoryParam = computed(() => {
   return Array.isArray(raw) ? raw[0] : raw;
 });
 
-const handleCaptured = async () => {
-  await Promise.all([
-    items.fetch(filterParams.value),
-    ...(selectedCategory.value
-      ? [items.fetchCategoryTotals(selectedCategory.value.value)]
-      : []),
-  ]);
-  items.fetchTotals({ force: true });
-};
-
 const selectedCategory = computed(() =>
   LIBRARY_CATEGORIES.find((c) => c.value === categoryParam.value),
 );
@@ -107,7 +90,6 @@ const filtered = computed(() =>
       item.creator?.toLowerCase().includes(search.value.toLowerCase());
     const matchStatus =
       activeStatus.value === "all" || item.status === activeStatus.value;
-
     return matchSearch && matchStatus;
   }),
 );
@@ -126,7 +108,6 @@ watchEffect(() => {
     useHead({ title: "Library" });
     return;
   }
-
   useHead({ title: selectedCategory.value.label });
   setPageHeader(
     selectedCategory.value.label,
@@ -143,7 +124,6 @@ watch(
   { immediate: true },
 );
 
-// Fetch category-scoped totals so status buttons show category-specific counts
 watch(
   selectedCategory,
   () => {

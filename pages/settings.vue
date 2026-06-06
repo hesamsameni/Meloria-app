@@ -4,9 +4,6 @@
     <SettingsPasswordSection />
     <SettingsIntegrationsSection />
     <SettingsNotificationsSection />
-    <div v-if="useHasPaidPlan().value">
-      <SettingsAiModelSection />
-    </div>
     <SettingsSuggestionsSection />
 
     <SettingsApiTokensSection />
@@ -14,8 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import { useHasPaidPlan } from "~/composables/useHasPaidPlan";
-
 const { setPageHeader } = usePageHeader();
 useHead({ title: "Settings" });
 setPageHeader("Settings", "Manage your account information and API access");

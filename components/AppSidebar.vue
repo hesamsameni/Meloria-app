@@ -28,111 +28,21 @@
 
     <!-- nav -->
     <nav class="flex flex-col gap-0.5 flex-1">
-      <template v-for="item in navItems" :key="item.to">
-        <template v-if="item.to === '/library'">
-          <div class="flex items-center gap-1">
-            <NuxtLink
-              :to="item.to"
-              @click="emit('navigate')"
-              class="flex flex-1 items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
-              :class="
-                isLibraryActive
-                  ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
-                  : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
-              "
-            >
-              <UIcon :name="item.icon" class="w-4 h-4 shrink-0" />
-              {{ item.label }}
-            </NuxtLink>
-
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="ghost"
-              class="shrink-0"
-              :icon="
-                isLibraryGroupOpen
-                  ? 'i-lucide-chevron-down'
-                  : 'i-lucide-chevron-right'
-              "
-              aria-label="Toggle library categories"
-              @click="isLibraryGroupOpen = !isLibraryGroupOpen"
-            />
-          </div>
-
-          <Transition
-            enter-active-class="transition duration-150 ease-out"
-            enter-from-class="opacity-0 -translate-y-1"
-            enter-to-class="opacity-100 translate-y-0"
-            leave-active-class="transition duration-100 ease-in"
-            leave-from-class="opacity-100 translate-y-0"
-            leave-to-class="opacity-0 -translate-y-1"
-          >
-            <div
-              v-if="isLibraryGroupOpen"
-              class="ml-6 mt-1 flex flex-col gap-0.5"
-            >
-              <template
-                v-for="categoryItem in libraryCategoryItems"
-                :key="categoryItem.to"
-              >
-                <span
-                  v-if="(categoryItem as any).comingSoon"
-                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-neutral-400 dark:text-neutral-600 cursor-not-allowed select-none"
-                >
-                  <UIcon
-                    :name="categoryItem.icon"
-                    class="w-3.5 h-3.5 shrink-0"
-                  />
-                  {{ categoryItem.label }}
-                  <span
-                    class="ml-auto text-[10px] font-medium text-neutral-400 dark:text-neutral-600"
-                    >Soon</span
-                  >
-                </span>
-                <NuxtLink
-                  v-else
-                  :to="categoryItem.to"
-                  @click="emit('navigate')"
-                  class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors"
-                  :class="
-                    isActive(categoryItem.to)
-                      ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
-                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
-                  "
-                >
-                  <UIcon
-                    :name="categoryItem.icon"
-                    class="w-3.5 h-3.5 shrink-0"
-                  />
-                  {{ categoryItem.label }}
-                  <span
-                    v-if="getCategoryCount(categoryItem.to) !== null"
-                    class="ml-auto text-[10px] tabular-nums text-neutral-400 dark:text-neutral-600"
-                  >
-                    {{ getCategoryCount(categoryItem.to) }}
-                  </span>
-                </NuxtLink>
-              </template>
-            </div>
-          </Transition>
-        </template>
-
-        <NuxtLink
-          v-else
-          :to="item.to"
-          @click="emit('navigate')"
-          class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
-          :class="
-            isActive(item.to)
-              ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
-              : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
-          "
-        >
-          <UIcon :name="item.icon" class="w-4 h-4 shrink-0" />
-          {{ item.label }}
-        </NuxtLink>
-      </template>
+      <NuxtLink
+        v-for="item in navItems"
+        :key="item.to"
+        :to="item.to === '/profile' ? profileTo : item.to"
+        @click="emit('navigate')"
+        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
+        :class="
+          isActive(item.to)
+            ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
+            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+        "
+      >
+        <UIcon :name="item.icon" class="w-4 h-4 shrink-0" />
+        {{ item.label }}
+      </NuxtLink>
     </nav>
 
     <!-- user -->
@@ -200,9 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { LIBRARY_CATEGORY_NAV_ITEMS } from "~/constants/items";
 import { NAV_ITEMS } from "~/constants/navigation";
-import { useItemsStore } from "~/stores/items";
 
 withDefaults(
   defineProps<{
@@ -222,7 +130,6 @@ const { user, signOut } = useAuth();
 const { profile, displayLabel } = useProfile();
 const posthog = usePostHog();
 const route = useRoute();
-const itemsStore = useItemsStore();
 
 const { hasPending, refresh: refreshReflect } = useReflectPending();
 const {
@@ -240,7 +147,6 @@ watch(notifPanelOpen, (open) => {
 
 onMounted(() => {
   refreshReflect();
-  itemsStore.fetchTotals();
   fetchNotifications();
   startPolling();
 });
@@ -248,21 +154,6 @@ onMounted(() => {
 onUnmounted(() => {
   stopPolling();
 });
-
-const CATEGORY_TOTALS_MAP: Record<string, keyof typeof itemsStore.totals> = {
-  movie: "movies",
-  music: "music",
-  show: "show",
-  book: "book",
-};
-
-const getCategoryCount = (to: string): number | null => {
-  const cat = to.split("/").pop() ?? "";
-  const key = CATEGORY_TOTALS_MAP[cat];
-  if (!key) return null;
-  const count = (itemsStore.totals as Record<string, number>)[key];
-  return typeof count === "number" ? count : null;
-};
 
 const { isAdmin } = useProfile();
 
@@ -273,22 +164,16 @@ const navItems = computed(() =>
       (item.adminOnly !== true || isAdmin.value),
   ),
 );
-const libraryCategoryItems = LIBRARY_CATEGORY_NAV_ITEMS;
-
-const isLibraryActive = computed(
-  () => route.path === "/library" || route.path.startsWith("/library/"),
+const profileTo = computed(() =>
+  user.value?.id ? `/profile/${user.value.id}` : "/profile",
 );
-
-const isLibraryGroupOpen = ref(false);
-
-watchEffect(() => {
-  if (isLibraryActive.value) {
-    isLibraryGroupOpen.value = true;
-  }
-});
 
 const isActive = (to: string) => {
   if (to === "/dashboard") return route.path === "/dashboard";
+  if (to === "/profile")
+    return (
+      route.path.startsWith("/profile/") && !route.path.startsWith("/library/")
+    );
   return route.path === to || route.path.startsWith(`${to}/`);
 };
 

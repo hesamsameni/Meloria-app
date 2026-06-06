@@ -13,7 +13,7 @@
           <span class="price-amount">€0</span>
           <span class="price-period">/ month</span>
         </div>
-        <div class="pricing-limit">30 captures per month</div>
+        <div class="pricing-limit">50 captures per month</div>
         <ul class="pricing-features">
           <li>✓ All capture methods (web, Telegram, Shortcut)</li>
           <li>✓ Full enrichment (TMDB, Spotify, Open Library)</li>
@@ -35,7 +35,7 @@
           <span class="price-amount">{{ proPriceLabel }}</span>
           <span class="price-period">/ month</span>
         </div>
-        <div class="pricing-limit">120 captures per month</div>
+        <div class="pricing-limit">200 captures per month</div>
         <ul class="pricing-features">
           <li>✓ Everything in Free</li>
           <li>✓ Full taste profile with cross-category insights</li>
