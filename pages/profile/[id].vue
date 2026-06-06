@@ -98,61 +98,80 @@
 
     <!-- Library content — only on the index profile page -->
     <template v-if="isIndexPage">
-      <div v-if="globalLoading" class="flex flex-col gap-3">
-        <USkeleton v-for="i in 4" :key="i" class="h-24 w-full rounded-xl" />
-      </div>
-
-      <div v-else class="space-y-8">
-        <section
-          v-for="group in activeGroups"
-          :key="group.value"
-          class="space-y-3"
+      <!-- Category filter buttons -->
+      <div class="mt-4 grid grid-cols-4 gap-2 mb-4">
+        <button
+          v-for="cat in mainCategories"
+          :key="cat.value"
+          type="button"
+          class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border-2 text-xs font-medium transition-all"
+          :class="
+            activeCategory === cat.value
+              ? 'border-primary-500 bg-primary-500 text-white'
+              : 'border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-500'
+          "
+          @click="toggleCategory(cat.value)"
         >
-          <div class="flex items-center justify-between">
-            <h2
-              class="text-base font-semibold text-neutral-900 dark:text-white flex items-center gap-2"
-            >
-              <UIcon
-                :name="group.icon"
-                class="w-4 h-4 text-neutral-500 dark:text-neutral-400"
-              />
-              {{ group.label }}
-              <span
-                v-if="categoryTotal(group.value) !== null"
-                class="text-xs font-normal text-neutral-500 dark:text-neutral-400"
-              >
-                ({{ categoryTotal(group.value) }})
-              </span>
-            </h2>
-            <NuxtLink
-              v-if="group.hasMore"
-              :to="`/profile/${route.params.id}/${group.value}`"
-              class="text-xs text-neutral-500 hover:text-primary-500 transition-colors"
-            >
-              View more →
-            </NuxtLink>
-          </div>
-
-          <ItemList
-            :items="group.items"
-            :show-status="true"
-            :skeleton-count="3"
-            empty-message="No items in this category"
-            @status-change="items.updateLocalStatus"
-          />
-        </section>
-
-        <EmptyState
-          v-if="activeGroups.length === 0"
-          description="Nothing captured yet"
-        />
+          <UIcon :name="cat.icon" class="w-5 h-5" />
+          {{ cat.label }}
+          <span class="text-[10px] opacity-60">{{
+            categoryCount(cat.value)
+          }}</span>
+        </button>
       </div>
+
+      <!-- Status filter chips -->
+      <div class="flex gap-1.5 flex-wrap mb-4">
+        <button
+          v-for="s in LIBRARY_STATUSES"
+          :key="s.value"
+          type="button"
+          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+          :class="
+            activeStatus === s.value
+              ? 'bg-primary-500 text-white'
+              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+          "
+          @click="activeStatus = s.value"
+        >
+          {{ s.label }}
+        </button>
+      </div>
+
+      <div
+        v-if="libraryLoading && items.items.value.length === 0"
+        class="flex flex-col gap-3"
+      >
+        <USkeleton v-for="i in 6" :key="i" class="h-24 w-full rounded-xl" />
+      </div>
+
+      <template v-else>
+        <ItemList
+          :items="filteredItems"
+          :show-status="true"
+          :skeleton-count="6"
+          empty-message="Nothing captured yet"
+          @status-change="items.updateLocalStatus"
+        />
+
+        <div v-if="hasMore" class="mt-4 text-center">
+          <UButton
+            variant="outline"
+            color="neutral"
+            size="sm"
+            :loading="loadingMore"
+            @click="loadMore"
+          >
+            Load more
+          </UButton>
+        </div>
+      </template>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { LIBRARY_CATEGORIES } from "~/constants/items";
+import { LIBRARY_STATUSES } from "~/constants/items";
 import { createItemsService, type Item } from "~/services/items.service";
 
 const route = useRoute();
@@ -204,8 +223,15 @@ const isIndexPage = computed(
   () => route.path === `/profile/${route.params.id}`,
 );
 
+const CATEGORY_SLUGS = ["movie", "show", "music", "book"];
+
+const isOnCategorySubRoute = computed(() =>
+  CATEGORY_SLUGS.some((s) => route.path === `/profile/${route.params.id}/${s}`),
+);
+
 const isTabActive = (to: string) => {
-  if (to === `/profile/${route.params.id}`) return isIndexPage.value;
+  if (to === `/profile/${route.params.id}`)
+    return isIndexPage.value || isOnCategorySubRoute.value;
   return route.path.startsWith(to);
 };
 
@@ -221,75 +247,160 @@ watchEffect(() => {
   setPageHeader(displayLabel.value || "Profile", "Your Meloria profile");
 });
 
+watch(
+  () => route.path,
+  (path) => {
+    if (path === `/profile/${route.params.id}` || isOnCategorySubRoute.value) {
+      setPageHeader(displayLabel.value || "Profile", "Your Meloria profile");
+      useHead({ title: "Profile" });
+    }
+  },
+);
+
 // --- Library content (only on the index tab) ---
-const PREVIEW_LIMIT = 6;
+const mainCategories = [
+  { value: "movie", label: "Movies", icon: "i-lucide-film" },
+  { value: "music", label: "Music", icon: "i-lucide-music-2" },
+  { value: "book", label: "Books", icon: "i-lucide-book-open" },
+  { value: "show", label: "TV Shows", icon: "i-lucide-tv" },
+];
 
-type CategoryGroup = {
-  value: string;
-  label: string;
-  icon: string;
-  items: Item[];
-  loading: boolean;
-  hasMore: boolean;
-};
+const PAGE_SIZE = 48;
 
-const groups = ref<CategoryGroup[]>(
-  LIBRARY_CATEGORIES.map((cat) => ({
-    ...cat,
-    items: [],
-    loading: true,
-    hasMore: false,
-  })),
-);
+const activeCategory = ref<string | null>(null);
+const activeStatus = ref("all");
+const itemsByCategory = ref<Record<string, Item[]>>({});
+const offsetByCategory = ref<Record<string, number>>({});
+const hasMoreByCategory = ref<Record<string, boolean>>({});
+const libraryLoading = ref(true);
+const loadingMore = ref(false);
 
-const globalLoading = ref(true);
+const baseItems = computed(() => {
+  if (activeCategory.value) {
+    return itemsByCategory.value[activeCategory.value] ?? [];
+  }
+  // Merge all per-category results if loaded, otherwise fall back to dashboard store items
+  const hasCategoryData = mainCategories.some(
+    (c) => (itemsByCategory.value[c.value] ?? []).length > 0,
+  );
+  if (!hasCategoryData) {
+    return items.items.value;
+  }
+  const all = mainCategories.flatMap(
+    (c) => itemsByCategory.value[c.value] ?? [],
+  );
+  return all.sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+});
 
-const activeGroups = computed(() =>
-  groups.value.filter((g) => g.items.length > 0),
-);
+const filteredItems = computed(() => {
+  if (activeStatus.value === "all") return baseItems.value;
+  return baseItems.value.filter((i) => i.status === activeStatus.value);
+});
 
-const CATEGORY_TOTAL_MAP: Record<string, keyof typeof items.totals.value> = {
+const hasMore = computed(() => {
+  if (activeCategory.value) {
+    return hasMoreByCategory.value[activeCategory.value] ?? false;
+  }
+  return mainCategories.some((c) => hasMoreByCategory.value[c.value]);
+});
+
+const CATEGORY_TOTAL_KEY: Record<string, string> = {
   movie: "movies",
   music: "music",
   show: "show",
   book: "book",
 };
 
-const categoryTotal = (catValue: string): number | null => {
-  const key = CATEGORY_TOTAL_MAP[catValue];
-  if (!key) return null;
-  return items.totals.value[key] as number;
+const categoryCount = (val: string): number => {
+  const key = CATEGORY_TOTAL_KEY[val];
+  return key ? ((items.totals.value as Record<string, number>)[key] ?? 0) : 0;
 };
 
-let _loadGeneration = 0;
+const toggleCategory = (val: string) => {
+  activeCategory.value = activeCategory.value === val ? null : val;
+};
+
+const saveCache = () => {
+  items.setProfileLibraryCache({
+    itemsByCategory: { ...itemsByCategory.value },
+    offsetByCategory: { ...offsetByCategory.value },
+    hasMoreByCategory: { ...hasMoreByCategory.value },
+  });
+};
 
 const loadAll = async () => {
   if (!isIndexPage.value) return;
-  const gen = ++_loadGeneration;
-  globalLoading.value = true;
 
-  await Promise.all(
-    groups.value.map(async (group) => {
-      group.loading = true;
-      try {
+  // Restore from Pinia cache if available — skip re-fetch
+  const cache = items.profileLibraryCache.value;
+  if (cache) {
+    itemsByCategory.value = cache.itemsByCategory;
+    offsetByCategory.value = cache.offsetByCategory;
+    hasMoreByCategory.value = cache.hasMoreByCategory;
+    libraryLoading.value = false;
+    return;
+  }
+
+  libraryLoading.value = true;
+  itemsByCategory.value = {};
+  offsetByCategory.value = {};
+  hasMoreByCategory.value = {};
+  try {
+    await Promise.all(
+      mainCategories.map(async (cat) => {
         const results = await itemsService.search({
-          category: group.value,
-          limit: PREVIEW_LIMIT + 1,
+          category: cat.value,
+          limit: PAGE_SIZE,
+          offset: 0,
         });
-        if (gen !== _loadGeneration) return;
-        group.items = results.slice(0, PREVIEW_LIMIT);
-        group.hasMore = results.length > PREVIEW_LIMIT;
-      } catch {
-        if (gen !== _loadGeneration) return;
-        group.items = [];
-        group.hasMore = false;
-      } finally {
-        group.loading = false;
-      }
-    }),
-  );
+        itemsByCategory.value[cat.value] = results;
+        offsetByCategory.value[cat.value] = results.length;
+        hasMoreByCategory.value[cat.value] = results.length === PAGE_SIZE;
+      }),
+    );
+    saveCache();
+  } catch {
+    // silent
+  } finally {
+    libraryLoading.value = false;
+  }
+};
 
-  if (gen === _loadGeneration) globalLoading.value = false;
+const loadMore = async () => {
+  if (loadingMore.value || !hasMore.value) return;
+  loadingMore.value = true;
+  try {
+    const categoriesToLoad = activeCategory.value
+      ? [activeCategory.value]
+      : mainCategories
+          .filter((c) => hasMoreByCategory.value[c.value])
+          .map((c) => c.value);
+
+    await Promise.all(
+      categoriesToLoad.map(async (cat) => {
+        const offset = offsetByCategory.value[cat] ?? 0;
+        const results = await itemsService.search({
+          category: cat,
+          limit: PAGE_SIZE,
+          offset,
+        });
+        itemsByCategory.value[cat] = [
+          ...(itemsByCategory.value[cat] ?? []),
+          ...results,
+        ];
+        offsetByCategory.value[cat] = offset + results.length;
+        hasMoreByCategory.value[cat] = results.length === PAGE_SIZE;
+      }),
+    );
+    saveCache();
+  } catch {
+    // silent
+  } finally {
+    loadingMore.value = false;
+  }
 };
 
 watch(

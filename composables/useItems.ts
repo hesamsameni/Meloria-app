@@ -14,6 +14,7 @@ export const useItems = () => {
     totalsLoaded,
     categoryTotals,
     categoryTotalsLoading,
+    profileLibraryCache,
   } = storeToRefs(store);
   return {
     items,
@@ -33,5 +34,8 @@ export const useItems = () => {
     updateStatus: store.updateStatus,
     updateLocalStatus: store.updateLocalStatus,
     deleteItem: store.deleteItem,
+    profileLibraryCache,
+    setProfileLibraryCache: store.setProfileLibraryCache,
+    clearProfileLibraryCache: store.clearProfileLibraryCache,
   };
 };
