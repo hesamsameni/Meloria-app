@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/* Prevent iOS auto-zoom on input focus (triggered when font-size < 16px) */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Your custom brand colors */
 @theme static {
   --color-primary-50: #fef5f0;
