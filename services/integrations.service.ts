@@ -28,20 +28,22 @@ export const createIntegrationsService = (
     api.call<TelegramLinkCode>("/telegram/generate-code", { method: "POST" });
 
   // --- Spotify ---
+  // NOTE: paths are relative to the API base (config.public.apiUrl === "/api"),
+  // so the effective URLs are /api/auth/spotify/*.
   const getSpotifyStatus = (): Promise<SpotifyStatus> =>
-    api.call<SpotifyStatus>("/api/auth/spotify/status");
+    api.call<SpotifyStatus>("/auth/spotify/status");
 
   const getSpotifyAuthUrl = (returnTo: string): Promise<{ url: string }> =>
-    api.call<{ url: string }>("/api/auth/spotify/auth-url", {
+    api.call<{ url: string }>("/auth/spotify/auth-url", {
       method: "POST",
       body: { return_to: returnTo },
     });
 
   const disconnectSpotify = (): Promise<void> =>
-    api.call<void>("/api/auth/spotify/disconnect", { method: "DELETE" });
+    api.call<void>("/auth/spotify/disconnect", { method: "DELETE" });
 
   const updateSpotifyPlaylist = (playlistUrl: string): Promise<void> =>
-    api.call<void>("/api/auth/spotify/playlist", {
+    api.call<void>("/auth/spotify/playlist", {
       method: "PATCH",
       body: { playlist_url: playlistUrl },
     });
