@@ -1,21 +1,33 @@
 <template>
   <div
-    class="group flex flex-col h-full overflow-hidden rounded-xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-md transition-shadow duration-200"
+    class="group flex flex-col h-full overflow-hidden rounded-2xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
   >
     <NuxtLink :to="`/items/${item.id}`" class="block">
-      <div class="relative h-48 bg-neutral-100 dark:bg-neutral-900">
+      <div
+        class="relative h-48 bg-neutral-100 dark:bg-neutral-900 overflow-hidden"
+      >
         <img
           v-if="item.artwork_url"
           :src="item.artwork_url"
           :alt="item.title || ''"
-          class="w-full h-full object-cover transition-transform duration-400 group-hover:scale-105"
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div v-else class="w-full h-full flex items-center justify-center">
+        <div
+          v-else
+          class="w-full h-full flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-900 dark:to-neutral-800"
+        >
           <UIcon
             :name="categoryIcon"
-            class="w-12 h-12 text-neutral-400 dark:text-neutral-500"
+            class="w-12 h-12 text-neutral-300 dark:text-neutral-600"
           />
         </div>
+
+        <!-- Scrim so overlaid badges stay legible on bright artwork -->
+        <div
+          v-if="item.artwork_url"
+          aria-hidden="true"
+          class="absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-black/20"
+        />
 
         <div class="absolute left-3 top-3">
           <UBadge
@@ -28,9 +40,23 @@
 
         <div class="absolute right-3 top-3">
           <span
-            class="inline-flex items-center px-2 py-0.5 text-xs rounded bg-black/50 text-white"
+            class="inline-flex items-center rounded-full bg-black/45 backdrop-blur px-2 py-0.5 text-[11px] font-medium text-white/90"
             >{{ timeAgo }}</span
           >
+        </div>
+
+        <!-- External rating sits on the artwork when we have imagery -->
+        <div
+          v-if="item.external_rating && item.artwork_url"
+          class="absolute bottom-3 right-3"
+        >
+          <span
+            class="inline-flex items-center gap-1 rounded-full bg-black/50 backdrop-blur px-2 py-0.5 text-[11px] font-semibold text-white"
+          >
+            <UIcon name="i-lucide-star" class="w-3 h-3 text-yellow-400" />{{
+              item.external_rating
+            }}
+          </span>
         </div>
       </div>
     </NuxtLink>
@@ -38,7 +64,7 @@
     <div class="p-4 flex flex-col flex-1">
       <div class="min-h-[48px]">
         <p
-          class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate"
+          class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 line-clamp-2 leading-snug"
         >
           {{ item.title || item.raw_input?.slice(0, 60) || "Untitled" }}
         </p>
@@ -50,45 +76,49 @@
         </p>
       </div>
 
-      <div class="mt-3 flex items-center gap-2">
-        <div
-          class="flex-1 min-w-0 flex items-center gap-2 overflow-x-auto whitespace-nowrap"
+      <!-- Meta line: year • runtime • album (+ rating when there's no artwork) -->
+      <div
+        v-if="metaParts.length || (item.external_rating && !item.artwork_url)"
+        class="mt-2 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400"
+      >
+        <template v-for="(part, i) in metaParts" :key="part">
+          <span v-if="i > 0" class="text-neutral-300 dark:text-neutral-700"
+            >•</span
+          >
+          <span class="truncate">{{ part }}</span>
+        </template>
+        <span
+          v-if="item.external_rating && !item.artwork_url"
+          class="ml-auto inline-flex items-center gap-1 text-neutral-600 dark:text-neutral-300"
         >
-          <UBadge
-            v-if="item.source"
-            class="inline-flex shrink-0"
-            :label="item.source"
-            size="xs"
-            variant="outline"
-            color="neutral"
-          />
-          <UBadge
-            v-for="tag in (item.tags || []).slice(0, 2)"
-            :key="tag"
-            class="inline-flex shrink-0"
-            :label="tag"
-            size="xs"
-            variant="outline"
-            color="neutral"
-          />
-        </div>
-        <div
-          v-if="item.external_rating"
-          class="ml-2 flex-shrink-0 inline-flex items-center gap-1 text-sm text-neutral-600 dark:text-neutral-300"
-        >
-          <UIcon name="i-lucide-star" class="w-3.5 h-3.5 text-yellow-400" />
-          <span class="text-xs">{{ item.external_rating }}</span>
-        </div>
+          <UIcon name="i-lucide-star" class="w-3.5 h-3.5 text-yellow-400" />{{
+            item.external_rating
+          }}
+        </span>
       </div>
 
-      <div class="mt-3">
-        <div
-          class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
-        >
-          <span v-if="item.release_year">{{ item.release_year }}</span>
-          <span v-if="item.runtime">• {{ formatRuntime(item.runtime) }}</span>
-          <span v-if="item.album_name">• {{ item.album_name }}</span>
-        </div>
+      <!-- Source + tags -->
+      <div
+        v-if="item.source || (item.tags && item.tags.length)"
+        class="mt-2.5 flex items-center gap-1.5 overflow-hidden"
+      >
+        <UBadge
+          v-if="item.source"
+          class="inline-flex shrink-0"
+          :label="item.source"
+          size="xs"
+          variant="soft"
+          color="neutral"
+        />
+        <UBadge
+          v-for="tag in (item.tags || []).slice(0, 2)"
+          :key="tag"
+          class="inline-flex shrink-0"
+          :label="tag"
+          size="xs"
+          variant="outline"
+          color="neutral"
+        />
       </div>
 
       <div
@@ -411,6 +441,15 @@ const statusOptions = [...STATUS_OPTIONS];
 const categoryIcon = computed(
   () => CATEGORY_ICON[props.item.category] || "i-lucide-shapes",
 );
+
+// Compact "year • runtime • album" meta, skipping whatever the item lacks.
+const metaParts = computed(() => {
+  const parts: string[] = [];
+  if (props.item.release_year) parts.push(String(props.item.release_year));
+  if (props.item.runtime) parts.push(formatRuntime(props.item.runtime));
+  if (props.item.album_name) parts.push(props.item.album_name);
+  return parts;
+});
 
 const isNote = computed(() =>
   ["note", "idea", "thought"].includes(props.item.category),

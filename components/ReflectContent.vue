@@ -47,7 +47,7 @@
     </div>
 
     <!-- Card stack -->
-    <div v-else>
+    <div v-else class="max-w-md mx-auto">
       <!-- Header -->
       <div class="mb-6 text-center">
         <p class="text-sm text-neutral-500 dark:text-neutral-400">
@@ -216,7 +216,7 @@
     <!-- Info banner -->
     <div
       v-if="!loading"
-      class="mb-8 mt-8 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-neutral-50 dark:bg-neutral-900/50 px-5 py-4 flex gap-4 items-start"
+      class="max-w-md mx-auto mb-8 mt-8 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-neutral-50 dark:bg-neutral-900/50 px-5 py-4 flex gap-4 items-start"
     >
       <div
         class="shrink-0 w-8 h-8 rounded-lg bg-primary-500/10 dark:bg-primary-500/15 flex items-center justify-center mt-0.5"
@@ -250,7 +250,7 @@
       :dismissible="reflectionStep === 'answering'"
       :ui="{
         content:
-          'max-w-4xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
+          'max-w-2xl rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
       }"
     >
       <template #body>

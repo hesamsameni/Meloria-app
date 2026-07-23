@@ -1,63 +1,99 @@
 <template>
-  <section class="mb-10">
-    <p class="text-xs font-medium uppercase tracking-widest text-neutral-400 mb-3">
-      Password
-    </p>
-
-    <UCard
-      class="border border-neutral-200/80 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-950/70 shadow-sm rounded-2xl"
+  <div class="inline-flex">
+    <UButton
+      variant="outline"
+      color="neutral"
+      size="sm"
+      icon="i-lucide-key-round"
+      class="shrink-0"
+      @click="openModal"
     >
-      <div class="flex flex-col gap-4 max-w-sm">
-        <p class="text-sm text-neutral-500 dark:text-neutral-400">
-          Set a new password for your account. Leave blank if you prefer to sign in with a magic link or Google.
-        </p>
+      Change password
+    </UButton>
 
-        <UAlert v-if="error" color="error" variant="soft" :description="error" />
-        <UAlert v-if="success" color="success" variant="soft" description="Password updated successfully." />
+    <UModal
+      v-model:open="open"
+      title="Change password"
+      :ui="{
+        content:
+          'max-w-md rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/95 dark:bg-neutral-950/95 shadow-xl',
+      }"
+    >
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Set a new password for your account. This also lets you sign in with
+            your email and password if you normally use a magic link or Google.
+          </p>
 
-        <UFormField label="New password">
-          <UInput
-            v-model="newPassword"
-            type="password"
-            placeholder="••••••••"
-            class="w-full"
-            autocomplete="new-password"
+          <UAlert
+            v-if="error"
+            color="error"
+            variant="soft"
+            :description="error"
           />
-        </UFormField>
 
-        <UFormField label="Confirm new password">
-          <UInput
-            v-model="confirmPassword"
-            type="password"
-            placeholder="••••••••"
-            class="w-full"
-            autocomplete="new-password"
-            @keyup.enter="handleSave"
-          />
-        </UFormField>
+          <UFormField label="New password">
+            <UInput
+              v-model="newPassword"
+              type="password"
+              placeholder="••••••••"
+              class="w-full"
+              autocomplete="new-password"
+            />
+          </UFormField>
 
-        <div>
-          <UButton :loading="loading" @click="handleSave">
-            Update password
-          </UButton>
+          <UFormField label="Confirm new password">
+            <UInput
+              v-model="confirmPassword"
+              type="password"
+              placeholder="••••••••"
+              class="w-full"
+              autocomplete="new-password"
+              @keyup.enter="handleSave"
+            />
+          </UFormField>
         </div>
-      </div>
-    </UCard>
-  </section>
+      </template>
+
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton
+            variant="ghost"
+            color="neutral"
+            label="Cancel"
+            @click="open = false"
+          />
+          <UButton
+            :loading="loading"
+            label="Update password"
+            @click="handleSave"
+          />
+        </div>
+      </template>
+    </UModal>
+  </div>
 </template>
 
 <script setup lang="ts">
 const { updatePassword } = useAuth();
+const toast = useGlobalToast();
 
+const open = ref(false);
 const newPassword = ref("");
 const confirmPassword = ref("");
 const loading = ref(false);
 const error = ref("");
-const success = ref(false);
+
+const openModal = () => {
+  error.value = "";
+  newPassword.value = "";
+  confirmPassword.value = "";
+  open.value = true;
+};
 
 const handleSave = async () => {
   error.value = "";
-  success.value = false;
 
   if (!newPassword.value || newPassword.value.length < 6) {
     error.value = "Password must be at least 6 characters.";
@@ -71,9 +107,13 @@ const handleSave = async () => {
   loading.value = true;
   try {
     await updatePassword(newPassword.value);
-    success.value = true;
     newPassword.value = "";
     confirmPassword.value = "";
+    open.value = false;
+    toast.success(
+      "Password updated",
+      "Your password has been changed successfully.",
+    );
   } catch (e: any) {
     error.value = e.message || "Failed to update password.";
   } finally {

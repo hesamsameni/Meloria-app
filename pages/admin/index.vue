@@ -208,12 +208,12 @@
       <div v-if="admin.modelsLoading" class="p-6 flex flex-col gap-5">
         <div v-for="i in 2" :key="i" class="space-y-2">
           <div
-            class="h-4 w-24 rounded bg-neutral-100 dark:bg-neutral-800 animate-pulse"
+            class="sk-shimmer relative overflow-hidden h-4 w-24 rounded bg-neutral-200 dark:bg-neutral-800"
           />
           <div
             v-for="j in 2"
             :key="j"
-            class="h-14 rounded-xl bg-neutral-100 dark:bg-neutral-800 animate-pulse"
+            class="sk-shimmer relative overflow-hidden h-14 rounded-xl bg-neutral-200 dark:bg-neutral-800"
           />
         </div>
       </div>

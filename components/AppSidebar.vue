@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="flex flex-col border-r border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 px-3 py-6"
+    class="flex flex-col border-r border-neutral-200/70 dark:border-neutral-800/70 bg-white/80 dark:bg-neutral-950/70 backdrop-blur-xl px-3 py-6"
     :class="
       mobile ? 'w-52 h-full shadow-xl' : 'w-56 shrink-0 h-screen sticky top-0'
     "
@@ -33,11 +33,11 @@
         :key="item.to"
         :to="item.to === '/profile' ? profileTo : item.to"
         @click="emit('navigate')"
-        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors"
+        class="group relative flex items-center gap-2.5 px-3 py-2 rounded-xl border-l-2 border-transparent text-sm transition-all duration-150"
         :class="
           isActive(item.to)
-            ? 'bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white font-medium'
-            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900'
+            ? 'border-l-primary-500 bg-primary-500/10 text-primary-600 dark:text-primary-400 font-semibold'
+            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100/80 dark:hover:bg-neutral-900/60'
         "
       >
         <UIcon :name="item.icon" class="w-4 h-4 shrink-0" />

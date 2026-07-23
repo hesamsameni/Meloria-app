@@ -1,13 +1,23 @@
 <template>
-  <div class="text-center py-12">
-    <p v-if="icon" class="text-4xl mb-3">{{ icon }}</p>
-    <p class="text-sm font-medium text-neutral-900 dark:text-white mb-1">
+  <div class="flex flex-col items-center text-center py-14">
+    <div
+      v-if="icon"
+      class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-500/10 text-2xl ring-1 ring-primary-500/15"
+    >
+      {{ icon }}
+    </div>
+    <p class="text-sm font-semibold text-neutral-900 dark:text-white mb-1">
       {{ title || "Nothing here yet" }}
     </p>
-    <p v-if="description" class="text-xs text-neutral-400 max-w-xs mx-auto">
+    <p
+      v-if="description"
+      class="text-xs text-neutral-500 dark:text-neutral-400 max-w-xs mx-auto leading-relaxed"
+    >
       {{ description }}
     </p>
-    <slot />
+    <div class="mt-4 empty:mt-0">
+      <slot />
+    </div>
   </div>
 </template>
 

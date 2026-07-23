@@ -2,23 +2,22 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
     <!-- Profile header -->
     <div
-      class="mb-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm p-6"
+      class="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white dark:bg-neutral-900 shadow-sm p-5 sm:p-7 mb-5"
     >
-      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-        <!-- Avatar -->
+      <div class="flex items-start gap-4 sm:gap-5">
         <UAvatar
           :src="profile?.avatar_url || undefined"
           :alt="displayLabel || user?.email"
-          size="xl"
+          size="3xl"
           :style="`background: var(--ui-color-primary-500)`"
-          class="shrink-0"
+          class="shrink-0 w-16 h-16 sm:w-20 sm:h-20 text-2xl ring-1 ring-neutral-200 dark:ring-neutral-800"
         />
 
-        <!-- Meta -->
-        <div class="flex-1 min-w-0">
+        <!-- Name + meta -->
+        <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2 flex-wrap">
             <h1
-              class="text-xl font-semibold text-neutral-900 dark:text-white truncate"
+              class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-white truncate"
             >
               {{ displayLabel || user?.email }}
             </h1>
@@ -38,20 +37,28 @@
             </span>
           </div>
 
-          <div
-            class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-neutral-500 dark:text-neutral-400"
-          >
-            <!-- Captured items total -->
-            <span class="flex items-center gap-1">
-              <UIcon name="i-lucide-library" class="w-3.5 h-3.5" />
-              <strong class="text-neutral-900 dark:text-white">{{
+          <!-- Stat pills -->
+          <div class="mt-2.5 flex flex-wrap items-center gap-2">
+            <span
+              class="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800/80 px-2.5 py-1 text-xs font-medium text-neutral-600 dark:text-neutral-300"
+            >
+              <UIcon
+                name="i-lucide-library"
+                class="w-3.5 h-3.5 text-primary-500"
+              />
+              <strong class="text-neutral-900 dark:text-white tabular-nums">{{
                 items.totals.value.total
               }}</strong>
               captured
             </span>
-            <!-- Join date -->
-            <span v-if="profile?.created_at" class="flex items-center gap-1">
-              <UIcon name="i-lucide-calendar" class="w-3.5 h-3.5" />
+            <span
+              v-if="joinedDate"
+              class="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800/80 px-2.5 py-1 text-xs font-medium text-neutral-600 dark:text-neutral-300"
+            >
+              <UIcon
+                name="i-lucide-calendar"
+                class="w-3.5 h-3.5 text-primary-500"
+              />
               Joined {{ joinedDate }}
             </span>
           </div>
@@ -64,30 +71,33 @@
             color="neutral"
             variant="soft"
             icon="i-lucide-pencil"
+            class="rounded-full"
           >
-            Edit profile
+            <span class="hidden sm:inline">Edit profile</span>
           </UButton>
         </NuxtLink>
       </div>
+    </div>
 
-      <!-- Profile nav grid -->
+    <!-- Segmented tab bar -->
+    <div class="mb-6 overflow-x-auto no-scrollbar">
       <div
-        class="mt-5 pt-4 border-t border-neutral-100 dark:border-neutral-800 grid grid-cols-5 gap-2"
+        class="inline-flex min-w-full gap-1 p-1 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-neutral-100/70 dark:bg-neutral-900/60 backdrop-blur"
       >
         <NuxtLink
           v-for="tab in profileTabs"
           :key="tab.to"
           :to="tab.to"
           :title="tab.label"
-          class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border-2 text-xs font-medium transition-all"
+          class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-150"
           :class="
             isTabActive(tab.to)
-              ? 'border-primary-500 bg-primary-500/8 text-primary-600 dark:text-primary-400'
-              : 'border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-500 dark:hover:border-primary-500 dark:hover:text-primary-400'
+              ? 'bg-white dark:bg-neutral-800 text-primary-600 dark:text-primary-400 shadow-sm'
+              : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
           "
         >
-          <UIcon :name="tab.icon" class="w-5 h-5 shrink-0" />
-          <span class="hidden sm:block">{{ tab.label }}</span>
+          <UIcon :name="tab.icon" class="w-4 h-4 shrink-0" />
+          <span>{{ tab.label }}</span>
         </NuxtLink>
       </div>
     </div>
@@ -98,39 +108,45 @@
 
     <!-- Library content — only on the index profile page -->
     <template v-if="isIndexPage">
-      <!-- Category filter buttons -->
-      <div class="mt-4 grid grid-cols-4 gap-2 mb-4">
+      <!-- Category filter tiles -->
+      <div class="grid grid-cols-4 gap-2.5 mb-4">
         <button
           v-for="cat in mainCategories"
           :key="cat.value"
           type="button"
-          class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl border-2 text-xs font-medium transition-all"
+          class="group relative flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-2xl border text-xs font-medium transition-all duration-200"
           :class="
             activeCategory === cat.value
-              ? 'border-primary-500 bg-primary-500 text-white'
-              : 'border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-400 hover:text-primary-500'
+              ? 'border-transparent bg-gradient-to-br from-primary-500 to-primary-600 text-white shadow-md shadow-primary-500/25'
+              : 'border-neutral-200/70 dark:border-neutral-800/70 bg-white/70 dark:bg-neutral-900/60 text-neutral-600 dark:text-neutral-300 hover:-translate-y-0.5 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-sm'
           "
           @click="toggleCategory(cat.value)"
         >
           <UIcon :name="cat.icon" class="w-5 h-5" />
-          {{ cat.label }}
-          <span class="text-[10px] opacity-60">{{
-            categoryCount(cat.value)
-          }}</span>
+          <span>{{ cat.label }}</span>
+          <span
+            class="rounded-full px-1.5 text-[10px] font-semibold tabular-nums"
+            :class="
+              activeCategory === cat.value
+                ? 'bg-white/20 text-white'
+                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'
+            "
+            >{{ categoryCount(cat.value) }}</span
+          >
         </button>
       </div>
 
       <!-- Status filter chips -->
-      <div class="flex gap-1.5 flex-wrap mb-4">
+      <div class="flex gap-1.5 flex-wrap mb-5">
         <button
           v-for="s in LIBRARY_STATUSES"
           :key="s.value"
           type="button"
-          class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+          class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150"
           :class="
             activeStatus === s.value
-              ? 'bg-primary-500 text-white'
-              : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700'
+              ? 'bg-primary-500 text-white shadow-sm shadow-primary-500/25'
+              : 'bg-white/70 dark:bg-neutral-900/60 border border-neutral-200/70 dark:border-neutral-800/70 text-neutral-600 dark:text-neutral-300 hover:border-primary-300 dark:hover:border-primary-700'
           "
           @click="activeStatus = s.value"
         >
@@ -415,3 +431,14 @@ onMounted(() => {
   items.fetchTotals();
 });
 </script>
+
+<style scoped>
+/* Hide the scrollbar on the horizontally-scrollable tab bar */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+</style>

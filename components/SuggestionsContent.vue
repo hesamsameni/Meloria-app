@@ -1,20 +1,20 @@
 <template>
-  <div>
+  <div class="mx-auto max-w-2xl">
     <!-- Loading / generating skeleton -->
     <div v-if="loading" class="space-y-4">
       <div class="flex items-center justify-between">
         <div
-          class="h-4 w-36 rounded bg-neutral-100 dark:bg-neutral-800 animate-pulse"
+          class="sk-shimmer relative overflow-hidden h-4 w-36 rounded bg-neutral-200 dark:bg-neutral-800"
         />
       </div>
       <div class="flex flex-col gap-3">
         <div
           v-for="i in 4"
           :key="i"
-          class="flex overflow-hidden rounded-xl border border-neutral-200/60 dark:border-neutral-800/60 bg-card/80 dark:bg-card-dark/80 animate-pulse"
+          class="sk-shimmer relative flex overflow-hidden rounded-2xl border border-neutral-200/60 dark:border-neutral-800/60 bg-card/80 dark:bg-card-dark/80"
         >
           <div
-            class="w-28 sm:w-36 shrink-0 h-28 bg-neutral-100 dark:bg-neutral-800"
+            class="w-28 sm:w-40 shrink-0 h-32 bg-neutral-100 dark:bg-neutral-800"
           />
           <div class="flex-1 p-4 space-y-2.5">
             <div class="flex items-start justify-between gap-2">
@@ -92,20 +92,34 @@
 
     <!-- Suggestions grid -->
     <div v-else-if="suggestions.length > 0" class="space-y-10">
-      <div class="flex items-center justify-between">
-        <p class="text-xs text-neutral-500 dark:text-neutral-400">
-          {{ totalNewCount }} personalised pick{{
-            totalNewCount !== 1 ? "s" : ""
-          }}
-          for you
-        </p>
+      <div
+        class="flex items-center justify-between gap-3 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/70 dark:bg-neutral-900/50 px-4 py-3"
+      >
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div
+            class="w-9 h-9 rounded-xl bg-primary-500/10 dark:bg-primary-500/15 flex items-center justify-center shrink-0"
+          >
+            <UIcon name="i-lucide-sparkles" class="w-5 h-5 text-primary-500" />
+          </div>
+          <div class="min-w-0">
+            <p
+              class="text-sm font-semibold text-neutral-900 dark:text-white leading-tight"
+            >
+              {{ totalNewCount }} pick{{ totalNewCount !== 1 ? "s" : "" }} for you
+            </p>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">
+              Personalised from your taste profile
+            </p>
+          </div>
+        </div>
         <UButton
           v-if="refreshEligible"
           size="xs"
-          variant="ghost"
+          variant="soft"
           color="neutral"
           icon="i-lucide-refresh-cw"
           :loading="generating"
+          class="shrink-0 rounded-full"
           @click="refresh"
         >
           Refresh
@@ -113,16 +127,22 @@
       </div>
 
       <div v-for="section in sections" :key="section.key" class="space-y-4">
-        <div class="flex items-center gap-2">
-          <UIcon
-            :name="section.icon"
-            class="w-4 h-4 text-neutral-500 dark:text-neutral-400"
-          />
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-7 h-7 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center shrink-0"
+          >
+            <UIcon
+              :name="section.icon"
+              class="w-4 h-4 text-neutral-500 dark:text-neutral-400"
+            />
+          </div>
           <h2 class="text-sm font-semibold text-neutral-900 dark:text-white">
             {{ section.label }}
           </h2>
-          <span class="text-xs text-neutral-400 dark:text-neutral-500">
-            ({{ section.newItems.length + section.wantToItems.length }})
+          <span
+            class="rounded-full bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-neutral-500 dark:text-neutral-400"
+          >
+            {{ section.newItems.length + section.wantToItems.length }}
           </span>
         </div>
 
