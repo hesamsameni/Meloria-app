@@ -1,55 +1,91 @@
 <template>
-  <div>
+  <div class="mx-auto max-w-lg">
     <!-- Input state -->
-    <div v-if="!recommendation" class="space-y-4">
-      <UCard
-        class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
+    <div v-if="!recommendation">
+      <div
+        class="relative overflow-hidden rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
       >
-        <div class="space-y-4">
-          <div class="flex items-center gap-2.5">
+        <!-- Soft header glow -->
+        <div
+          aria-hidden="true"
+          class="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 h-40 w-72 rounded-full bg-primary-500/15 blur-3xl"
+        />
+
+        <div class="relative p-6 sm:p-7">
+          <!-- Icon + heading -->
+          <div class="flex flex-col items-center text-center gap-3">
             <div
-              class="w-8 h-8 rounded-lg bg-primary-500/10 flex items-center justify-center shrink-0"
+              class="w-12 h-12 rounded-2xl bg-primary-500/10 dark:bg-primary-500/15 flex items-center justify-center"
             >
               <UIcon
-                name="i-lucide-sparkles"
-                class="w-4 h-4 text-primary-500"
+                name="i-lucide-moon-star"
+                class="w-6 h-6 text-primary-500"
               />
             </div>
             <div>
-              <p class="text-sm font-semibold text-neutral-900 dark:text-white">
-                What tonight?
-              </p>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400">
-                One pick from your library, with a reason
+              <h2
+                class="text-lg font-semibold text-neutral-900 dark:text-white"
+              >
+                What should I enjoy tonight?
+              </h2>
+              <p
+                class="mt-1 text-sm text-neutral-500 dark:text-neutral-400 max-w-xs mx-auto"
+              >
+                One thoughtful pick from your library — with a reason it fits
+                right now.
               </p>
             </div>
           </div>
 
-          <UTextarea
-            v-model="mood"
-            :rows="1"
-            autoresize
-            placeholder="Any mood or preference? (optional)"
-            class="w-full"
-            @keyup.enter.prevent="getRecommendation"
-          />
+          <!-- Mood input -->
+          <div class="mt-6 space-y-3">
+            <UTextarea
+              v-model="mood"
+              :rows="1"
+              autoresize
+              placeholder="Set the mood… (optional)"
+              class="w-full"
+              @keyup.enter.prevent="getRecommendation"
+            />
+
+            <!-- Quick mood chips -->
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="m in moodSuggestions"
+                :key="m"
+                type="button"
+                class="px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150"
+                :class="
+                  mood === m
+                    ? 'border-primary-500 bg-primary-500/10 text-primary-600 dark:text-primary-400'
+                    : 'border-neutral-200 dark:border-neutral-800 text-neutral-500 dark:text-neutral-400 hover:border-primary-300 dark:hover:border-primary-700 hover:text-neutral-800 dark:hover:text-neutral-200'
+                "
+                @click="mood = mood === m ? '' : m"
+              >
+                {{ m }}
+              </button>
+            </div>
+          </div>
 
           <UButton
             color="primary"
+            size="lg"
             :loading="loading"
-            class="w-full"
+            block
+            class="mt-6 rounded-xl"
+            icon="i-lucide-sparkles"
             @click="getRecommendation"
           >
-            Get recommendation
+            Get my pick
           </UButton>
         </div>
-      </UCard>
+      </div>
     </div>
 
     <!-- Result state -->
-    <div v-else class="space-y-4">
+    <div v-else>
       <div
-        class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm overflow-hidden"
+        class="rounded-3xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm overflow-hidden"
       >
         <!-- Artwork -->
         <div
@@ -263,6 +299,15 @@ const posthog = usePostHog();
 
 const mood = ref("");
 const loading = ref(false);
+
+// Quick-pick moods so the empty state feels intentional (not a big blank box).
+const moodSuggestions = [
+  "Cozy night in",
+  "Something light",
+  "Thought-provoking",
+  "Short & sweet",
+  "A classic",
+];
 const saving = ref(false);
 const recommendation = ref<TonightRecommendation | null>(null);
 const savedItem = ref<Item | null>(null);

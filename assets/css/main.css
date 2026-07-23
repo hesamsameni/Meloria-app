@@ -10,6 +10,47 @@
   }
 }
 
+/* Skeleton shimmer — a subtle gradient sweep instead of a pulse */
+/* Hard-cancel any pulse on the skeleton element itself (the shimmer lives on ::after) */
+.sk-shimmer {
+  animation: none !important;
+}
+
+.sk-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  animation: sk-shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .sk-shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 100%
+  );
+}
+
+@keyframes sk-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-shimmer::after {
+    animation: none;
+  }
+}
+
 /* Your custom brand colors */
 @theme static {
   --color-primary-50: #fef5f0;

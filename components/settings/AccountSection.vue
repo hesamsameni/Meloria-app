@@ -37,15 +37,17 @@
           </p>
         </div>
 
-        <UButton
-          variant="outline"
-          color="neutral"
-          size="sm"
-          class="shrink-0"
-          @click="signOut"
-        >
-          Sign out
-        </UButton>
+        <div class="flex items-center gap-2 shrink-0">
+          <SettingsPasswordSection />
+          <UButton
+            variant="outline"
+            color="neutral"
+            size="sm"
+            @click="signOut"
+          >
+            Sign out
+          </UButton>
+        </div>
       </div>
 
       <!-- Display name -->

@@ -1,10 +1,15 @@
 <template>
-  <div class="flex min-h-screen bg-neutral-50 dark:bg-neutral-950">
-    <div v-if="isAuthenticated" class="hidden md:block">
+  <div class="relative flex min-h-screen bg-neutral-50 dark:bg-neutral-950">
+    <!-- Ambient warm backdrop -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(60rem_40rem_at_15%_-10%,var(--color-primary-100)_0%,transparent_55%),radial-gradient(50rem_35rem_at_110%_10%,#fce9d8_0%,transparent_50%)] opacity-70 dark:bg-[radial-gradient(60rem_40rem_at_15%_-10%,rgba(232,103,58,0.16)_0%,transparent_55%),radial-gradient(50rem_35rem_at_110%_10%,rgba(232,103,58,0.10)_0%,transparent_50%)] dark:opacity-100"
+    />
+    <div v-if="mounted && isAuthenticated" class="hidden md:block">
       <AppSidebar />
     </div>
 
-    <div v-if="isAuthenticated" class="md:hidden">
+    <div v-if="mounted && isAuthenticated" class="md:hidden">
       <Transition
         enter-active-class="transition duration-200 ease-out"
         enter-from-class="opacity-0"
@@ -38,8 +43,8 @@
 
     <main class="flex-1 min-w-0">
       <div
-        v-if="isAuthenticated"
-        class="md:hidden sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-950/90 backdrop-blur supports-[backdrop-filter]:bg-white/75 dark:supports-[backdrop-filter]:bg-neutral-950/75"
+        v-if="mounted && isAuthenticated"
+        class="md:hidden sticky top-0 z-40 border-b border-neutral-200/70 dark:border-neutral-800/70 bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl"
       >
         <div class="flex items-center gap-3 px-4 py-3">
           <UButton
@@ -47,11 +52,12 @@
             size="sm"
             color="neutral"
             variant="soft"
+            class="rounded-xl"
             aria-label="Open navigation menu"
             @click="isMobileSidebarOpen = true"
           />
 
-          <div class="min-w-0 flex-1 text-right">
+          <div class="min-w-0 flex-1">
             <p
               class="text-sm font-semibold text-neutral-900 dark:text-white truncate"
             >
@@ -64,6 +70,12 @@
               {{ pageHeaderDescription }}
             </p>
           </div>
+
+          <img
+            src="/logo.svg"
+            alt="Meloria"
+            class="w-6 h-6 shrink-0 opacity-90"
+          />
         </div>
       </div>
 
@@ -85,6 +97,14 @@ const { isAuthenticated } = useAuth();
 const { title: pageHeaderTitle, description: pageHeaderDescription } =
   usePageHeader();
 const isMobileSidebarOpen = ref(false);
+
+// Auth is resolved client-side, so the auth-only chrome (sidebar, mobile bar)
+// must not render until after mount. Otherwise an SSR page (e.g. /terms) would
+// emit the logged-out shell and hydrate into the logged-in shell — a mismatch.
+const mounted = ref(false);
+onMounted(() => {
+  mounted.value = true;
+});
 
 watch(
   () => route.fullPath,

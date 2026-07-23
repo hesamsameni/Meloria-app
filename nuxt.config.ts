@@ -13,6 +13,19 @@ export default defineNuxtConfig({
     localApiEndpoint: "/_nuxt_icon",
   },
 
+  // Hybrid rendering. Auth is client-only (Supabase client plugin + client-side
+  // init), so if the app shell were server-rendered it would emit the
+  // logged-out layout and then hydrate into the logged-in layout — a structural
+  // hydration mismatch that intermittently blanks the page on refresh/login.
+  // App routes are therefore rendered client-side (SPA); only the public
+  // marketing/legal pages keep SSR for SEO and social previews.
+  routeRules: {
+    "/**": { ssr: false },
+    "/welcome": { ssr: true },
+    "/terms": { ssr: true },
+    "/privacy": { ssr: true },
+  },
+
   // Local dev only: the frontend calls a relative `/api` base (see
   // NUXT_PUBLIC_API_URL), which in production is rewritten to the backend by
   // the platform proxy. Locally there is no such proxy, so we forward

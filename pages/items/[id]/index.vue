@@ -36,11 +36,20 @@
         "
       >
         <template #header>
-          <p
-            class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-          >
-            Cast & Crew
-          </p>
+          <div class="flex items-center gap-2">
+            <div
+              class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+            >
+              <UIcon
+                name="i-lucide-users"
+                class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+              />
+            </div>
+            <span
+              class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+              >Cast &amp; Crew</span
+            >
+          </div>
         </template>
         <ItemCastAndCrew :item="item" />
       </UCard>
@@ -55,11 +64,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              {{ embedLabel }}
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  :name="embedIcon"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >{{ embedLabel }}</span
+              >
+            </div>
           </template>
           <ItemEmbeds :item="item" />
         </UCard>
@@ -69,11 +87,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Description
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-align-left"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >Description</span
+              >
+            </div>
           </template>
           <p
             class="text-sm text-neutral-600 dark:text-neutral-300 leading-relaxed"
@@ -88,7 +115,7 @@
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
               <div
-                class="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center shrink-0"
+                class="w-8 h-8 rounded-xl bg-primary-500/10 dark:bg-primary-500/15 flex items-center justify-center shrink-0"
               >
                 <UIcon
                   name="i-lucide-message-circle"
@@ -121,11 +148,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Your Notes
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-pencil-line"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >Your Notes</span
+              >
+            </div>
           </template>
           <UTextarea
             v-model="userNotes"
@@ -143,11 +179,20 @@
           v-if="item.category != 'place'"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              {{ linksLabel }}
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-external-link"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >{{ linksLabel }}</span
+              >
+            </div>
           </template>
           <ItemPlatformLinks :item="item" />
         </UCard>
@@ -157,11 +202,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Tags
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-tags"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >Tags</span
+              >
+            </div>
           </template>
           <div class="flex gap-1.5 flex-wrap">
             <UBadge
@@ -180,11 +234,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              AI Confidence
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-primary-500/10 dark:bg-primary-500/15 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-sparkles"
+                  class="h-3.5 w-3.5 text-primary-500"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >AI Confidence</span
+              >
+            </div>
           </template>
           <div class="space-y-3">
             <div class="flex items-center gap-2">
@@ -261,11 +324,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Data Sources
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-database"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >Data Sources</span
+              >
+            </div>
           </template>
           <p class="text-xs text-neutral-400 leading-relaxed">
             This page uses data from
@@ -284,11 +356,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Data Sources
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-database"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >Data Sources</span
+              >
+            </div>
           </template>
           <p class="text-xs text-neutral-400 leading-relaxed">
             Music data provided by
@@ -315,11 +396,20 @@
           class="rounded-2xl border border-neutral-200/70 dark:border-neutral-800/70 bg-white/90 dark:bg-neutral-950/70 shadow-sm"
         >
           <template #header>
-            <p
-              class="text-xs font-medium uppercase tracking-widest text-neutral-400"
-            >
-              Data Sources
-            </p>
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-6 w-6 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 shrink-0"
+              >
+                <UIcon
+                  name="i-lucide-database"
+                  class="h-3.5 w-3.5 text-neutral-500 dark:text-neutral-400"
+                />
+              </div>
+              <span
+                class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400"
+                >Data Sources</span
+              >
+            </div>
           </template>
           <p class="text-xs text-neutral-400 leading-relaxed">
             Book data provided by
@@ -799,6 +889,20 @@ const embedLabel = computed(() => {
   if ((category === "movie" || category === "show") && trailer_url)
     return "Trailer";
   return null;
+});
+
+// Icon that matches the embed type, for the section header tile.
+const embedIcon = computed(() => {
+  switch (embedLabel.value) {
+    case "Preview":
+      return "i-lucide-music";
+    case "Location":
+      return "i-lucide-map-pin";
+    case "Trailer":
+      return "i-lucide-play";
+    default:
+      return "i-lucide-play";
+  }
 });
 
 const saveNotes = async () => {

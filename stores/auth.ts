@@ -15,18 +15,29 @@ export const useAuthStore = defineStore("auth", () => {
     return _authService;
   };
 
-  const init = async () => {
-    if (import.meta.server) return;
-    const svc = getService();
-    const session = await svc.getSession();
-    user.value = session?.user ?? null;
-    loading.value = false;
-    svc.onAuthChange((u: any, event: string) => {
-      user.value = u;
-      if (event === "PASSWORD_RECOVERY") {
-        navigateTo("/reset-password");
-      }
-    });
+  // Guard so init() runs exactly once even though it's called from both the
+  // global auth middleware and app.vue (onMounted). Without this we'd fetch the
+  // session twice and register two onAuthStateChange listeners.
+  let initPromise: Promise<void> | null = null;
+
+  const init = (): Promise<void> => {
+    if (import.meta.server) return Promise.resolve();
+    if (initPromise) return initPromise;
+
+    initPromise = (async () => {
+      const svc = getService();
+      const session = await svc.getSession();
+      user.value = session?.user ?? null;
+      loading.value = false;
+      svc.onAuthChange((u: any, event: string) => {
+        user.value = u;
+        if (event === "PASSWORD_RECOVERY") {
+          navigateTo("/reset-password");
+        }
+      });
+    })();
+
+    return initPromise;
   };
 
   const signInWithEmail = async (email: string, password: string) => {

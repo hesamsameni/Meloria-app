@@ -2,17 +2,17 @@
   <!-- ── ROW variant (suggestions page — full-width horizontal) ── -->
   <div
     v-if="variant === 'row'"
-    class="group flex overflow-hidden rounded-xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-md transition-shadow duration-200"
+    class="group flex overflow-hidden rounded-2xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
   >
     <!-- Thumbnail -->
     <div
-      class="relative w-28 sm:w-36 shrink-0 self-stretch bg-neutral-100 dark:bg-neutral-900"
+      class="relative w-28 sm:w-40 shrink-0 self-stretch bg-neutral-100 dark:bg-neutral-900 overflow-hidden"
     >
       <img
         v-if="suggestion.artwork_url || suggestion.backdrop_url"
         :src="(suggestion.artwork_url || suggestion.backdrop_url)!"
         :alt="suggestion.title"
-        class="absolute inset-0 w-full h-full object-cover transition-transform duration-400 group-hover:scale-105"
+        class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
       <div v-else class="absolute inset-0 flex items-center justify-center">
         <UIcon
@@ -20,6 +20,9 @@
           class="w-9 h-9 text-neutral-400 dark:text-neutral-500"
         />
       </div>
+      <div
+        class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent"
+      />
       <div class="absolute bottom-2 left-2">
         <UBadge
           :label="suggestion.category.toUpperCase()"
@@ -31,13 +34,13 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 min-w-0 p-4 flex flex-col">
+    <div class="flex-1 min-w-0 p-4 sm:p-5 flex flex-col">
       <div class="flex items-start gap-2">
-        <p
-          class="flex-1 min-w-0 text-sm font-semibold text-neutral-900 dark:text-neutral-100 leading-snug"
+        <h3
+          class="flex-1 min-w-0 text-sm sm:text-base font-semibold text-neutral-900 dark:text-neutral-100 leading-snug"
         >
           {{ suggestion.title }}
-        </p>
+        </h3>
         <span
           v-if="suggestion.mood_match"
           class="shrink-0 mt-0.5 text-xs px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 capitalize"
@@ -71,45 +74,48 @@
         </span>
       </p>
 
-      <div class="mt-2.5 flex items-start gap-1.5">
-        <UIcon
-          name="i-lucide-sparkles"
-          class="w-3 h-3 text-primary-500 shrink-0 mt-0.5"
-        />
-        <div class="min-w-0">
+      <!-- AI reason — highlighted so it reads as the "why" -->
+      <div
+        class="mt-3 rounded-xl bg-primary-500/[0.05] dark:bg-primary-500/[0.08] px-3 py-2.5"
+      >
+        <div class="flex items-start gap-1.5">
+          <UIcon
+            name="i-lucide-sparkles"
+            class="w-3.5 h-3.5 text-primary-500 shrink-0 mt-0.5"
+          />
+          <div class="min-w-0">
+            <p
+              class="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed"
+              :class="reasonExpanded ? '' : 'line-clamp-2'"
+            >
+              {{ suggestion.reason }}
+            </p>
+            <button
+              class="mt-0.5 text-xs font-medium text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+              @click.stop="reasonExpanded = !reasonExpanded"
+            >
+              {{ reasonExpanded ? "Show less" : "Read more" }}
+            </button>
+          </div>
+        </div>
+
+        <div
+          v-if="suggestion.cross_category_connection"
+          class="mt-2 pt-2 border-t border-primary-500/10 flex items-start gap-1.5"
+        >
+          <UIcon
+            name="i-lucide-link-2"
+            class="w-3 h-3 text-neutral-400 dark:text-neutral-500 shrink-0 mt-0.5"
+          />
           <p
-            class="text-xs text-neutral-500 dark:text-neutral-400 italic leading-relaxed"
-            :class="reasonExpanded ? '' : 'line-clamp-2'"
+            class="text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed"
           >
-            {{ suggestion.reason }}
+            {{ suggestion.cross_category_connection }}
           </p>
-          <button
-            class="mt-0.5 text-xs text-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            @click.stop="reasonExpanded = !reasonExpanded"
-          >
-            {{ reasonExpanded ? "Show less" : "Read more" }}
-          </button>
         </div>
       </div>
 
-      <div
-        v-if="suggestion.cross_category_connection"
-        class="mt-1.5 mb-3 flex items-start gap-1.5"
-      >
-        <UIcon
-          name="i-lucide-link-2"
-          class="w-3 h-3 text-neutral-400 dark:text-neutral-500 shrink-0 mt-0.5"
-        />
-        <p
-          class="text-xs text-neutral-400 dark:text-neutral-500 leading-relaxed"
-        >
-          {{ suggestion.cross_category_connection }}
-        </p>
-      </div>
-
-      <div
-        class="mt-auto pt-2.5 border-t border-neutral-100 dark:border-neutral-800/60 flex items-center gap-2"
-      >
+      <div class="mt-4 flex items-center gap-2">
         <template v-if="saved">
           <UIcon
             name="i-lucide-check-circle"
@@ -173,7 +179,7 @@
   <!-- ── CARD variant (dashboard — vertical, grid-friendly) ── -->
   <div
     v-else
-    class="group flex flex-col overflow-hidden rounded-xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-md transition-shadow duration-200"
+    class="group flex flex-col overflow-hidden rounded-2xl border bg-card/80 dark:bg-card-dark/80 border-neutral-200/60 dark:border-neutral-800/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
   >
     <!-- Artwork -->
     <div class="relative h-36 bg-neutral-100 dark:bg-neutral-900 shrink-0">
