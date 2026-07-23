@@ -11,21 +11,21 @@
         icon="i-simple-icons-telegram"
         title="Telegram"
         provider="telegram"
-        description="Connect Telegram to capture anything directly from your phone — voice notes, links, forwarded posts."
+        description="Connect Telegram to capture anything directly from your phone — text, links, and forwarded posts."
       />
 
       <SettingsIntegrationProviderCard
         icon="i-simple-icons-spotify"
         title="Spotify"
         provider="spotify"
-        description="Connect Spotify to add tracks to your playlists directly from Meloria, and create a smart playlist based on your listening habits."
+        description="Connect Spotify to automatically add the music you capture to a dedicated Meloria playlist."
       />
 
       <SettingsIntegrationProviderCard
         icon="i-simple-icons-soundcloud"
         title="SoundCloud"
         provider="soundcloud"
-        description="Connect SoundCloud to add tracks to your playlists directly from Meloria, and create a smart playlist based on your listening habits."
+        description="Connect SoundCloud to automatically add the music you capture to a dedicated Meloria playlist."
       />
     </div>
   </section>

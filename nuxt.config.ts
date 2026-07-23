@@ -6,6 +6,26 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"], // add this line
 
+  // @nuxt/icon serves its local icon bundle from `/api/_nuxt_icon` by default,
+  // which collides with the `/api/**` backend proxy below (icon requests would
+  // be forwarded to Express and 404). Move it out of the `/api` namespace.
+  icon: {
+    localApiEndpoint: "/_nuxt_icon",
+  },
+
+  // Local dev only: the frontend calls a relative `/api` base (see
+  // NUXT_PUBLIC_API_URL), which in production is rewritten to the backend by
+  // the platform proxy. Locally there is no such proxy, so we forward
+  // `/api/**` on the Nuxt dev server to the Express backend, stripping the
+  // `/api` prefix (the `**` glob is mapped to the target's `**`).
+  $development: {
+    routeRules: {
+      "/api/**": {
+        proxy: `${process.env.NUXT_DEV_BACKEND_ORIGIN || "http://localhost:3000"}/**`,
+      },
+    },
+  },
+
   runtimeConfig: {
     public: {
       supabaseUrl: process.env.SUPABASE_URL,

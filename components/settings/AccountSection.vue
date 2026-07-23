@@ -104,6 +104,22 @@
           </div>
         </div>
 
+        <!-- Usage this period -->
+        <div v-if="usage" class="space-y-4 mb-5">
+          <UsageMeter
+            label="Captures this month"
+            icon="i-lucide-hard-drive-download"
+            :metric="usage.captures"
+            reset-cadence="monthly"
+          />
+          <UsageMeter
+            label="AI discussions today"
+            icon="i-lucide-messages-square"
+            :metric="usage.discussions"
+            reset-cadence="daily"
+          />
+        </div>
+
         <div class="flex flex-wrap gap-2">
           <!-- Free → upgrade options -->
           <template v-if="currentPlan === 'free'">
@@ -185,6 +201,9 @@ const { profile, loading, error, displayLabel, updateProfile, uploadAvatar } =
   useProfile();
 const api = useApiService();
 const billingService = createBillingService(api);
+const { usage, refresh: refreshUsage } = useUsage();
+
+onMounted(refreshUsage);
 const config = useRuntimeConfig();
 const proPriceLabel = config.public.proPriceLabel;
 const ultimatePriceLabel = config.public.ultimatePriceLabel;

@@ -4,10 +4,25 @@
   >
     <!-- Header -->
     <div class="flex items-center justify-between px-4 pt-4 pb-2">
-      <span
-        class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 tracking-wide uppercase"
-        >Capture</span
-      >
+      <div class="flex items-center gap-2">
+        <span
+          class="text-sm font-semibold text-neutral-500 dark:text-neutral-400 tracking-wide uppercase"
+          >Capture</span
+        >
+        <NuxtLink
+          v-if="usage && !usage.captures.unlimited"
+          to="/settings"
+          class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium tabular-nums transition-colors"
+          :class="
+            usage.captures.remaining !== null && usage.captures.remaining <= 0
+              ? 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400'
+              : 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400 hover:text-primary-500'
+          "
+          :title="`${usage.captures.remaining} of ${usage.captures.limit} captures left this month`"
+        >
+          {{ usage.captures.remaining }} left
+        </NuxtLink>
+      </div>
       <NuxtLink
         to="/import"
         class="inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium text-neutral-400 dark:text-neutral-500 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
@@ -247,6 +262,10 @@ const {
   reset,
 } = useCapture();
 const posthog = usePostHog();
+const { usage, ensureLoaded: ensureUsageLoaded, refresh: refreshUsage } =
+  useUsage();
+
+onMounted(ensureUsageLoaded);
 
 const input = ref("");
 const source = "Meloria Dashboard";
@@ -391,6 +410,7 @@ const selectCandidate = async (c: SearchCandidate) => {
       source,
       mode: "sure",
     });
+    refreshUsage();
     searchQuery.value = "";
     candidates.value = [];
     searchedOnce.value = false;
@@ -422,6 +442,7 @@ const handleCapture = async () => {
       source: source,
       mode: "ai",
     });
+    refreshUsage();
     input.value = "";
     emit("captured", item);
   }

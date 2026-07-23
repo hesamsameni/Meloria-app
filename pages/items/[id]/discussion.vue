@@ -222,6 +222,7 @@ useHead({ title: "Discuss with AI" });
 const route = useRoute();
 const api = useApiService();
 const itemsService = createItemsService(api);
+const { refresh: refreshUsage } = useUsage();
 
 const itemId = computed(() => route.params.id as string);
 
@@ -334,6 +335,9 @@ async function send() {
   const text = input.value.trim();
   if (!text || streaming.value) return;
 
+  // A brand-new conversation consumes one of the daily discussion slots.
+  const isNewConversation = messages.value.length === 0;
+
   const userMessage: DiscussionMessage = { role: "user", content: text };
   messages.value.push(userMessage);
   input.value = "";
@@ -401,6 +405,8 @@ async function send() {
       messages.value[messages.value.length - 1].content =
         "Sorry, something went wrong. Please try again.";
     }
+    // Keep the "AI discussions today" meter in sync once a new thread starts.
+    if (isNewConversation) refreshUsage();
   } finally {
     streaming.value = false;
     await nextTick();

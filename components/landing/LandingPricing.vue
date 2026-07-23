@@ -18,10 +18,12 @@
           <li>✓ All capture methods (web, Telegram, Shortcut)</li>
           <li>✓ Full enrichment (TMDB, Spotify, Open Library)</li>
           <li>✓ Library & item detail pages</li>
+          <li>✓ Full taste profile with cross-category insights</li>
           <li>✓ Smart suggestions feed</li>
           <li>✓ "What tonight?" recommendations</li>
+          <li>✓ Reflection notes & post-finish discussion</li>
           <li>✓ Bulk import</li>
-          <li>✓ Basic taste profile</li>
+          <li>✓ AI item discussions — 2 / day, up to 10 messages each</li>
         </ul>
         <a href="/login" class="pricing-btn pricing-btn-ghost"
           >Get started free</a
@@ -38,9 +40,8 @@
         <div class="pricing-limit">200 captures per month</div>
         <ul class="pricing-features">
           <li>✓ Everything in Free</li>
-          <li>✓ Full taste profile with cross-category insights</li>
-          <li>✓ Reflection notes & post-finish discussion</li>
-          <li>✓ Priority enrichment</li>
+          <li>✓ 200 captures per month (4× the Free limit)</li>
+          <li>✓ Extended AI discussions — 10 / day, up to 30 messages each</li>
         </ul>
         <a href="/login" class="pricing-btn pricing-btn-primary">Start Pro</a>
       </div>
@@ -55,7 +56,7 @@
         <ul class="pricing-features">
           <li>✓ Everything in Pro</li>
           <li>✓ Unlimited captures</li>
-          <li>✓ AI model selection</li>
+          <li>✓ Unlimited AI discussions — up to 60 messages each</li>
           <li>✓ Early access to all new features</li>
           <li>✓ Priority support</li>
         </ul>
