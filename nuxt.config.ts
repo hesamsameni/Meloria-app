@@ -40,10 +40,35 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Server-only secrets. Values are read from the matching env vars at runtime
+    // (Nitro on Vercel exposes them via process.env, which the ported server
+    // modules read directly). Declared here so the contract is documented and
+    // overridable, and so Nuxt loads them from .env in development.
+    supabaseUrl: process.env.SUPABASE_URL,
+    supabaseServiceKey: process.env.SUPABASE_SERVICE_KEY,
+    supabaseAvatarsBucket: process.env.SUPABASE_AVATARS_BUCKET,
+    frontendUrl: process.env.FRONTEND_URL,
+    cronSecret: process.env.CRON_SECRET,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    stripeProPriceId: process.env.STRIPE_PRO_PRICE_ID,
+    stripeUltimatePriceId: process.env.STRIPE_ULTIMATE_PRICE_ID,
+    stripeTestPriceId: process.env.STRIPE_TEST_PRICE_ID,
+    stripePortalConfigId: process.env.STRIPE_PORTAL_CONFIG_ID,
+    openrouterApiKey: process.env.OPENROUTER_API_KEY,
+    deepseekApiKey: process.env.DEEPSEEK_API_KEY,
+    tmdbApiToken: process.env.TMDB_API_TOKEN,
+    spotifyClientId: process.env.SPOTIFY_CLIENT_ID,
+    spotifyClientSecret: process.env.SPOTIFY_CLIENT_SECRET,
+    spotifyRedirectUri: process.env.SPOTIFY_REDIRECT_URI,
+    telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
+    resendApiKey: process.env.RESEND_API_KEY,
+    emailFrom: process.env.EMAIL_FROM,
     public: {
       supabaseUrl: process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-      apiUrl: process.env.NUXT_PUBLIC_API_URL || "http://localhost:3000",
+      // Same-origin now that the backend lives in this app's Nitro server.
+      apiUrl: process.env.NUXT_PUBLIC_API_URL || "/api",
       proPriceLabel: process.env.NUXT_PUBLIC_PRO_PRICE_LABEL || "4.99 Euros",
       ultimatePriceLabel:
         process.env.NUXT_PUBLIC_ULTIMATE_PRICE_LABEL || "9.99 Euros",
@@ -51,6 +76,16 @@ export default defineNuxtConfig({
         publicKey: process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "",
         host:
           process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com",
+      },
+    },
+  },
+
+  nitro: {
+    // Allow long-running AI operations (suggestions, taste profiles, SSE chat,
+    // cron batches) to run beyond the default serverless limit.
+    vercel: {
+      functions: {
+        maxDuration: 300,
       },
     },
   },
